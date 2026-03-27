@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: static-orbit-server
+    runtime: node
+    buildCommand: npm install && npx tsc
+    startCommand: node dist/server/src/index.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGIN
+        sync: false
+      - key: NODE_ENV
+        value: production
