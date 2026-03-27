@@ -57,19 +57,19 @@ export class AudioEngine {
   // ─────────────── BGM ───────────────
 
   playBGM(track: BGMTrack): void {
-    this.ensureInit();
+    if (!this.ensureInit()) return;
     this.bgmManager.play(track);
   }
 
   stopBGM(fadeTime?: number): void {
-    this.ensureInit();
+    if (!this.ensureInit()) return;
     this.bgmManager.stop(fadeTime);
   }
 
   // ─────────────── SFX ───────────────
 
   playSFX(name: SFXName): void {
-    this.ensureInit();
+    if (!this.ensureInit()) return;
     this.sfxManager.play(name);
   }
 
@@ -77,7 +77,7 @@ export class AudioEngine {
   // Rhythmic low thump that intensifies tension during time-critical phases.
 
   playHeartbeat(): void {
-    this.ensureInit();
+    if (!this.ensureInit()) return;
     if (this.heartbeatLoop) return; // already playing
 
     this.heartbeatFilter = new Tone.Filter({
@@ -131,19 +131,19 @@ export class AudioEngine {
 
   /** Set master volume (0 = unity, -Infinity = mute). Accepts dB values. */
   setMasterVolume(vol: number): void {
-    this.ensureInit();
+    if (!this.ensureInit()) return;
     this.masterVolume.volume.value = vol;
   }
 
   /** Set BGM bus volume in dB. */
   setBGMVolume(vol: number): void {
-    this.ensureInit();
+    if (!this.ensureInit()) return;
     this.bgmBus.volume.value = vol;
   }
 
   /** Set SFX bus volume in dB. */
   setSFXVolume(vol: number): void {
-    this.ensureInit();
+    if (!this.ensureInit()) return;
     this.sfxBus.volume.value = vol;
   }
 
@@ -170,12 +170,14 @@ export class AudioEngine {
 
   // ─────────────── Helpers ───────────────
 
-  private ensureInit(): void {
+  private ensureInit(): boolean {
     if (!this.initialized) {
       console.warn(
         '[AudioEngine] Not initialized. Call AudioEngine.getInstance().init() ' +
         'from a user-gesture handler first.',
       );
+      return false;
     }
+    return true;
   }
 }

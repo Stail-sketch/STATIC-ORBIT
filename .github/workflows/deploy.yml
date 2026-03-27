@@ -30,8 +30,6 @@ jobs:
 
       - name: Build client
         working-directory: client
-        env:
-          VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
         run: npm run build
 
       - name: Upload artifact
