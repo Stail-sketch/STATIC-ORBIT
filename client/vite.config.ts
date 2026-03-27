@@ -4,7 +4,7 @@ import path from 'path';
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: command === 'build' ? '/Static-Orbit/' : '/',
+  base: command === 'build' ? '/STATIC-ORBIT/' : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
