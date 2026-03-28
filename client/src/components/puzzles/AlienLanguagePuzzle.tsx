@@ -86,7 +86,6 @@ const cornerDecor = (position: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRi
 
 function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
   const translationTable = roleData.translationTable as Record<string, string>;
-  const alienText = roleData.alienText as string;
 
   const entries = Object.entries(translationTable);
 
@@ -151,31 +150,6 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             ))}
           </div>
 
-          {/* Alien text to translate */}
-          <div style={{
-            padding: '16px 20px',
-            background: 'linear-gradient(90deg, rgba(0,240,255,0.04), rgba(0,240,255,0.08), rgba(0,240,255,0.04))',
-            borderLeft: '3px solid rgba(0,240,255,0.6)',
-          }}>
-            <div style={{
-              fontFamily: "'Orbitron', sans-serif",
-              fontSize: 10,
-              color: 'rgba(0,240,255,0.5)',
-              letterSpacing: 2,
-              marginBottom: 8,
-            }}>
-              翻訳対象テキスト
-            </div>
-            <div style={{
-              fontSize: 36,
-              color: '#00f0ff',
-              textShadow: '0 0 16px rgba(0,240,255,0.5), 0 0 32px rgba(0,240,255,0.2)',
-              letterSpacing: 12,
-              textAlign: 'center',
-            }}>
-              {alienText}
-            </div>
-          </div>
         </div>
 
         <div style={{

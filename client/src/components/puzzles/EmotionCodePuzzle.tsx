@@ -146,6 +146,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={{
           position: 'relative', zIndex: 3,
           display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap',
+          paddingTop: 4,
         }}>
           {sequence.map((entry, i) => {
             const hex = COLOR_HEX[entry.color] || '#fff';

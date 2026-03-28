@@ -352,9 +352,24 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                   {/* Frequency Slider */}
                   <div style={{ flex: '1 1 200px' }}>
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 4, letterSpacing: 1 }}>
-                      周波数: <span style={{ color: locked ? '#33ff66' : '#ff0066', fontSize: 16 }}>{w.frequency}</span>
+                      周波数: <span style={{ color: locked ? '#33ff66' : '#ff0066', fontSize: 22, fontWeight: 'bold', textShadow: `0 0 8px ${locked ? 'rgba(51,255,102,0.4)' : 'rgba(255,0,102,0.4)'}` }}>{w.frequency}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button
+                        onClick={() => updateWave(i, 'frequency', Math.max(1, w.frequency - 1))}
+                        disabled={locked}
+                        style={{
+                          width: 28, height: 28,
+                          background: 'rgba(255,0,102,0.15)',
+                          border: '1px solid rgba(255,0,102,0.3)',
+                          color: locked ? 'rgba(255,255,255,0.2)' : '#ff0066',
+                          fontSize: 16, fontWeight: 'bold',
+                          cursor: locked ? 'default' : 'pointer',
+                          fontFamily: "'Share Tech Mono', monospace",
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 0,
+                        }}
+                      >-</button>
                       <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>1</span>
                       <input
                         type="range"
@@ -374,15 +389,45 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         }}
                       />
                       <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>10</span>
+                      <button
+                        onClick={() => updateWave(i, 'frequency', Math.min(10, w.frequency + 1))}
+                        disabled={locked}
+                        style={{
+                          width: 28, height: 28,
+                          background: 'rgba(255,0,102,0.15)',
+                          border: '1px solid rgba(255,0,102,0.3)',
+                          color: locked ? 'rgba(255,255,255,0.2)' : '#ff0066',
+                          fontSize: 16, fontWeight: 'bold',
+                          cursor: locked ? 'default' : 'pointer',
+                          fontFamily: "'Share Tech Mono', monospace",
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 0,
+                        }}
+                      >+</button>
                     </div>
                   </div>
 
                   {/* Amplitude Slider */}
                   <div style={{ flex: '1 1 200px' }}>
                     <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 4, letterSpacing: 1 }}>
-                      振幅: <span style={{ color: locked ? '#33ff66' : '#ff0066', fontSize: 16 }}>{w.amplitude.toFixed(2)}</span>
+                      振幅: <span style={{ color: locked ? '#33ff66' : '#ff0066', fontSize: 22, fontWeight: 'bold', textShadow: `0 0 8px ${locked ? 'rgba(51,255,102,0.4)' : 'rgba(255,0,102,0.4)'}` }}>{w.amplitude.toFixed(2)}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <button
+                        onClick={() => updateWave(i, 'amplitude', Math.max(0, Math.round((w.amplitude - 0.05) * 100) / 100))}
+                        disabled={locked}
+                        style={{
+                          width: 28, height: 28,
+                          background: 'rgba(255,0,102,0.15)',
+                          border: '1px solid rgba(255,0,102,0.3)',
+                          color: locked ? 'rgba(255,255,255,0.2)' : '#ff0066',
+                          fontSize: 16, fontWeight: 'bold',
+                          cursor: locked ? 'default' : 'pointer',
+                          fontFamily: "'Share Tech Mono', monospace",
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 0,
+                        }}
+                      >-</button>
                       <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>0.0</span>
                       <input
                         type="range"
@@ -402,6 +447,21 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         }}
                       />
                       <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>1.0</span>
+                      <button
+                        onClick={() => updateWave(i, 'amplitude', Math.min(1, Math.round((w.amplitude + 0.05) * 100) / 100))}
+                        disabled={locked}
+                        style={{
+                          width: 28, height: 28,
+                          background: 'rgba(255,0,102,0.15)',
+                          border: '1px solid rgba(255,0,102,0.3)',
+                          color: locked ? 'rgba(255,255,255,0.2)' : '#ff0066',
+                          fontSize: 16, fontWeight: 'bold',
+                          cursor: locked ? 'default' : 'pointer',
+                          fontFamily: "'Share Tech Mono', monospace",
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          padding: 0,
+                        }}
+                      >+</button>
                     </div>
                   </div>
                 </div>
