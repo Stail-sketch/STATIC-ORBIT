@@ -104,6 +104,27 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
     greenZoneEnd: number;
   }>;
 
+  const [phases, setPhases] = useState<number[]>(() => Array(gauges.length).fill(0));
+  const animRef = useRef<number>(0);
+  const startTime = useRef<number>(Date.now());
+
+  // Animate gauges using requestAnimationFrame (same oscillation as operator)
+  useEffect(() => {
+    const animate = () => {
+      const now = Date.now();
+      const elapsed = now - startTime.current;
+      const newPhases = gauges.map(g => {
+        const period = SPEED_MS[g.speed] || 2000;
+        const t = (elapsed % period) / period;
+        return t < 0.5 ? t * 2 : 2 - t * 2;
+      });
+      setPhases(newPhases);
+      animRef.current = requestAnimationFrame(animate);
+    };
+    animRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [gauges]);
+
   return (
     <div style={containerStyle}>
       <div style={panelStyle}>
@@ -122,61 +143,119 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         </div>
 
         <div style={{ position: 'relative', zIndex: 3 }}>
-          {gauges.map((g, i) => (
-            <motion.div
-              key={g.index}
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.12, duration: 0.5 }}
-              style={{
-                padding: '14px 16px',
-                marginBottom: 10,
-                background: 'linear-gradient(90deg, rgba(0,240,255,0.04), rgba(0,240,255,0.08), rgba(0,240,255,0.04))',
-                borderLeft: '3px solid rgba(0,240,255,0.6)',
-                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
-              }}
-            >
-              <div style={{
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: 11, letterSpacing: 2,
-                color: 'rgba(0,240,255,0.5)',
-                marginBottom: 10,
-              }}>
-                ゲージ {g.index + 1}
-              </div>
+          {gauges.map((g, i) => {
+            const phase = phases[i] || 0;
+            const inGreen = phase >= g.greenZoneStart && phase <= g.greenZoneEnd;
 
-              {/* Visual gauge bar showing green zone */}
-              <div style={{
-                position: 'relative',
-                height: 24,
-                background: 'rgba(0,0,0,0.4)',
-                border: '1px solid rgba(0,240,255,0.15)',
-                marginBottom: 10,
-              }}>
+            return (
+              <motion.div
+                key={g.index}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.12, duration: 0.5 }}
+                style={{
+                  padding: '14px 16px',
+                  marginBottom: 10,
+                  background: 'linear-gradient(90deg, rgba(0,240,255,0.04), rgba(0,240,255,0.08), rgba(0,240,255,0.04))',
+                  borderLeft: '3px solid rgba(0,240,255,0.6)',
+                  clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
+                }}
+              >
                 <div style={{
-                  position: 'absolute',
-                  left: `${g.greenZoneStart * 100}%`,
-                  width: `${(g.greenZoneEnd - g.greenZoneStart) * 100}%`,
-                  top: 0, bottom: 0,
-                  background: 'rgba(51,255,102,0.2)',
-                  border: '1px solid rgba(51,255,102,0.4)',
-                }} />
-              </div>
-
-              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 13 }}>
-                <div>
-                  <span style={{ color: 'rgba(0,240,255,0.5)', fontSize: 10 }}>速度: </span>
-                  <span style={{ color: '#00f0ff', fontWeight: 'bold' }}>{SPEED_JP[g.speed] || g.speed}</span>
-                </div>
-                <div>
-                  <span style={{ color: 'rgba(51,255,102,0.6)', fontSize: 10 }}>グリーンゾーン: </span>
-                  <span style={{ color: '#33ff66', fontWeight: 'bold', fontSize: 18 }}>
-                    {g.greenZoneStart.toFixed(2)} - {g.greenZoneEnd.toFixed(2)}
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}>
+                  <span style={{
+                    fontFamily: "'Orbitron', sans-serif",
+                    fontSize: 11, letterSpacing: 2,
+                    color: 'rgba(0,240,255,0.5)',
+                  }}>
+                    ゲージ {g.index + 1}
+                  </span>
+                  <span style={{
+                    fontSize: 10, color: 'rgba(255,255,255,0.3)',
+                    letterSpacing: 1,
+                  }}>
+                    {SPEED_JP[g.speed] || g.speed}
                   </span>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+
+                {/* Visual gauge bar with green zone and moving indicator */}
+                <div style={{
+                  position: 'relative',
+                  height: 28,
+                  background: 'rgba(0,0,0,0.4)',
+                  border: '1px solid rgba(0,240,255,0.15)',
+                  marginBottom: 10,
+                  overflow: 'hidden',
+                }}>
+                  {/* Tick marks */}
+                  {Array.from({ length: 11 }, (_, t) => (
+                    <div key={t} style={{
+                      position: 'absolute',
+                      left: `${t * 10}%`,
+                      top: 0, bottom: 0,
+                      width: 1,
+                      background: 'rgba(255,255,255,0.06)',
+                    }} />
+                  ))}
+
+                  {/* Green zone highlight */}
+                  <div style={{
+                    position: 'absolute',
+                    left: `${g.greenZoneStart * 100}%`,
+                    width: `${(g.greenZoneEnd - g.greenZoneStart) * 100}%`,
+                    top: 0, bottom: 0,
+                    background: inGreen ? 'rgba(51,255,102,0.35)' : 'rgba(51,255,102,0.15)',
+                    border: `1px solid ${inGreen ? 'rgba(51,255,102,0.7)' : 'rgba(51,255,102,0.3)'}`,
+                    boxShadow: inGreen ? '0 0 12px rgba(51,255,102,0.4), inset 0 0 8px rgba(51,255,102,0.2)' : 'none',
+                    transition: 'background 0.1s, border-color 0.1s, box-shadow 0.1s',
+                  }} />
+
+                  {/* Moving indicator line */}
+                  <div style={{
+                    position: 'absolute',
+                    left: `${phase * 100}%`,
+                    top: 2, bottom: 2,
+                    width: 4,
+                    background: inGreen ? '#33ff66' : '#00f0ff',
+                    boxShadow: inGreen
+                      ? '0 0 12px rgba(51,255,102,0.9), 0 0 24px rgba(51,255,102,0.4)'
+                      : '0 0 8px rgba(0,240,255,0.6), 0 0 16px rgba(0,240,255,0.2)',
+                    transform: 'translateX(-50%)',
+                    transition: 'none',
+                  }} />
+
+                  {/* Triangle indicator above the bar */}
+                  <div style={{
+                    position: 'absolute',
+                    left: `${phase * 100}%`,
+                    top: -1,
+                    width: 0, height: 0,
+                    borderLeft: '5px solid transparent',
+                    borderRight: '5px solid transparent',
+                    borderTop: `6px solid ${inGreen ? '#33ff66' : '#00f0ff'}`,
+                    transform: 'translateX(-50%)',
+                    filter: inGreen ? 'drop-shadow(0 0 4px rgba(51,255,102,0.8))' : 'none',
+                    transition: 'none',
+                  }} />
+                </div>
+
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', fontSize: 13 }}>
+                  <div>
+                    <span style={{ color: 'rgba(51,255,102,0.6)', fontSize: 10 }}>グリーンゾーン: </span>
+                    <span style={{ color: '#33ff66', fontWeight: 'bold', fontSize: 18 }}>
+                      {g.greenZoneStart.toFixed(2)} - {g.greenZoneEnd.toFixed(2)}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'rgba(0,240,255,0.5)', fontSize: 10 }}>位相: </span>
+                    <span style={{ color: '#00f0ff' }}>{phase.toFixed(2)}</span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
         <div style={{

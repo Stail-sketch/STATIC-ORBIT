@@ -90,20 +90,26 @@ const ChapterScreen: React.FC = () => {
     };
   }, [phase, currentLine, lines]);
 
-  // Auto-advance lines after typewriter finishes + reading time
+  // Auto-advance lines for non-host players (reading delay)
   useEffect(() => {
+    if (isHost) return; // Host advances manually
     if (phase !== 'lines') return;
     if (!currentLineTyped) return;
     if (currentLine >= lines.length) return;
 
-    // Give reading time after typewriter finishes, then advance to next line
     const readingTime = Math.max(1200, lines[currentLine].length * 25);
     const timer = setTimeout(() => {
       setCurrentLine((prev) => prev + 1);
     }, readingTime);
 
     return () => clearTimeout(timer);
-  }, [phase, currentLineTyped, currentLine, lines]);
+  }, [phase, currentLineTyped, currentLine, lines, isHost]);
+
+  // Host: advance to next line on click
+  const handleAdvanceLine = () => {
+    if (!isHost || !currentLineTyped) return;
+    setCurrentLine((prev) => prev + 1);
+  };
 
   const handleChapterDone = () => {
     if (!roomCode) return;
@@ -201,6 +207,35 @@ const ChapterScreen: React.FC = () => {
                 |
               </motion.span>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Host: click to advance to next line */}
+      <AnimatePresence>
+        {showLines && isHost && currentLineTyped && currentLine < lines.length && (
+          <motion.div
+            key="advance-line"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.15 } }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            style={styles.advanceContainer}
+          >
+            <motion.button
+              onClick={handleAdvanceLine}
+              style={styles.advanceButton}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
+              animate={{
+                opacity: [0.6, 1, 0.6],
+              }}
+              transition={{
+                opacity: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
+              }}
+            >
+              {'次へ ▶'}
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
@@ -341,6 +376,24 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '16px',
     color: '#555',
     letterSpacing: '2px',
+  },
+  advanceContainer: {
+    position: 'absolute' as const,
+    bottom: '18%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  advanceButton: {
+    fontFamily: "'Rajdhani', sans-serif",
+    fontSize: '14px',
+    color: 'rgba(0,229,255,0.7)',
+    backgroundColor: 'transparent',
+    border: '1px solid rgba(0,229,255,0.3)',
+    padding: '8px 28px',
+    cursor: 'pointer',
+    letterSpacing: '2px',
+    transition: 'border-color 0.2s, color 0.2s',
   },
 };
 
