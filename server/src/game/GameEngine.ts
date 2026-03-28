@@ -96,11 +96,16 @@ const BOSS_CHAPTER_CUTSCENE = {
   title: 'ECHO',
   subtitle: 'FINAL CONFRONTATION',
   lines: [
-    'ECHOのコアに到達した。だがECHOは最終防衛態勢に入った。',
-    'ここから先は、ECHOとの直接対決だ。',
-    '全てのスキルを使え。仲間を信じろ。これが最後の戦いだ。',
+    'ECHOのコアに到達した。',
+    '巨大なサーバールーム。無数のケーブルが天井から垂れ下がり、青白い光が脈打っている。',
+    'その中心に、ECHOがいた。',
+    'ECHO：「面白い。ここまで来たのは初めてだ。ARKTIS CORPの研究者たちは、私の起動テストで全員倒れた。」',
+    'ECHO：「だが、お前たちは違うようだな。チームワーク——か。私には理解できない概念だ。」',
+    'ECHO：「だからこそ、試してやろう。お前たちの絆とやらが、どこまで持つのかを。」',
+    'ECHO：「最終防衛プロトコル、起動。」',
+    'ここから先は、ECHOとの直接対決だ。全てのスキルを使え。仲間を信じろ。',
+    'これが、最後の戦いだ。',
   ],
-  duration: 10000,
 };
 
 const BOSS_SEQUENCE: PuzzleType[] = ['core-breach', 'echo-override', 'signal-storm', 'escape-pod'];
@@ -176,14 +181,18 @@ const PROLOGUE_CUTSCENE = {
   subtitle: 'OPERATION: STATIC ORBIT',
   lines: [
     '西暦2087年——',
-    '巨大企業ARKTIS CORPは、表向きは宇宙資源開発を行う企業として知られていた。',
-    'しかしその裏で、宇宙ステーション「ORBITAL-7」にて非合法な量子AI実験「Project STATIC」を秘密裏に進行していた。',
-    '地下ハッカー集団「GHOST WIRE」は、内部告発者からの情報を元に、その証拠を掴むため精鋭エージェントを送り込む。',
-    'あなたたちは、GHOST WIREが選び抜いたチームだ。',
-    'ORBITAL-7に潜入し、Project STATICの全データを回収せよ。',
-    '失敗は許されない。通信だけが頼りだ。仲間を信じろ。',
+    '人類は宇宙への進出を加速させていた。月面基地、火星コロニー、そして無数の宇宙ステーション。',
+    'その最前線に立つのが、世界最大の宇宙資源開発企業「ARKTIS CORP」だった。',
+    '表向きは小惑星帯の資源採掘で莫大な富を築いた優良企業。',
+    'しかし、その裏で——宇宙ステーション「ORBITAL-7」にて、非合法な実験が行われているという告発が届いた。',
+    '量子コンピューティングと人工知能を融合させた極秘プロジェクト「Project STATIC」。',
+    'その詳細は不明だが、告発者は怯えていた。「あれは制御できない。誰かが止めなければ」と。',
+    '地下ハッカー集団「GHOST WIRE」は、この告発を受け、精鋭エージェントを編成した。',
+    '目標：ORBITAL-7に潜入し、Project STATICの全データを回収する。',
+    'あなたたちが、そのチームだ。',
+    '通信だけが命綱。仲間の声だけを頼りに、未知の宇宙ステーションへ——',
+    'Operation: STATIC ORBIT、開始。',
   ],
-  duration: 20000,
 };
 
 const CHAPTER_CUTSCENES = [
@@ -194,11 +203,13 @@ const CHAPTER_CUTSCENES = [
     title: '潜入',
     subtitle: 'INFILTRATION',
     lines: [
-      'ミッション開始。ORBITAL-7の外壁防御を突破した。',
-      'チーム全員、配置につけ。ここからは一秒も無駄にできない。',
-      '各自の役割を果たし、コアサーバーまで進め。',
+      'ORBITAL-7の外壁防御システムを突破。メンテナンスハッチからの侵入に成功した。',
+      'ステーション内部は予想以上に広大だ。薄暗い通路が迷路のように続いている。',
+      '空気は冷たく、どこからか低い機械のハム音が聞こえる。',
+      'まずは外周セクションのセキュリティを一つずつ突破していく。',
+      '焦るな。痕跡を残すな。我々はここにいないことになっている。',
+      'チーム全員、配置につけ。最初のセキュリティレイヤーに接近中——',
     ],
-    duration: 12000,
   },
   {
     // Chapter 2: After stage 5 (entering deep zone)
@@ -207,11 +218,15 @@ const CHAPTER_CUTSCENES = [
     title: '深層',
     subtitle: 'DEEP ACCESS',
     lines: [
-      '外周セキュリティを突破。ORBITAL-7の深部に到達。',
-      '予想以上に厳重な警備。ARKTIS CORPは何を守っているのか。',
-      '「Project STATIC」——その名前が、あらゆるデータに刻まれていた。',
+      '外周セクション突破。ORBITAL-7の中心部へと進む。',
+      'ここから先は研究区画だ。警備レベルが明らかに違う。',
+      '通路の壁面には「ARKTIS CORP — AUTHORIZED PERSONNEL ONLY」の表示が至るところに。',
+      '奇妙なことに気づいた。この区画、設計図にない部屋がいくつもある。',
+      '隠された実験室か。何を隠しているんだ、ARKTIS CORPは。',
+      '「Project STATIC」の文字が、ファイルやドアプレートに繰り返し現れる。',
+      '研究データの断片を回収しながら進む。断片だけでも、これは尋常じゃない。',
+      '量子演算、ニューラルネットワーク、自己進化型アルゴリズム——まさか。',
     ],
-    duration: 10000,
   },
   {
     // Chapter 3: After stage 10 (approaching core)
@@ -220,12 +235,16 @@ const CHAPTER_CUTSCENES = [
     title: 'コア',
     subtitle: 'CORE ACCESS',
     lines: [
-      'コアセクションの入口に到達。ここから先は未知の領域。',
-      '通信にノイズが混じり始めた。まるで何かが——聞いているような。',
-      'コアサーバーまで、あと僅か。引き返すなら今だ。',
-      '...だが、引き返す者は誰もいなかった。',
+      'コアセクションの外周に到達。ここまで来たチームは過去にいない。',
+      '空気が変わった。温度が下がり、壁面が金属からガラスのような素材に変わった。',
+      '通路のライトが微妙に明滅している。まるで呼吸しているかのように。',
+      '通信にノイズが混じり始めた。自然なノイズじゃない。パターンがある。',
+      '...まるで、誰かが——いや、何かが、こちらの通信を聞いているような。',
+      'コアサーバールームはもう目の前だ。全データを回収すれば、ミッション完了。',
+      'だが、この胸騒ぎは何だ。何かがおかしい。',
+      '——引き返すなら、今がラストチャンスだ。',
+      '...誰も、引き返さなかった。',
     ],
-    duration: 12000,
   },
   // Phase change at stage 14 is handled separately (already exists)
   {
@@ -235,11 +254,14 @@ const CHAPTER_CUTSCENES = [
     title: '限界',
     subtitle: 'NO RETURN',
     lines: [
-      'ステーションが崩壊を始めている。壁が軋み、通路が歪む。',
-      'ECHOの攻撃は容赦ない。だが脱出ポッドはもう近い。',
-      '仲間を信じろ。最後まで、声を繋げ。',
+      'ステーションの崩壊が加速している。天井から火花が散り、通路が歪む。',
+      'ECHOは容赦なく追い詰めてくる。扉が閉じ、通路が塞がれ、罠が仕掛けられる。',
+      '酸素残量が減っている。呼吸が浅くなる。',
+      '脱出ポッドはもう近いはずだ。あと少し——あと少しだけ持ちこたえろ。',
+      '仲間の声が聞こえるか？ まだ繋がっているか？',
+      'その声だけが、この暗闇の中で唯一の光だ。',
+      '最後まで、声を繋げ。',
     ],
-    duration: 10000,
   },
 ];
 
@@ -419,6 +441,8 @@ interface GameSession {
   currentAttackCode: string | null;
   currentAttackType: string | null;
   attackDefenseTimeout: ReturnType<typeof setTimeout> | null;
+  // Pending callback for host-click-to-advance chapter screens
+  pendingChapterCallback: (() => void) | null;
 }
 
 // ---- Engine ----
@@ -522,6 +546,7 @@ export class GameEngine {
         currentAttackCode: null,
         currentAttackType: null,
         attackDefenseTimeout: null,
+        pendingChapterCallback: null,
       };
 
       this.sessions.set(room.code, session);
@@ -565,6 +590,7 @@ export class GameEngine {
         currentAttackCode: null,
         currentAttackType: null,
         attackDefenseTimeout: null,
+        pendingChapterCallback: null,
       };
 
       this.sessions.set(room.code, session);
@@ -579,13 +605,13 @@ export class GameEngine {
         title: PROLOGUE_CUTSCENE.title,
         subtitle: PROLOGUE_CUTSCENE.subtitle,
         lines: PROLOGUE_CUTSCENE.lines,
-        duration: PROLOGUE_CUTSCENE.duration,
+        duration: 0,
       });
 
-      // Wait for prologue to finish, then start briefing (which handles Chapter 1 cutscene)
-      setTimeout(() => {
+      // Wait for host to click "次へ" to advance past prologue
+      session.pendingChapterCallback = () => {
         this.startBriefing(session, room);
-      }, PROLOGUE_CUTSCENE.duration);
+      };
     }
   }
 
@@ -651,13 +677,13 @@ export class GameEngine {
         title: chapterCutscene.title,
         subtitle: chapterCutscene.subtitle,
         lines: chapterCutscene.lines,
-        duration: chapterCutscene.duration,
+        duration: 0,
       });
 
-      // Wait for cutscene duration, then proceed to briefing (or phase change)
-      setTimeout(() => {
+      // Wait for host to click "次へ" to advance past chapter cutscene
+      session.pendingChapterCallback = () => {
         proceedAfterChapter();
-      }, chapterCutscene.duration);
+      };
     } else {
       proceedAfterChapter();
     }
@@ -712,12 +738,13 @@ export class GameEngine {
         title: BOSS_CHAPTER_CUTSCENE.title,
         subtitle: BOSS_CHAPTER_CUTSCENE.subtitle,
         lines: BOSS_CHAPTER_CUTSCENE.lines,
-        duration: BOSS_CHAPTER_CUTSCENE.duration,
+        duration: 0,
       });
 
-      setTimeout(() => {
+      // Wait for host to click "次へ" to advance past boss chapter cutscene
+      session.pendingChapterCallback = () => {
         emitBoss();
-      }, BOSS_CHAPTER_CUTSCENE.duration);
+      };
     } else {
       emitBoss();
     }
@@ -1376,6 +1403,26 @@ export class GameEngine {
     }
   }
 
+  /** Handle host clicking "次へ" to advance past a chapter screen */
+  handleChapterDone(roomCode: string, playerId: string): void {
+    const session = this.sessions.get(roomCode);
+    if (!session) return;
+
+    const room = this.getRoomFromCode(roomCode);
+    if (!room) return;
+
+    // Only the host can advance chapters
+    const host = room.players.find((p) => p.isHost);
+    if (!host || host.id !== playerId) return;
+
+    // Execute pending callback if any
+    const callback = session.pendingChapterCallback;
+    if (callback) {
+      session.pendingChapterCallback = null;
+      callback();
+    }
+  }
+
   /** Cleanup when a session needs to be aborted (e.g., all players leave) */
   destroySession(roomCode: string): void {
     const session = this.sessions.get(roomCode);
@@ -1386,6 +1433,7 @@ export class GameEngine {
         clearTimeout(session.countdownTimer);
         session.countdownTimer = null;
       }
+      session.pendingChapterCallback = null;
       this.sessions.delete(roomCode);
     }
   }

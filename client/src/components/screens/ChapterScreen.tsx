@@ -2,15 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../stores/gameStore';
 import { useAudio } from '../../audio/useAudio';
+import { getSocket } from '../../hooks/useSocket';
 
 type Phase = 'black' | 'chapterNum' | 'title' | 'subtitle' | 'fadeTitle' | 'lines';
 
 const ChapterScreen: React.FC = () => {
   const chapterData = useGameStore((s) => s.chapterData);
+  const isHost = useGameStore((s) => s.isHost);
+  const roomCode = useGameStore((s) => s.roomCode);
   const audio = useAudio();
   const [phase, setPhase] = useState<Phase>('black');
   const [currentLine, setCurrentLine] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
+  const [allLinesFinished, setAllLinesFinished] = useState(false);
+  const [currentLineTyped, setCurrentLineTyped] = useState(false);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   if (!chapterData) return null;
@@ -43,17 +48,22 @@ const ChapterScreen: React.FC = () => {
   useEffect(() => {
     if (phase !== 'lines') return;
 
-    if (currentLine >= lines.length) return;
+    if (currentLine >= lines.length) {
+      setAllLinesFinished(true);
+      return;
+    }
 
     const text = lines[currentLine];
     let charIndex = 0;
     setDisplayedText('');
+    setCurrentLineTyped(false);
 
     typewriterRef.current = setInterval(() => {
       charIndex++;
       setDisplayedText(text.slice(0, charIndex));
       if (charIndex >= text.length) {
         if (typewriterRef.current) clearInterval(typewriterRef.current);
+        setCurrentLineTyped(true);
       }
     }, 35);
 
@@ -62,24 +72,30 @@ const ChapterScreen: React.FC = () => {
     };
   }, [phase, currentLine, lines]);
 
-  // Advance lines on a timer
+  // Auto-advance lines after typewriter finishes + reading time
   useEffect(() => {
     if (phase !== 'lines') return;
+    if (!currentLineTyped) return;
     if (currentLine >= lines.length) return;
 
-    // Each line visible for ~2.5 seconds (typewriter + reading time)
-    const lineDelay = Math.max(2500, lines[currentLine].length * 35 + 800);
+    // Give reading time after typewriter finishes, then advance to next line
+    const readingTime = Math.max(1200, lines[currentLine].length * 25);
     const timer = setTimeout(() => {
       setCurrentLine((prev) => prev + 1);
-    }, lineDelay);
+    }, readingTime);
 
     return () => clearTimeout(timer);
-  }, [phase, currentLine, lines]);
+  }, [phase, currentLineTyped, currentLine, lines]);
+
+  const handleChapterDone = () => {
+    if (!roomCode) return;
+    const socket = getSocket();
+    socket.emit('game:chapterDone', { roomCode });
+  };
 
   const showChapterNum = phase !== 'black';
-  const showTitle = phase === 'title' || phase === 'subtitle';
-  const showSubtitle = phase === 'subtitle';
   const showTitleBlock = phase !== 'black' && phase !== 'chapterNum' && phase !== 'fadeTitle' && phase !== 'lines';
+  const showSubtitle = phase === 'subtitle';
   const showLines = phase === 'lines';
 
   return (
@@ -170,6 +186,44 @@ const ChapterScreen: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* "Next" button or waiting message after all lines are done */}
+      <AnimatePresence>
+        {showLines && allLinesFinished && (
+          <motion.div
+            key="chapter-done-action"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            style={styles.actionContainer}
+          >
+            {isHost ? (
+              <motion.button
+                onClick={handleChapterDone}
+                style={styles.nextButton}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                animate={{
+                  boxShadow: [
+                    '0 0 8px rgba(0,229,255,0.3)',
+                    '0 0 20px rgba(0,229,255,0.6)',
+                    '0 0 8px rgba(0,229,255,0.3)',
+                  ],
+                }}
+                transition={{
+                  boxShadow: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
+                }}
+              >
+                {'次へ ▶'}
+              </motion.button>
+            ) : (
+              <div style={styles.waitingText}>
+                {'ホストの操作を待っています...'}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -242,6 +296,33 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#c0c0c0',
     fontWeight: 300,
     marginLeft: '2px',
+  },
+  actionContainer: {
+    position: 'absolute' as const,
+    bottom: '12%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nextButton: {
+    fontFamily: "'Orbitron', sans-serif",
+    fontSize: '18px',
+    fontWeight: 700,
+    color: '#00e5ff',
+    backgroundColor: 'transparent',
+    border: '2px solid #00e5ff',
+    padding: '14px 48px',
+    cursor: 'pointer',
+    letterSpacing: '3px',
+    clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
+    textTransform: 'uppercase' as const,
+    transition: 'background-color 0.2s, color 0.2s',
+  },
+  waitingText: {
+    fontFamily: "'Rajdhani', sans-serif",
+    fontSize: '16px',
+    color: '#555',
+    letterSpacing: '2px',
   },
 };
 

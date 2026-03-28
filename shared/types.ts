@@ -110,6 +110,7 @@ export interface ClientToServerEvents {
   'game:requestHint': (data: { roomCode: string }) => void;
   'game:defendAttack': (data: { roomCode: string; defenseCode: string }) => void;
   'game:scan': (data: { roomCode: string }) => void;
+  'game:chapterDone': (data: { roomCode: string }) => void;
 }
 
 export interface ServerToClientEvents {
