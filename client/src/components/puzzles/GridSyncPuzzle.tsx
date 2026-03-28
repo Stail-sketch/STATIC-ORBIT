@@ -104,9 +104,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// TARGET PATTERN ///</div>
+          <div style={{ marginBottom: 4 }}>/// 目標パターン ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            RELAY COORDINATES TO OPERATOR
+            座標をオペレーターに伝えてください
           </div>
         </div>
 
@@ -218,7 +218,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
               border: '1px solid rgba(0,240,255,0.3)',
             }} />
             <span style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 1 }}>
-              ACTIVE ({filledCount})
+              有効 ({filledCount})
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -229,7 +229,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
               border: '1px solid rgba(0,240,255,0.12)',
             }} />
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: 1 }}>
-              INACTIVE ({totalCells - filledCount})
+              無効 ({totalCells - filledCount})
             </span>
           </div>
         </div>
@@ -250,7 +250,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             marginBottom: 8,
             fontFamily: "'Orbitron', sans-serif",
           }}>
-            ACTIVE COORDINATES:
+            有効座標:
           </div>
           <div style={{
             fontSize: 12,
@@ -326,9 +326,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// GRID SYNC CONSOLE ///</div>
+          <div style={{ marginBottom: 4 }}>/// グリッド同期コンソール ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            REPLICATE THE TARGET PATTERN
+            目標パターンを再現せよ
           </div>
         </div>
 
@@ -486,7 +486,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             color: 'rgba(255,0,102,0.4)',
             letterSpacing: 1,
           }}>
-            ACTIVE: {filledCount} / {gridSize * gridSize}
+            有効: {filledCount} / {gridSize * gridSize}
           </div>
 
           {/* Clear Button */}
@@ -506,7 +506,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
             }}
           >
-            CLEAR
+            クリア
           </motion.button>
 
           {/* Sync Button */}
@@ -529,7 +529,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               transition: 'all 0.3s ease',
             }}
           >
-            {isSubmitting ? '...' : 'SYNC'}
+            {isSubmitting ? '...' : '同期'}
           </motion.button>
         </div>
 
@@ -548,12 +548,12 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
         }}>
           {filledCount > 0 ? (
             <>
-              MARKED: {grid.flatMap((row, r) =>
+              選択済: {grid.flatMap((row, r) =>
                 row.map((filled, c) => filled ? cellLabel(r, c) : null).filter(Boolean)
               ).join('  ')}
             </>
           ) : (
-            'NO CELLS SELECTED -- TAP CELLS TO TOGGLE'
+            'セル未選択 -- タップして切替'
           )}
         </div>
       </div>

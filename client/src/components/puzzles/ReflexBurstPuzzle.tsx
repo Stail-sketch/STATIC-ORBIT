@@ -124,9 +124,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// BYPASS SEQUENCE — CALL OUT THE KEYS ///</div>
+          <div style={{ marginBottom: 4 }}>/// バイパスシーケンス -- キーを読み上げよ ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            TEMPO: {bpm} BPM -- {totalBeats} BEATS
+            テンポ: {bpm} BPM -- {totalBeats}ビート
           </div>
         </div>
 
@@ -195,7 +195,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
                     background: 'rgba(255,34,68,0.15)',
                     padding: '1px 6px',
                   }}>
-                    FAKE
+                    フェイク
                   </span>
                 )}
               </motion.div>
@@ -216,7 +216,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          {sequence.filter(s => !s.isFake).length} REAL COMMANDS -- {sequence.filter(s => s.isFake).length} FAKE TRAPS -- RELAY ORDER CAREFULLY
+          本物{sequence.filter(s => !s.isFake).length}個 -- フェイク{sequence.filter(s => s.isFake).length}個 -- 順番を正確に伝えてください
         </div>
       </div>
     </div>
@@ -305,9 +305,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// REFLEX BYPASS ///</div>
+          <div style={{ marginBottom: 4 }}>/// リフレックスバイパス ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            HIT THE KEYS ON BEAT
+            ビートに合わせてキーを押せ
           </div>
         </div>
 
@@ -426,7 +426,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 2,
             fontFamily: "'Orbitron', sans-serif",
           }}>
-            PRESS THE KEY YOUR TEAM CALLS OUT
+            チームが読み上げたキーを押せ
           </div>
 
           {/* Key buttons */}
@@ -487,7 +487,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             marginBottom: 6,
           }}>
-            <span>SEQUENCE PROGRESS</span>
+            <span>シーケンス進捗</span>
             <span>{currentBeat + 1} / {totalBeats}</span>
           </div>
           <div style={{

@@ -34,7 +34,7 @@ const MissCounter: React.FC<MissCounterProps> = ({
             style={alertLabelStyle}
           >
             <span style={alertIconStyle}>!</span>
-            SYSTEM ALERT
+            システム警告
           </motion.div>
         ) : (
           <motion.div
@@ -44,7 +44,7 @@ const MissCounter: React.FC<MissCounterProps> = ({
             exit={{ opacity: 0 }}
             style={labelStyle}
           >
-            ERRORS
+            エラー
           </motion.div>
         )}
       </AnimatePresence>

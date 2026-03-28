@@ -148,9 +148,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// SECURITY PATTERN ///</div>
+          <div style={{ marginBottom: 4 }}>/// セキュリティパターン ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            MEMORIZE AND RELAY
+            記憶して伝達せよ
           </div>
         </div>
 
@@ -171,7 +171,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
               color: '#00f0ff',
               letterSpacing: 2,
             }}>
-              SEQUENCE: {sequence.length} STEPS
+              シーケンス: {sequence.length}ステップ
             </div>
           </div>
 
@@ -241,7 +241,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
                 clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
               }}
             >
-              {isPlaying ? 'PLAYING...' : 'PLAY SEQUENCE'}
+              {isPlaying ? '再生中...' : 'シーケンス再生'}
             </motion.button>
           </div>
 
@@ -267,7 +267,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
                   color: 'rgba(0,240,255,0.4)',
                   marginBottom: 8,
                 }}>
-                  SEQUENCE ORDER
+                  シーケンス順序
                 </div>
                 <div style={{
                   fontFamily: "'Share Tech Mono', monospace",
@@ -298,7 +298,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          SECURITY PATTERN CAPTURED -- VERBAL RELAY REQUIRED
+          セキュリティパターン取得 -- 口頭で伝達してください
         </div>
       </div>
     </div>
@@ -352,9 +352,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// SEQUENCE INPUT PANEL ///</div>
+          <div style={{ marginBottom: 4 }}>/// シーケンス入力パネル ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            REPRODUCE THE SECURITY PATTERN
+            セキュリティパターンを再現せよ
           </div>
         </div>
 
@@ -453,7 +453,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 letterSpacing: 2,
                 color: 'rgba(255,0,102,0.4)',
               }}>
-                INPUT SEQUENCE
+                入力シーケンス
               </span>
               <span style={{
                 fontSize: 11,
@@ -516,7 +516,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 textAlign: 'center',
                 padding: 8,
               }}>
-                TAP PANELS TO BUILD SEQUENCE
+                パネルをタップしてシーケンスを構築
               </div>
             )}
           </div>
@@ -545,7 +545,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 cursor: inputSequence.length > 0 ? 'pointer' : 'default',
               }}
             >
-              UNDO
+              戻す
             </motion.button>
 
             <motion.button
@@ -566,7 +566,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 cursor: inputSequence.length > 0 ? 'pointer' : 'default',
               }}
             >
-              CLEAR
+              クリア
             </motion.button>
 
             <motion.button
@@ -588,7 +588,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
               }}
             >
-              SUBMIT
+              送信
             </motion.button>
           </div>
         </div>
@@ -603,7 +603,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             marginBottom: 6,
           }}>
-            <span>SEQUENCE PROGRESS</span>
+            <span>シーケンス進捗</span>
             <span>{inputSequence.length} / {sequenceLength}</span>
           </div>
           <div style={{

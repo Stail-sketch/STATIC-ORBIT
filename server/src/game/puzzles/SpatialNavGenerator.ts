@@ -143,12 +143,12 @@ export class SpatialNavGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'move') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { direction } = action.data as { direction: string };
         if (!direction || !['up', 'down', 'left', 'right'].includes(direction)) {
-          return { correct: false, penalty: 0, feedback: 'Invalid direction.' };
+          return { correct: false, penalty: 0, feedback: '無効な方向。' };
         }
 
         const delta: Record<string, Position> = {
@@ -164,12 +164,12 @@ export class SpatialNavGenerator implements PuzzleGenerator {
 
         // Out of bounds check
         if (nx < 0 || nx >= size || ny < 0 || ny >= size) {
-          return { correct: false, penalty: 0, feedback: 'Cannot move out of bounds.' };
+          return { correct: false, penalty: 0, feedback: '範囲外には移動できない。' };
         }
 
         // Wall check
         if (grid[ny][nx] === 'wall') {
-          return { correct: false, penalty: 0, feedback: 'Wall blocks the path.' };
+          return { correct: false, penalty: 0, feedback: '壁が道を塞いでいる。' };
         }
 
         // Move to new position
@@ -184,7 +184,7 @@ export class SpatialNavGenerator implements PuzzleGenerator {
           return {
             correct: false,
             penalty: 10,
-            feedback: 'Hazard! Environmental damage sustained.',
+            feedback: '危険地帯！ 環境ダメージを受けた。',
           };
         }
 
@@ -193,15 +193,16 @@ export class SpatialNavGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: 'Exit reached. Navigation complete.',
+            feedback: '出口到達。ナビゲーション完了。',
             solved: true,
           };
         }
 
+        const dirNames: Record<string, string> = { up: '上', down: '下', left: '左', right: '右' };
         return {
           correct: true,
           penalty: 0,
-          feedback: `Moved ${direction}. Position: (${nx}, ${ny}).`,
+          feedback: `${dirNames[direction]}に移動。位置: (${nx}, ${ny})`,
         };
       },
     };

@@ -161,13 +161,13 @@ export class LogicGateGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'assign') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { assignments } = action.data as { assignments: Record<string, string> };
 
         if (!assignments || typeof assignments !== 'object') {
-          return { correct: false, penalty: 0, feedback: 'Missing assignments.' };
+          return { correct: false, penalty: 0, feedback: '割り当てが未入力。' };
         }
 
         // Check all assignments
@@ -177,10 +177,10 @@ export class LogicGateGenerator implements PuzzleGenerator {
         for (const name of elementNames) {
           if (!assignments[name]) {
             allCorrect = false;
-            errors.push(`${name} not assigned.`);
+            errors.push(`${name}が未割当。`);
           } else if (assignments[name] !== solution[name]) {
             allCorrect = false;
-            errors.push(`${name} is incorrect.`);
+            errors.push(`${name}が不正解。`);
           }
         }
 
@@ -188,7 +188,7 @@ export class LogicGateGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: 'All assignments correct. Logic matrix solved.',
+            feedback: '全割当正解。ロジックマトリクス解除。',
             solved: true,
           };
         }
@@ -196,7 +196,7 @@ export class LogicGateGenerator implements PuzzleGenerator {
         return {
           correct: false,
           penalty: 15,
-          feedback: `Incorrect: ${errors.join(' ')}`,
+          feedback: `不正解: ${errors.join(' ')}`,
         };
       },
     };

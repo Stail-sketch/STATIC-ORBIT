@@ -100,6 +100,7 @@ export interface ServerToClientEvents {
     timeLimit: number;
     storyText: string;
     stagePhase: StagePhase;
+    puzzleGuide?: string;
   }) => void;
   'game:start': (data: { puzzleType: PuzzleType; roleData: Record<string, unknown>; timeLimit: number }) => void;
   'game:timeUpdate': (data: { remaining: number }) => void;

@@ -114,7 +114,7 @@ const PhaseChangeScreen: React.FC = () => {
               transition={{ duration: 1.5, times: [0, 0.1, 0.15, 0.3, 0.35, 0.5, 1] }}
               style={glitchTextStyle}
             >
-              BREACH DETECTED
+              侵入検知
             </motion.div>
           )}
         </AnimatePresence>
@@ -149,14 +149,14 @@ const PhaseChangeScreen: React.FC = () => {
               transition={{ duration: 1.5, repeat: Infinity }}
               style={warningTextStyle}
             >
-              WARNING
+              警告
             </motion.div>
             <motion.div
               animate={{ opacity: [0.6, 1, 0.6] }}
               transition={{ duration: 2, repeat: Infinity }}
               style={lockdownTextStyle}
             >
-              SYSTEM LOCKDOWN INITIATED
+              システムロックダウン開始
             </motion.div>
 
             {/* Red pulse rings */}

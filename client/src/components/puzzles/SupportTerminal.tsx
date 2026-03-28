@@ -39,7 +39,7 @@ const SupportTerminal: React.FC<SupportTerminalProps> = ({ role, roleData }) => 
 
   const isNavigator = role === 'navigator';
   const accentColor = isNavigator ? '#33ff99' : '#ffaa00';
-  const roleName = isNavigator ? 'NAVIGATOR' : 'HACKER';
+  const roleName = isNavigator ? 'ナビゲーター' : 'ハッカー';
 
   const handleChat = useCallback(() => {
     const msg = chatInput.trim();
@@ -63,16 +63,16 @@ const SupportTerminal: React.FC<SupportTerminalProps> = ({ role, roleData }) => 
           {isNavigator ? '\u25C8' : '\u25A0'}
         </span>
         <span style={{ ...headerTitleStyle, color: accentColor }}>
-          {roleName} TERMINAL
+          {roleName}端末
         </span>
-        <span style={headerSubStyle}>SUPPORT MODE</span>
+        <span style={headerSubStyle}>サポートモード</span>
       </motion.div>
 
       {/* Data readout */}
       <div style={dataContainerStyle}>
         {dataEntries.length === 0 ? (
           <div style={{ ...dataLineStyle, color: `${accentColor}88` }}>
-            AWAITING DATA FEED...
+            データフィード待機中...
           </div>
         ) : (
           dataEntries.map(([key, value]) => (
@@ -91,7 +91,7 @@ const SupportTerminal: React.FC<SupportTerminalProps> = ({ role, roleData }) => 
       {/* Separator */}
       <div style={{ ...separatorStyle, borderTopColor: `${accentColor}22` }}>
         <span style={{ ...separatorLabelStyle, color: `${accentColor}66` }}>
-          COMMS CHANNEL
+          通信チャネル
         </span>
       </div>
 
@@ -103,12 +103,12 @@ const SupportTerminal: React.FC<SupportTerminalProps> = ({ role, roleData }) => 
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleChat()}
-          placeholder={`Send intel to team...`}
+          placeholder={`チームに情報を送信...`}
           style={{ ...inputStyle, caretColor: accentColor }}
           maxLength={120}
         />
         <button onClick={handleChat} style={{ ...sendBtnStyle, color: accentColor }}>
-          SEND
+          送信
         </button>
       </div>
     </div>

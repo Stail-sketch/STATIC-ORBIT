@@ -117,10 +117,10 @@ const GameScreen: React.FC = () => {
       }
 
       // Play stage-end SFX
-      if (lastFeedback.feedback === 'SOLVED') {
+      if (lastFeedback.feedback === '解除成功！') {
         audio.playSFX('stageCleared');
         audio.stopHeartbeat();
-      } else if (lastFeedback.feedback === 'TIME UP') {
+      } else if (lastFeedback.feedback === '時間切れ') {
         audio.playSFX('stageFailed');
         audio.stopHeartbeat();
       }
@@ -161,7 +161,7 @@ const GameScreen: React.FC = () => {
         .split('-')
         .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ')
-    : 'UNKNOWN';
+    : '不明';
 
   return (
     <div
@@ -197,7 +197,7 @@ const GameScreen: React.FC = () => {
           )
         ) : (
           <div style={noPuzzleStyle}>
-            <span className="terminal-text">LOADING PUZZLE MODULE...</span>
+            <span className="terminal-text">パズルモジュール読込中...</span>
           </div>
         )}
       </div>
@@ -231,7 +231,7 @@ const GameScreen: React.FC = () => {
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleChat()}
-            placeholder="Quick message..."
+            placeholder="メッセージ..."
             style={chatInputStyle}
             maxLength={80}
           />

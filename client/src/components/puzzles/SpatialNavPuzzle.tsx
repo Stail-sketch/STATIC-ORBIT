@@ -128,9 +128,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// STATION BLUEPRINT — NAVIGATE THE OPERATIVE ///</div>
+          <div style={{ marginBottom: 4 }}>/// ステーション設計図 -- 工作員を誘導せよ ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            RELAY COORDINATES TO OPERATOR
+            座標をオペレーターに伝えてください
           </div>
         </div>
 
@@ -214,11 +214,11 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             flexWrap: 'wrap',
           }}>
             {[
-              { label: 'WALL', color: CELL_COLORS.wall, border: CELL_BORDERS.wall },
-              { label: 'OPEN', color: CELL_COLORS.open, border: CELL_BORDERS.open },
-              { label: 'START', color: CELL_COLORS.start, border: CELL_BORDERS.start },
-              { label: 'EXIT', color: CELL_COLORS.exit, border: CELL_BORDERS.exit },
-              { label: 'HAZARD', color: CELL_COLORS.hazard, border: CELL_BORDERS.hazard },
+              { label: '壁', color: CELL_COLORS.wall, border: CELL_BORDERS.wall },
+              { label: '通路', color: CELL_COLORS.open, border: CELL_BORDERS.open },
+              { label: '開始', color: CELL_COLORS.start, border: CELL_BORDERS.start },
+              { label: '出口', color: CELL_COLORS.exit, border: CELL_BORDERS.exit },
+              { label: '危険', color: CELL_COLORS.hazard, border: CELL_BORDERS.hazard },
             ].map((item) => (
               <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{
@@ -253,7 +253,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          GRID {mapSize}x{mapSize} -- START ({String.fromCharCode(65 + startPos.x)}{startPos.y + 1}) -- EXIT ({String.fromCharCode(65 + exitPos.x)}{exitPos.y + 1})
+          グリッド {mapSize}x{mapSize} -- 開始地点 ({String.fromCharCode(65 + startPos.x)}{startPos.y + 1}) -- 出口 ({String.fromCharCode(65 + exitPos.x)}{exitPos.y + 1})
         </div>
       </div>
     </div>
@@ -401,9 +401,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// SPATIAL NAVIGATION ///</div>
+          <div style={{ marginBottom: 4 }}>/// 空間ナビゲーション ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            NAVIGATE TO THE EXIT POINT
+            出口ポイントまで移動せよ
           </div>
         </div>
 
@@ -506,7 +506,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               color: 'rgba(255,0,102,0.7)',
               fontFamily: "'Orbitron', sans-serif",
             }}>
-              MOVES: {moveCount}
+              移動回数: {moveCount}
             </div>
             <div style={{
               padding: '6px 16px',

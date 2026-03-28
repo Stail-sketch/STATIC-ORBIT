@@ -76,21 +76,21 @@ export class FreqTuneGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'tune') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { dialIndex, frequency } = action.data as { dialIndex: number; frequency: number };
 
         if (dialIndex == null || frequency == null) {
-          return { correct: false, penalty: 0, feedback: 'Missing dial index or frequency.' };
+          return { correct: false, penalty: 0, feedback: 'ダイヤル番号または周波数が未指定。' };
         }
 
         if (dialIndex < 0 || dialIndex >= count) {
-          return { correct: false, penalty: 0, feedback: 'Invalid dial index.' };
+          return { correct: false, penalty: 0, feedback: '無効なダイヤル番号。' };
         }
 
         if (tunedDials.has(dialIndex)) {
-          return { correct: false, penalty: 0, feedback: `Dial ${dialIndex + 1} is already tuned.` };
+          return { correct: false, penalty: 0, feedback: `ダイヤル${dialIndex + 1}は既にチューニング済み。` };
         }
 
         const target = targets[dialIndex];
@@ -102,7 +102,7 @@ export class FreqTuneGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: `Dial ${dialIndex + 1} locked at ${frequency} MHz.`,
+            feedback: `ダイヤル${dialIndex + 1}を${frequency} MHzでロック。`,
             solved,
           };
         }
@@ -110,7 +110,7 @@ export class FreqTuneGenerator implements PuzzleGenerator {
         return {
           correct: false,
           penalty: 10,
-          feedback: `Dial ${dialIndex + 1}: ${frequency} MHz — signal not acquired.`,
+          feedback: `ダイヤル${dialIndex + 1}: ${frequency} MHz -- 信号未取得。`,
         };
       },
     };

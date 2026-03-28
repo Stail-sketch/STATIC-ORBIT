@@ -117,12 +117,12 @@ export class CipherBreakGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'submit-decode') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { decoded } = action.data as { decoded: string };
         if (!decoded) {
-          return { correct: false, penalty: 0, feedback: 'No decoded text provided.' };
+          return { correct: false, penalty: 0, feedback: '解読テキストが未入力。' };
         }
 
         const normalized = decoded.toUpperCase().trim();
@@ -130,7 +130,7 @@ export class CipherBreakGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: 'Cipher decoded successfully.',
+            feedback: '暗号解読成功。',
             solved: true,
           };
         }
@@ -138,7 +138,7 @@ export class CipherBreakGenerator implements PuzzleGenerator {
         return {
           correct: false,
           penalty: 15,
-          feedback: 'Incorrect decryption. Try again.',
+          feedback: '解読失敗。もう一度試せ。',
         };
       },
     };

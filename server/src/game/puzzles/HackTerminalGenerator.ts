@@ -133,21 +133,21 @@ export class HackTerminalGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'type-command') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { index, input } = action.data as { index: number; input: string };
 
         if (index == null || input == null) {
-          return { correct: false, penalty: 0, feedback: 'Missing command index or input.' };
+          return { correct: false, penalty: 0, feedback: 'コマンド番号または入力が未指定。' };
         }
 
         if (index < 0 || index >= count) {
-          return { correct: false, penalty: 0, feedback: 'Invalid command index.' };
+          return { correct: false, penalty: 0, feedback: '無効なコマンド番号。' };
         }
 
         if (completedCommands.has(index)) {
-          return { correct: false, penalty: 0, feedback: `Command ${index + 1} already executed.` };
+          return { correct: false, penalty: 0, feedback: `コマンド${index + 1}は既に実行済み。` };
         }
 
         if (input === commands[index]) {
@@ -156,7 +156,7 @@ export class HackTerminalGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: `Command ${index + 1} executed successfully.`,
+            feedback: `コマンド${index + 1}の実行に成功。`,
             solved,
           };
         }
@@ -164,7 +164,7 @@ export class HackTerminalGenerator implements PuzzleGenerator {
         return {
           correct: false,
           penalty: 10,
-          feedback: `Command ${index + 1}: syntax error. Exact input required.`,
+          feedback: `コマンド${index + 1}: 構文エラー。正確な入力が必要。`,
         };
       },
     };

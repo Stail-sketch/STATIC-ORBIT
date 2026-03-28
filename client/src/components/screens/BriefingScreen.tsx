@@ -78,7 +78,7 @@ const BriefingScreen: React.FC = () => {
           color: isEscape ? '#ff2244' : '#00f0ff',
         }}
       >
-        {stagePhase.toUpperCase()} PHASE
+        {stagePhase === 'escape' ? '脱出フェーズ' : '潜入フェーズ'}
       </motion.div>
 
       {/* Stage number */}
@@ -88,7 +88,7 @@ const BriefingScreen: React.FC = () => {
         transition={{ delay: 0.2, duration: 0.6 }}
         style={stageNumberStyle}
       >
-        STAGE {stageNum} / {totalNum}
+        ステージ {stageNum} / {totalNum}
       </motion.div>
 
       {/* Puzzle type name */}
@@ -129,7 +129,7 @@ const BriefingScreen: React.FC = () => {
       >
         <div style={terminalHeaderStyle}>
           <span style={terminalDotStyle} />
-          <span style={terminalLabelStyle}>MISSION BRIEF</span>
+          <span style={terminalLabelStyle}>ミッションブリーフ</span>
         </div>
         <div style={terminalBodyStyle}>
           <TypewriterText
@@ -139,6 +139,62 @@ const BriefingScreen: React.FC = () => {
           />
         </div>
       </motion.div>
+
+      {/* Puzzle guide panel */}
+      {briefing.puzzleGuide && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5, duration: 0.6 }}
+          style={guideBoxStyle}
+        >
+          <div style={guideHeaderStyle}>
+            <span style={guideDotStyle} />
+            <span style={guideLabelStyle}>ミッション指示</span>
+          </div>
+          <div style={guideBodyStyle}>
+            {briefing.puzzleGuide.split('\n').map((line, i) => {
+              const isObserver = line.startsWith('【オブザーバー】');
+              const isOperator = line.startsWith('【オペレーター】');
+              let color = 'rgba(255, 255, 255, 0.75)';
+              let labelColor = color;
+              if (isObserver) {
+                labelColor = '#00f0ff';
+              } else if (isOperator) {
+                labelColor = '#ff44ff';
+              }
+              const label = isObserver
+                ? '【オブザーバー】'
+                : isOperator
+                  ? '【オペレーター】'
+                  : '';
+              const body = label ? line.slice(label.length) : line;
+              return (
+                <div key={i} style={{ marginBottom: i < briefing.puzzleGuide!.split('\n').length - 1 ? '10px' : 0 }}>
+                  {label && (
+                    <span
+                      style={{
+                        color: labelColor,
+                        fontWeight: 700,
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.75rem',
+                        textShadow: isObserver
+                          ? '0 0 8px rgba(0, 240, 255, 0.4)'
+                          : '0 0 8px rgba(255, 68, 255, 0.4)',
+                      }}
+                    >
+                      {label}
+                    </span>
+                  )}
+                  <span style={{ color, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', lineHeight: '1.6' }}>
+                    {body}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Standby pulse */}
       {typingDone && (
@@ -154,13 +210,13 @@ const BriefingScreen: React.FC = () => {
               : '0 0 10px rgba(0, 240, 255, 0.4)',
           }}
         >
-          STANDBY...
+          スタンバイ...
         </motion.div>
       )}
 
       {/* Time limit info */}
       <div style={timeLimitStyle}>
-        TIME LIMIT: {briefing.timeLimit}s
+        制限時間: {briefing.timeLimit}秒
       </div>
     </div>
   );
@@ -256,6 +312,41 @@ const terminalLabelStyle: React.CSSProperties = {
 const terminalBodyStyle: React.CSSProperties = {
   padding: '16px',
   minHeight: '100px',
+};
+
+const guideBoxStyle: React.CSSProperties = {
+  width: '100%',
+  maxWidth: '540px',
+  background: 'rgba(0, 240, 255, 0.03)',
+  border: '1px solid rgba(0, 240, 255, 0.15)',
+  marginTop: '8px',
+};
+
+const guideHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '8px 12px',
+  borderBottom: '1px solid rgba(0, 240, 255, 0.1)',
+};
+
+const guideDotStyle: React.CSSProperties = {
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  background: '#ffaa22',
+  boxShadow: '0 0 4px rgba(255, 170, 34, 0.5)',
+};
+
+const guideLabelStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.6rem',
+  color: 'rgba(255, 255, 255, 0.3)',
+  letterSpacing: '0.15em',
+};
+
+const guideBodyStyle: React.CSSProperties = {
+  padding: '14px 16px',
 };
 
 const standbyStyle: React.CSSProperties = {

@@ -96,9 +96,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// CIRCUIT SCHEMATIC ///</div>
+          <div style={{ marginBottom: 4 }}>/// 回路図 ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            CLASSIFIED -- RELAY TO OPERATOR
+            【機密】 オペレーターに伝えてください
           </div>
         </div>
 
@@ -113,13 +113,13 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             padding: '0 8px',
           }}>
             <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
-              SOURCE
+              入力
             </div>
             <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.4)', letterSpacing: 2, textAlign: 'center', fontFamily: "'Orbitron', sans-serif" }}>
-              WIRE
+              ワイヤー
             </div>
             <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.4)', letterSpacing: 2, textAlign: 'right', fontFamily: "'Orbitron', sans-serif" }}>
-              DEST
+              出力
             </div>
           </div>
 
@@ -229,7 +229,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           textAlign: 'center',
           letterSpacing: 1,
         }}>
-          {connectionMap.length} WIRE CONNECTIONS DETECTED -- VERBAL RELAY REQUIRED
+          {connectionMap.length}本のワイヤー接続を検出 -- 口頭で伝達してください
         </div>
       </div>
     </div>
@@ -300,9 +300,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// WIRE CONNECTION PANEL ///</div>
+          <div style={{ marginBottom: 4 }}>/// ワイヤー接続パネル ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            CONNECT EACH WIRE TO ITS DESTINATION PORT
+            各ワイヤーを正しい出力ポートに接続せよ
           </div>
         </div>
 
@@ -471,7 +471,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         minWidth: 90,
                       }}
                     >
-                      <option value="" style={{ background: '#0a0a1a' }}>-- PORT --</option>
+                      <option value="" style={{ background: '#0a0a1a' }}>-- ポート --</option>
                       {available.map((d) => (
                         <option key={d} value={d} style={{ background: '#0a0a1a' }}>
                           {d}
@@ -498,7 +498,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         clipPath: 'polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%)',
                       }}
                     >
-                      CONNECT
+                      接続
                     </motion.button>
                   </div>
                 )}
@@ -517,7 +517,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             marginBottom: 6,
           }}>
-            <span>CONNECTIONS</span>
+            <span>接続数</span>
             <span>{assignments.filter((a) => a.connected).length} / {assignments.length}</span>
           </div>
           <div style={{

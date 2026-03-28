@@ -89,20 +89,20 @@ export class MemoryChainGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'submit-sequence') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { sequence: submitted } = action.data as { sequence: string[] };
 
         if (!submitted || !Array.isArray(submitted)) {
-          return { correct: false, penalty: 0, feedback: 'No sequence provided.' };
+          return { correct: false, penalty: 0, feedback: 'シーケンスが未入力。' };
         }
 
         if (submitted.length !== sequence.length) {
           return {
             correct: false,
             penalty: 15,
-            feedback: `Expected ${sequence.length} steps, got ${submitted.length}.`,
+            feedback: `${sequence.length}ステップ必要だが、${submitted.length}ステップ入力された。`,
           };
         }
 
@@ -112,7 +112,7 @@ export class MemoryChainGenerator implements PuzzleGenerator {
             return {
               correct: false,
               penalty: 15,
-              feedback: `Sequence mismatch at step ${i + 1}.`,
+              feedback: `ステップ${i + 1}でシーケンス不一致。`,
             };
           }
         }
@@ -120,7 +120,7 @@ export class MemoryChainGenerator implements PuzzleGenerator {
         return {
           correct: true,
           penalty: 0,
-          feedback: 'Sequence verified. Access granted.',
+          feedback: 'シーケンス認証完了。アクセス許可。',
           solved: true,
         };
       },

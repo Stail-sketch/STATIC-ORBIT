@@ -10,22 +10,22 @@ const RANK_CONFIG: Record<Rank, { color: string; glow: string; label: string }> 
   S: {
     color: '#ffd700',
     glow: '0 0 40px rgba(255, 215, 0, 0.7), 0 0 80px rgba(255, 215, 0, 0.3)',
-    label: 'LEGENDARY',
+    label: '伝説',
   },
   A: {
     color: '#00f0ff',
     glow: '0 0 40px rgba(0, 240, 255, 0.6), 0 0 80px rgba(0, 240, 255, 0.25)',
-    label: 'EXCELLENT',
+    label: '優秀',
   },
   B: {
     color: '#c0c0c0',
     glow: '0 0 30px rgba(192, 192, 192, 0.5), 0 0 60px rgba(192, 192, 192, 0.2)',
-    label: 'ADEQUATE',
+    label: '合格',
   },
   C: {
     color: '#883333',
     glow: '0 0 20px rgba(136, 51, 51, 0.5)',
-    label: 'COMPROMISED',
+    label: '危険',
   },
 };
 
@@ -97,13 +97,13 @@ const ResultScreen: React.FC = () => {
 
   const buildShareText = () => {
     return [
-      '\u{1F6F8} STATIC ORBIT \u2014 MISSION REPORT',
+      '\u{1F6F8} STATIC ORBIT \u2014 ミッションレポート',
       '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501',
-      `RANK: ${rank}`,
-      `SCORE: ${totalScore} / ${maxScore} (${Math.round(percentage)}%)`,
-      `STAGES: ${clearedCount}/${stages.length} CLEARED`,
+      `ランク: ${rank}`,
+      `スコア: ${totalScore} / ${maxScore} (${Math.round(percentage)}%)`,
+      `ステージ: ${clearedCount}/${stages.length} クリア`,
       '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501',
-      '#StaticOrbit #CoopPuzzle',
+      '#StaticOrbit #協力パズル',
     ].join('\n');
   };
 
@@ -146,8 +146,8 @@ const ResultScreen: React.FC = () => {
         transition={{ duration: 0.8 }}
         style={headerStyle}
       >
-        <h1 style={titleStyle}>MISSION REPORT</h1>
-        <div style={subtitleStyle}>DEBRIEF SUMMARY</div>
+        <h1 style={titleStyle}>ミッションレポート</h1>
+        <div style={subtitleStyle}>デブリーフィング</div>
       </motion.div>
 
       {/* Stage list */}
@@ -158,10 +158,10 @@ const ResultScreen: React.FC = () => {
         style={stageListStyle}
       >
         <div style={stageHeaderRowStyle}>
-          <span style={stageColStyle}>OPERATION</span>
-          <span style={stageColCenterStyle}>STATUS</span>
-          <span style={stageColRightStyle}>SCORE</span>
-          <span style={stageColRightStyle}>ERRORS</span>
+          <span style={stageColStyle}>ステージ</span>
+          <span style={stageColCenterStyle}>結果</span>
+          <span style={stageColRightStyle}>スコア</span>
+          <span style={stageColRightStyle}>ミス</span>
         </div>
 
         {stages.map((stage: StageScore, i: number) => {
@@ -195,7 +195,7 @@ const ResultScreen: React.FC = () => {
                     color: stage.cleared ? '#44ff88' : '#ff2244',
                   }}
                 >
-                  {stage.cleared ? 'CLEARED' : 'FAILED'}
+                  {stage.cleared ? 'クリア' : '失敗'}
                 </span>
               </span>
               <span style={{ ...stageColRightStyle, color: '#eee' }}>
@@ -236,7 +236,7 @@ const ResultScreen: React.FC = () => {
         </div>
 
         <div style={scoreRowStyle}>
-          <span style={scoreLabelStyle}>TOTAL SCORE</span>
+          <span style={scoreLabelStyle}>合計スコア</span>
           <span style={scoreValueStyle}>
             {displayScore}
             <span style={scoreMaxStyle}> / {maxScore}</span>
@@ -280,10 +280,10 @@ const ResultScreen: React.FC = () => {
         style={buttonRowStyle}
       >
         <button className="btn-primary" onClick={handleReconnect}>
-          RECONNECT
+          タイトルへ
         </button>
         <button className="btn-primary" onClick={handleReconnect}>
-          RETRY
+          もう一回
         </button>
         <button
           className="btn-primary"
@@ -291,12 +291,12 @@ const ResultScreen: React.FC = () => {
           style={shareButtonStyle}
         >
           {shareStatus === 'copied'
-            ? 'COPIED!'
+            ? 'コピー完了！'
             : shareStatus === 'shared'
-            ? 'SHARED!'
+            ? 'シェア完了！'
             : shareStatus === 'error'
-            ? 'FAILED'
-            : 'SHARE RESULT'}
+            ? '失敗'
+            : '結果をシェア'}
         </button>
       </motion.div>
     </div>

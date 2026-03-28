@@ -198,9 +198,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// INTERCEPTED SIGNAL ///</div>
+          <div style={{ marginBottom: 4 }}>/// 傍受信号 ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            DECODE AND RELAY
+            解読して伝達せよ
           </div>
         </div>
 
@@ -297,7 +297,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
                 clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
               }}
             >
-              {isPlaying ? 'PLAYING...' : 'PLAY'}
+              {isPlaying ? '再生中...' : '再生'}
             </motion.button>
 
             <div style={{
@@ -305,7 +305,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
               color: 'rgba(0,240,255,0.4)',
               letterSpacing: 1,
             }}>
-              SPEED: {playbackSpeed} WPM
+              速度: {playbackSpeed} WPM
             </div>
           </div>
         </div>
@@ -323,7 +323,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          MORSE SIGNAL INTERCEPTED -- DECODE AND TRANSMIT VIA VOICE
+          モールス信号を傍受 -- 解読して口頭で伝達してください
         </div>
       </div>
     </div>
@@ -368,9 +368,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// MORSE DECODER TERMINAL ///</div>
+          <div style={{ marginBottom: 4 }}>/// モールス解読端末 ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            DECODE THE INTERCEPTED SIGNAL
+            傍受信号を解読せよ
           </div>
         </div>
 
@@ -418,7 +418,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               color: 'rgba(255,0,102,0.4)',
               marginBottom: 8,
             }}>
-              REFERENCE CHART
+              参照表
             </div>
             <div style={{
               display: 'grid',
@@ -520,7 +520,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 letterSpacing: 2,
                 color: 'rgba(255,0,102,0.5)',
               }}>
-                DECODED MESSAGE
+                解読メッセージ
               </span>
               <span style={{
                 fontSize: 11,
@@ -574,7 +574,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                   clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
                 }}
               >
-                TRANSMIT
+                送信
               </motion.button>
             </div>
           </div>

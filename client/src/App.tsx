@@ -7,6 +7,7 @@ import ResultScreen from './components/screens/ResultScreen';
 import BriefingScreen from './components/screens/BriefingScreen';
 import PhaseChangeScreen from './components/screens/PhaseChangeScreen';
 import ScanlineOverlay from './components/effects/ScanlineOverlay';
+import SettingsPanel from './components/ui/SettingsPanel';
 
 export default function App() {
   useSocket();
@@ -15,6 +16,7 @@ export default function App() {
   return (
     <div className="app">
       <ScanlineOverlay />
+      <SettingsPanel />
       {screen === 'title' && <TitleScreen />}
       {screen === 'lobby' && <LobbyScreen />}
       {screen === 'briefing' && <BriefingScreen />}

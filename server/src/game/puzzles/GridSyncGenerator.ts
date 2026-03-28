@@ -49,23 +49,23 @@ export class GridSyncGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'submit-grid') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { grid } = action.data as { grid: boolean[][] };
         if (!grid || !Array.isArray(grid)) {
-          return { correct: false, penalty: 0, feedback: 'Invalid grid data.' };
+          return { correct: false, penalty: 0, feedback: 'グリッドデータが無効。' };
         }
 
         if (grid.length !== size) {
-          return { correct: false, penalty: 15, feedback: 'Grid dimensions mismatch.' };
+          return { correct: false, penalty: 15, feedback: 'グリッドサイズ不一致。' };
         }
 
         // Check each cell
         let mismatches = 0;
         for (let row = 0; row < size; row++) {
           if (!grid[row] || grid[row].length !== size) {
-            return { correct: false, penalty: 15, feedback: 'Grid dimensions mismatch.' };
+            return { correct: false, penalty: 15, feedback: 'グリッドサイズ不一致。' };
           }
           for (let col = 0; col < size; col++) {
             if (!!grid[row][col] !== targetPattern[row][col]) {
@@ -78,7 +78,7 @@ export class GridSyncGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: 'Grid pattern synchronized perfectly.',
+            feedback: 'グリッドパターン完全同期。',
             solved: true,
           };
         }
@@ -86,7 +86,7 @@ export class GridSyncGenerator implements PuzzleGenerator {
         return {
           correct: false,
           penalty: 15,
-          feedback: `Pattern mismatch: ${mismatches} cell${mismatches > 1 ? 's' : ''} differ.`,
+          feedback: `パターン不一致: ${mismatches}セルが異なる。`,
         };
       },
     };

@@ -109,18 +109,18 @@ export class ReflexBurstGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'press') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { key, beatIndex } = action.data as { key: string; beatIndex: number };
 
         if (typeof key !== 'string' || typeof beatIndex !== 'number') {
-          return { correct: false, penalty: 0, feedback: 'Invalid press data.' };
+          return { correct: false, penalty: 0, feedback: '無効な入力データ。' };
         }
 
         // Already pressed this beat
         if (pressedBeats.has(beatIndex)) {
-          return { correct: false, penalty: 0, feedback: 'Beat already registered.' };
+          return { correct: false, penalty: 0, feedback: 'このビートは登録済み。' };
         }
 
         pressedBeats.add(beatIndex);
@@ -130,7 +130,7 @@ export class ReflexBurstGenerator implements PuzzleGenerator {
           return {
             correct: false,
             penalty: 10,
-            feedback: 'Pressed a fake command! System shock.',
+            feedback: 'フェイクコマンドを押した！ システムショック。',
           };
         }
 
@@ -139,7 +139,7 @@ export class ReflexBurstGenerator implements PuzzleGenerator {
           return {
             correct: false,
             penalty: 5,
-            feedback: 'No command at this beat.',
+            feedback: 'このビートにコマンドはない。',
           };
         }
 
@@ -149,7 +149,7 @@ export class ReflexBurstGenerator implements PuzzleGenerator {
           return {
             correct: false,
             penalty: 10,
-            feedback: `Wrong key. Expected ${expectedKey}, got ${key.toUpperCase()}.`,
+            feedback: `キーが違う。正解: ${expectedKey}、入力: ${key.toUpperCase()}。`,
           };
         }
 
@@ -158,7 +158,7 @@ export class ReflexBurstGenerator implements PuzzleGenerator {
         return {
           correct: true,
           penalty: 0,
-          feedback: `Beat ${beatIndex} — ${key.toUpperCase()} confirmed.`,
+          feedback: `ビート${beatIndex} -- ${key.toUpperCase()} 確認。`,
           solved: allRealPressed,
         };
       },

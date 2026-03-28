@@ -85,9 +85,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// CIPHER KEY ///</div>
+          <div style={{ marginBottom: 4 }}>/// 暗号キー ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            DECRYPT TABLE -- RELAY TO OPERATOR
+            変換表 -- オペレーターに伝えてください
           </div>
         </div>
 
@@ -180,7 +180,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
                     color: 'rgba(255,100,100,0.3)',
                     letterSpacing: 1,
                   }}>
-                    DECOY
+                    ダミー
                   </div>
                 )}
               </motion.div>
@@ -199,7 +199,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           textAlign: 'center',
           letterSpacing: 1,
         }}>
-          {cipherTable.length} SYMBOLS IN CIPHER TABLE -- VERBAL RELAY REQUIRED
+          暗号表に{cipherTable.length}個のシンボル -- 口頭で伝達してください
         </div>
       </div>
     </div>
@@ -253,9 +253,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// DECRYPTION TERMINAL ///</div>
+          <div style={{ marginBottom: 4 }}>/// 解読端末 ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            DECODE THE ENCRYPTED SEQUENCE
+            暗号化されたシーケンスを解読せよ
           </div>
         </div>
 
@@ -297,7 +297,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             marginBottom: 10,
             fontFamily: "'Orbitron', sans-serif",
           }}>
-            ENCRYPTED SIGNAL:
+            暗号化信号:
           </div>
           <div style={{
             display: 'flex',
@@ -361,8 +361,8 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          <span>CHARS: {targetLength}</span>
-          {hasSpaces && <span>CONTAINS SPACES</span>}
+          <span>文字数: {targetLength}</span>
+          {hasSpaces && <span>スペースを含む</span>}
         </div>
 
         {/* Input Terminal */}
@@ -380,7 +380,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             marginBottom: 10,
             fontFamily: "'Orbitron', sans-serif",
           }}>
-            DECODED OUTPUT {'>'}_
+            解読結果 {'>'}_
           </div>
 
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -390,7 +390,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               value={answer}
               onChange={(e) => setAnswer(e.target.value.toUpperCase())}
               onKeyDown={handleKeyDown}
-              placeholder="ENTER DECODED TEXT..."
+              placeholder="解読テキストを入力..."
               spellCheck={false}
               autoComplete="off"
               style={{
@@ -419,7 +419,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             transition: 'color 0.3s ease',
           }}>
-            {answer.replace(/ /g, '').length} / {targetLength} CHARACTERS
+            {answer.replace(/ /g, '').length} / {targetLength} 文字
           </div>
         </div>
 
@@ -445,7 +445,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               transition: 'all 0.3s ease',
             }}
           >
-            {isSubmitting ? '...' : 'DECRYPT'}
+            {isSubmitting ? '...' : '解読'}
           </motion.button>
         </div>
       </div>

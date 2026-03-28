@@ -90,7 +90,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 3,
             color: 'rgba(0,255,65,0.5)',
           }}>
-            INJECTION PAYLOAD -- DICTATE TO OPERATOR
+            注入コマンド -- オペレーターに口述せよ
           </span>
         </div>
 
@@ -116,10 +116,10 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             }}
           >
             <div>ARKTIS ORBITAL SYSTEMS v7.2.1</div>
-            <div>PAYLOAD INJECTION MODULE</div>
+            <div>ペイロード注入モジュール</div>
             <div>-----------------------------------</div>
-            <div>DISPLAY TIME PER COMMAND: {displayTime}s</div>
-            <div>TOTAL COMMANDS: {commands.length}</div>
+            <div>コマンド表示時間: {displayTime}秒</div>
+            <div>コマンド総数: {commands.length}</div>
             <div>-----------------------------------</div>
           </motion.div>
 
@@ -200,7 +200,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           textAlign: 'center',
           letterSpacing: 1,
         }}>
-          {commands.length} COMMANDS QUEUED -- EXACT SYNTAX REQUIRED
+          {commands.length}個のコマンド待機中 -- 正確な構文が必要
         </div>
       </div>
     </div>
@@ -226,7 +226,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
 
   // Track successful commands from feedback
   useEffect(() => {
-    if (lastFeedback?.correct && lastFeedback.feedback?.includes('executed successfully')) {
+    if (lastFeedback?.correct && lastFeedback.feedback?.includes('実行に成功')) {
       setCompletedCommands(prev => {
         const next = new Set(prev);
         next.add(currentIndex);
@@ -297,7 +297,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 3,
             color: 'rgba(255,0,102,0.5)',
           }}>
-            HACK TERMINAL -- COMMAND INJECTION
+            ハック端末 -- コマンド注入
           </span>
         </div>
 
@@ -367,7 +367,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               color: '#ff0066',
               textShadow: '0 0 10px rgba(255,0,102,0.4)',
             }}>
-              COMMAND {currentIndex + 1}/{commandCount}
+              コマンド {currentIndex + 1}/{commandCount}
             </div>
 
             {/* Command step indicators */}
@@ -408,7 +408,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                   marginBottom: 2,
                   paddingLeft: 8,
                 }}>
-                  <span style={{ color: 'rgba(51,255,102,0.3)' }}>{'>'}</span> Command {idx + 1}: <span style={{ color: 'rgba(51,255,102,0.6)' }}>EXECUTED</span>
+                  <span style={{ color: 'rgba(51,255,102,0.3)' }}>{'>'}</span> コマンド {idx + 1}: <span style={{ color: 'rgba(51,255,102,0.6)' }}>実行完了</span>
                 </div>
               ))}
             </div>
@@ -427,7 +427,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
               color: 'rgba(255,0,102,0.3)',
               marginBottom: 8,
             }}>
-              TYPE THE COMMAND EXACTLY AS DICTATED:
+              口述されたコマンドを正確に入力せよ:
             </div>
 
             {/* Input line */}
@@ -502,7 +502,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
               }}
             >
-              EXECUTE
+              実行
             </motion.button>
           </div>
         </div>
@@ -521,7 +521,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             marginBottom: 6,
           }}>
-            <span>INJECTION PROGRESS</span>
+            <span>注入進捗</span>
             <span>{completedCommands.size} / {commandCount}</span>
           </div>
           <div style={{

@@ -120,20 +120,20 @@ export class MorseDecodeGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'decode') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { answer } = action.data as { answer: string };
 
         if (!answer) {
-          return { correct: false, penalty: 0, feedback: 'No answer provided.' };
+          return { correct: false, penalty: 0, feedback: '回答が未入力。' };
         }
 
         if (answer.toUpperCase() === targetWord.toUpperCase()) {
           return {
             correct: true,
             penalty: 0,
-            feedback: `Decoded: "${targetWord}". Signal confirmed.`,
+            feedback: `解読完了: "${targetWord}"。信号確認。`,
             solved: true,
           };
         }
@@ -141,7 +141,7 @@ export class MorseDecodeGenerator implements PuzzleGenerator {
         return {
           correct: false,
           penalty: 15,
-          feedback: `Decode failed. Expected ${targetWord.length} characters.`,
+          feedback: `解読失敗。${targetWord.length}文字が必要。`,
         };
       },
     };

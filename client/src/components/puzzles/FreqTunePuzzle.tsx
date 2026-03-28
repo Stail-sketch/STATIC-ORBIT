@@ -148,9 +148,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// FREQUENCY TARGETS ///</div>
+          <div style={{ marginBottom: 4 }}>/// 周波数ターゲット ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            RELAY TO OPERATOR
+            オペレーターに伝えてください
           </div>
         </div>
 
@@ -180,7 +180,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
                 color: 'rgba(0,240,255,0.5)',
                 minWidth: 90,
               }}>
-                CHANNEL {t.dialIndex + 1}
+                チャネル {t.dialIndex + 1}
               </div>
 
               {/* Frequency readout */}
@@ -235,7 +235,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          {targets.length} FREQUENCY TARGETS DETECTED -- VERBAL RELAY REQUIRED
+          {targets.length}個の周波数ターゲットを検出 -- 口頭で伝達してください
         </div>
       </div>
     </div>
@@ -291,9 +291,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// FREQUENCY TUNING ARRAY ///</div>
+          <div style={{ marginBottom: 4 }}>/// 周波数チューニング ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            ADJUST DIALS TO TARGET FREQUENCIES
+            ダイヤルを目標周波数に合わせよ
           </div>
         </div>
 
@@ -446,7 +446,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         letterSpacing: 2,
                       }}
                     >
-                      <span style={{ fontSize: 14 }}>&#10003;</span> LOCKED
+                      <span style={{ fontSize: 14 }}>&#10003;</span> ロック済
                     </motion.div>
                   ) : (
                     <motion.button
@@ -466,7 +466,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      LOCK
+                      ロック
                     </motion.button>
                   )}
                 </div>
@@ -485,7 +485,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             marginBottom: 6,
           }}>
-            <span>DIALS LOCKED</span>
+            <span>ロック済ダイヤル</span>
             <span>{lockedDials.size} / {dialCount}</span>
           </div>
           <div style={{

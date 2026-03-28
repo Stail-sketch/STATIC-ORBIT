@@ -45,7 +45,7 @@ export class AudioEngine {
 
     // Routing: synths → bus → master → destination
     this.masterVolume = new Tone.Volume(0).toDestination();
-    this.bgmBus = new Tone.Volume(0).connect(this.masterVolume);
+    this.bgmBus = new Tone.Volume(-12).connect(this.masterVolume);
     this.sfxBus = new Tone.Volume(0).connect(this.masterVolume);
 
     this.bgmManager = new BGMManager(this.bgmBus);

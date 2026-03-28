@@ -110,21 +110,21 @@ export class OrbitCalcGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'calibrate') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { paramIndex, value } = action.data as { paramIndex: number; value: number };
 
         if (typeof paramIndex !== 'number' || typeof value !== 'number') {
-          return { correct: false, penalty: 0, feedback: 'Invalid calibration data.' };
+          return { correct: false, penalty: 0, feedback: '無効なキャリブレーションデータ。' };
         }
 
         if (paramIndex < 0 || paramIndex >= count) {
-          return { correct: false, penalty: 0, feedback: 'Invalid parameter index.' };
+          return { correct: false, penalty: 0, feedback: '無効なパラメータ番号。' };
         }
 
         if (locked.has(paramIndex)) {
-          return { correct: false, penalty: 0, feedback: `${parameters[paramIndex].name} is already locked.` };
+          return { correct: false, penalty: 0, feedback: `${parameters[paramIndex].name}は既にロック済み。` };
         }
 
         const param = parameters[paramIndex];
@@ -144,20 +144,20 @@ export class OrbitCalcGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: `${param.name} locked at ${value}${param.unit}. ` +
-              (allLocked ? 'All parameters calibrated.' : `${count - locked.size} remaining.`),
+            feedback: `${param.name}を${value}${param.unit}でロック。` +
+              (allLocked ? '全パラメータ較正完了。' : `残り${count - locked.size}個。`),
             solved: allLocked,
           };
         }
 
         // Give directional hint based on proximity
-        const direction = value < param.targetValue ? 'higher' : 'lower';
-        const proximity = diff <= param.tolerance * 3 ? 'Close' : 'Off target';
+        const direction = value < param.targetValue ? '上げろ' : '下げろ';
+        const proximity = diff <= param.tolerance * 3 ? '近い' : 'ずれている';
 
         return {
           correct: false,
           penalty: 5,
-          feedback: `${param.name}: ${proximity}. Adjust ${direction}.`,
+          feedback: `${param.name}: ${proximity}。もっと${direction}。`,
         };
       },
     };

@@ -189,9 +189,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// LOGIC MATRIX — RELAY CONSTRAINTS ///</div>
+          <div style={{ marginBottom: 4 }}>/// ロジックマトリクス -- 制約を伝達せよ ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            {elementNames.length} ELEMENTS TO ASSIGN
+            {elementNames.length}個の要素を割り当て
           </div>
         </div>
 
@@ -249,7 +249,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          {clues.length} LOGICAL CONSTRAINTS -- RELAY TO OPERATOR FOR ASSIGNMENT
+          {clues.length}個の論理制約 -- オペレーターに伝えて割り当てさせてください
         </div>
       </div>
     </div>
@@ -304,9 +304,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// LOGIC MATRIX ASSIGNMENT ///</div>
+          <div style={{ marginBottom: 4 }}>/// ロジックマトリクス割当 ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            ASSIGN COLORS TO EACH ELEMENT
+            各要素に色を割り当てよ
           </div>
         </div>
 
@@ -455,7 +455,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 : 'none',
             }}
           >
-            VALIDATE
+            検証
           </motion.button>
         </div>
 
@@ -469,7 +469,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             marginBottom: 6,
           }}>
-            <span>ELEMENTS ASSIGNED</span>
+            <span>割当済み要素</span>
             <span>{assignedCount} / {elementNames.length}</span>
           </div>
           <div style={{

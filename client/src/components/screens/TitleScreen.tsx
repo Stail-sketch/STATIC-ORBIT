@@ -79,7 +79,7 @@ const TitleScreen: React.FC = () => {
 
   const handleCreate = useCallback(async () => {
     if (!nameValid) {
-      setError('CALLSIGN REQUIRED');
+      setError('名前を入力してください');
       return;
     }
     audio.playSFX('click');
@@ -91,7 +91,7 @@ const TitleScreen: React.FC = () => {
 
   const handleJoinClick = useCallback(async () => {
     if (!nameValid) {
-      setError('CALLSIGN REQUIRED');
+      setError('名前を入力してください');
       return;
     }
     audio.playSFX('click');
@@ -104,7 +104,7 @@ const TitleScreen: React.FC = () => {
   const handleJoinSubmit = useCallback(() => {
     const code = roomInput.trim().toUpperCase();
     if (!code) {
-      setError('ROOM CODE REQUIRED');
+      setError('ルームコードを入力してください');
       return;
     }
     audio.playSFX('click');
@@ -136,7 +136,7 @@ const TitleScreen: React.FC = () => {
         transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
         style={connectionStyle}
       >
-        CONNECTION ESTABLISHED
+        接続確立
       </motion.div>
 
       {/* Central content */}
@@ -159,7 +159,7 @@ const TitleScreen: React.FC = () => {
           transition={{ delay: 0.6, duration: 1.2 }}
           style={subtitleStyle}
         >
-          COOPERATIVE BREACH PROTOCOL
+          協力型リアルタイム謎解きゲーム
         </motion.p>
 
         {/* Name Input */}
@@ -169,7 +169,7 @@ const TitleScreen: React.FC = () => {
           transition={{ delay: 1.0, duration: 0.6 }}
           style={inputGroupStyle}
         >
-          <label style={labelStyle}>AGENT CALLSIGN:</label>
+          <label style={labelStyle}>エージェント名:</label>
           <input
             type="text"
             value={name}
@@ -213,14 +213,14 @@ const TitleScreen: React.FC = () => {
             onClick={handleCreate}
             style={!nameValid ? disabledBtnStyle : undefined}
           >
-            CREATE ROOM
+            ルーム作成
           </button>
           <button
             className="btn-primary"
             onClick={handleJoinClick}
             style={!nameValid ? disabledBtnStyle : undefined}
           >
-            JOIN ROOM
+            ルーム参加
           </button>
         </motion.div>
 
@@ -234,7 +234,7 @@ const TitleScreen: React.FC = () => {
               style={{ overflow: 'hidden', marginTop: '16px' }}
             >
               <div style={inputGroupStyle}>
-                <label style={labelStyle}>ROOM CODE:</label>
+                <label style={labelStyle}>ルームコード:</label>
                 <input
                   type="text"
                   value={roomInput}
@@ -253,7 +253,7 @@ const TitleScreen: React.FC = () => {
                   onClick={handleJoinSubmit}
                   style={{ marginTop: '8px' }}
                 >
-                  CONNECT
+                  接続
                 </button>
               </div>
             </motion.div>

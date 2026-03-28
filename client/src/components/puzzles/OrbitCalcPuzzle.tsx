@@ -178,9 +178,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={cornerDecor('bottomRight')} />
 
         <div style={headerStyle}>
-          <div style={{ marginBottom: 4 }}>/// ORBITAL PARAMETERS — CALIBRATE TO TARGET ///</div>
+          <div style={{ marginBottom: 4 }}>/// 軌道パラメータ -- 目標値に較正せよ ///</div>
           <div style={{ fontSize: 10, color: 'rgba(0,240,255,0.5)', letterSpacing: 2 }}>
-            RELAY TARGET VALUES TO OPERATOR
+            目標値をオペレーターに伝えてください
           </div>
         </div>
 
@@ -258,7 +258,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
                 letterSpacing: 1,
                 display: 'inline-block',
               }}>
-                TOLERANCE: +/- {t.tolerance}{t.unit}
+                許容誤差: +/- {t.tolerance}{t.unit}
               </div>
             </motion.div>
           ))}
@@ -277,7 +277,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           position: 'relative',
           zIndex: 3,
         }}>
-          {targets.length} ORBITAL PARAMETERS DETECTED -- VERBAL RELAY REQUIRED
+          {targets.length}個の軌道パラメータを検出 -- 口頭で伝達してください
         </div>
       </div>
     </div>
@@ -340,9 +340,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           color: '#ff0066',
           borderBottomColor: 'rgba(255,0,102,0.2)',
         }}>
-          <div style={{ marginBottom: 4 }}>/// ORBITAL CALIBRATION ARRAY ///</div>
+          <div style={{ marginBottom: 4 }}>/// 軌道キャリブレーション ///</div>
           <div style={{ fontSize: 10, color: 'rgba(255,0,102,0.5)', letterSpacing: 2 }}>
-            ADJUST PARAMETERS TO TARGET VALUES
+            パラメータを目標値に調整せよ
           </div>
         </div>
 
@@ -532,7 +532,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         letterSpacing: 2,
                       }}
                     >
-                      <span style={{ fontSize: 14 }}>&#10003;</span> LOCKED
+                      <span style={{ fontSize: 14 }}>&#10003;</span> ロック済
                     </motion.div>
                   ) : (
                     <motion.button
@@ -552,7 +552,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      LOCK
+                      ロック
                     </motion.button>
                   )}
                 </div>
@@ -571,7 +571,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 1,
             marginBottom: 6,
           }}>
-            <span>PARAMETERS LOCKED</span>
+            <span>ロック済パラメータ</span>
             <span>{lockedParams.size} / {parameters.length}</span>
           </div>
           <div style={{

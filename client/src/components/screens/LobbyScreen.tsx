@@ -80,7 +80,7 @@ const LobbyScreen: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         style={headerStyle}
       >
-        <span style={headerLabelStyle}>SECURE CHANNEL</span>
+        <span style={headerLabelStyle}>セキュアチャネル</span>
       </motion.div>
 
       {/* Room Code */}
@@ -90,18 +90,18 @@ const LobbyScreen: React.FC = () => {
         transition={{ delay: 0.2 }}
         style={roomCodeContainerStyle}
       >
-        <span style={roomCodeLabelStyle}>ROOM CODE</span>
+        <span style={roomCodeLabelStyle}>ルームコード</span>
         <div style={roomCodeRowStyle}>
           <span style={roomCodeStyle}>{roomCode ?? '------'}</span>
           <button onClick={handleCopy} style={copyBtnStyle}>
-            {copied ? 'COPIED' : 'COPY'}
+            {copied ? 'コピー完了' : 'コピー'}
           </button>
         </div>
       </motion.div>
 
       {/* Player count */}
       <div style={playerCountStyle}>
-        AGENTS: {players.length}/{MAX_PLAYERS}
+        エージェント: {players.length}/{MAX_PLAYERS}
       </div>
 
       {/* Player List */}
@@ -134,7 +134,7 @@ const LobbyScreen: React.FC = () => {
               <div style={playerInfoStyle}>
                 <span style={playerNameStyle}>
                   {player.name}
-                  {player.isHost && <span style={hostBadgeStyle}>HOST</span>}
+                  {player.isHost && <span style={hostBadgeStyle}>ホスト</span>}
                 </span>
                 <span
                   style={{
@@ -142,13 +142,13 @@ const LobbyScreen: React.FC = () => {
                     color: ROLE_COLORS[player.role] ?? '#aaa',
                   }}
                 >
-                  {player.role.toUpperCase()}
+                  {({observer: 'オブザーバー', operator: 'オペレーター', navigator: 'ナビゲーター', hacker: 'ハッカー'} as Record<string, string>)[player.role] ?? player.role.toUpperCase()}
                 </span>
               </div>
 
               {/* Status */}
               <span style={statusTextStyle}>
-                {player.ready ? 'READY' : 'STANDBY'}
+                {player.ready ? '準備完了' : '待機中'}
               </span>
             </motion.div>
           ))}
@@ -161,7 +161,7 @@ const LobbyScreen: React.FC = () => {
           className={me?.ready ? 'btn-danger' : 'btn-primary'}
           onClick={handleReady}
         >
-          {me?.ready ? 'CANCEL READY' : 'READY UP'}
+          {me?.ready ? '準備取消' : '準備完了'}
         </button>
 
         {isHost && (
@@ -170,14 +170,14 @@ const LobbyScreen: React.FC = () => {
             onClick={handleStart}
             style={!allReady ? { opacity: 0.35, pointerEvents: 'none' } : undefined}
           >
-            LAUNCH MISSION
+            ミッション開始
           </button>
         )}
       </div>
 
       {/* Chat area */}
       <div style={chatContainerStyle}>
-        <div style={chatHeaderStyle}>COMMS</div>
+        <div style={chatHeaderStyle}>通信</div>
         <div style={chatMessagesStyle}>
           {chatMessages.map((msg, i) => (
             <div key={i} style={chatMsgStyle}>
@@ -193,12 +193,12 @@ const LobbyScreen: React.FC = () => {
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleChat()}
-            placeholder="Type message..."
+            placeholder="メッセージを入力..."
             style={chatInputStyle}
             maxLength={120}
           />
           <button className="btn-primary" onClick={handleChat} style={chatSendBtnStyle}>
-            SEND
+            送信
           </button>
         </div>
       </div>

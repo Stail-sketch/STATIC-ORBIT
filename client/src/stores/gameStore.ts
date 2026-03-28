@@ -18,6 +18,7 @@ interface BriefingData {
   timeLimit: number;
   storyText: string;
   stagePhase: StagePhase;
+  puzzleGuide?: string;
 }
 
 interface ChatMessage {
@@ -152,9 +153,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastFeedback: { correct: result.correct, feedback: result.feedback },
     })),
 
-  setSolved: (_data) => set({ lastFeedback: { correct: true, feedback: 'SOLVED' } }),
+  setSolved: (_data) => set({ lastFeedback: { correct: true, feedback: '解除成功！' } }),
 
-  setFailed: (_reason) => set({ lastFeedback: { correct: false, feedback: 'TIME UP' } }),
+  setFailed: (_reason) => set({ lastFeedback: { correct: false, feedback: '時間切れ' } }),
 
   setStageResult: (data) =>
     set((s) => ({

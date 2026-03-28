@@ -78,17 +78,17 @@ export class CircuitLinkGenerator implements PuzzleGenerator {
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'connect-wire') {
-          return { correct: false, penalty: 0, feedback: 'Unknown action.' };
+          return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
         const { color, destPort } = action.data as { color: string; destPort: string };
 
         if (!color || !destPort) {
-          return { correct: false, penalty: 0, feedback: 'Missing color or destination port.' };
+          return { correct: false, penalty: 0, feedback: 'ワイヤー色または出力ポートが未指定。' };
         }
 
         if (connectedWires.has(color)) {
-          return { correct: false, penalty: 0, feedback: `Wire ${color} is already connected.` };
+          return { correct: false, penalty: 0, feedback: `ワイヤー${color}は既に接続済み。` };
         }
 
         if (answerMap[color] === destPort) {
@@ -97,7 +97,7 @@ export class CircuitLinkGenerator implements PuzzleGenerator {
           return {
             correct: true,
             penalty: 0,
-            feedback: `Wire ${color} connected to ${destPort}.`,
+            feedback: `ワイヤー${color}を${destPort}に接続完了。`,
             solved,
           };
         }
@@ -105,7 +105,7 @@ export class CircuitLinkGenerator implements PuzzleGenerator {
         return {
           correct: false,
           penalty: 15,
-          feedback: `Wrong connection for wire ${color}.`,
+          feedback: `ワイヤー${color}の接続先が違う。`,
         };
       },
     };
