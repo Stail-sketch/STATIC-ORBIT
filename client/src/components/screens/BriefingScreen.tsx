@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../stores/gameStore';
+import { getSocket } from '../../hooks/useSocket';
 import TypewriterText from '../effects/TypewriterText';
 import { useAudio } from '../../audio/useAudio';
 
@@ -23,10 +24,22 @@ const BriefingScreen: React.FC = () => {
   const stagePhase = useGameStore((s) => s.stagePhase);
   const gameMode = useGameStore((s) => s.gameMode);
   const isEndless = gameMode === 'endless';
+  const readyPlayers = useGameStore((s) => s.readyPlayers);
+  const isReady = useGameStore((s) => s.isReady);
+  const countdown = useGameStore((s) => s.countdown);
+  const players = useGameStore((s) => s.players);
+  const roomCode = useGameStore((s) => s.roomCode);
+  const livesRemaining = useGameStore((s) => s.livesRemaining);
 
   const audio = useAudio();
   const [typingDone, setTypingDone] = useState(false);
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleReady = useCallback(() => {
+    if (isReady || !roomCode) return;
+    getSocket().emit('game:ready', { roomCode });
+    useGameStore.getState().setMyReady();
+  }, [isReady, roomCode]);
 
   // On mount: switch BGM and play warning SFX for escape phase
   useEffect(() => {
@@ -249,23 +262,81 @@ const BriefingScreen: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Standby pulse */}
-      {typingDone && (
+      {/* Lives remaining (story mode only) */}
+      {gameMode === 'story' && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          style={{
-            ...standbyStyle,
-            color: isEscape ? '#ff4466' : '#00f0ff',
-            textShadow: isEscape
-              ? '0 0 10px rgba(255, 68, 102, 0.5)'
-              : '0 0 10px rgba(0, 240, 255, 0.4)',
-          }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          style={livesStyle}
         >
-          スタンバイ...
+          残機:{' '}
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              style={{
+                color: i < livesRemaining ? '#ff4466' : 'rgba(255, 255, 255, 0.15)',
+                textShadow: i < livesRemaining ? '0 0 8px rgba(255, 68, 102, 0.5)' : 'none',
+                fontSize: '1.1rem',
+                marginLeft: '2px',
+              }}
+            >
+              {i < livesRemaining ? '\u2665' : '\u2661'}
+            </span>
+          ))}
         </motion.div>
       )}
+
+      {/* Ready button and status */}
+      {typingDone && countdown === null && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          style={readySectionStyle}
+        >
+          {/* Ready status */}
+          <div style={readyStatusStyle}>
+            {readyPlayers.length}/{players.length} 準備完了
+          </div>
+
+          {/* Ready button */}
+          <button
+            className="btn-primary"
+            onClick={handleReady}
+            disabled={isReady}
+            style={{
+              ...readyButtonStyle,
+              opacity: isReady ? 0.6 : 1,
+              cursor: isReady ? 'default' : 'pointer',
+              background: isReady
+                ? 'rgba(0, 240, 255, 0.1)'
+                : undefined,
+              borderColor: isReady
+                ? 'rgba(0, 240, 255, 0.3)'
+                : undefined,
+            }}
+          >
+            {isReady ? '準備完了 \u2713' : '準備完了'}
+          </button>
+        </motion.div>
+      )}
+
+      {/* Countdown overlay */}
+      <AnimatePresence>
+        {countdown !== null && countdown > 0 && (
+          <motion.div
+            key={`countdown-${countdown}`}
+            initial={{ opacity: 0, scale: 2.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            style={countdownOverlayStyle}
+          >
+            <span style={countdownNumberStyle}>{countdown}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Time limit info */}
       <div style={timeLimitStyle}>
@@ -402,12 +473,57 @@ const guideBodyStyle: React.CSSProperties = {
   padding: '14px 16px',
 };
 
-const standbyStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-display)',
-  fontSize: '0.9rem',
-  fontWeight: 700,
-  letterSpacing: '0.3em',
+const livesStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.75rem',
+  color: 'rgba(255, 255, 255, 0.5)',
+  letterSpacing: '0.1em',
+  marginTop: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+};
+
+const readySectionStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '12px',
   marginTop: '20px',
+};
+
+const readyStatusStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.75rem',
+  color: 'rgba(0, 240, 255, 0.6)',
+  letterSpacing: '0.15em',
+};
+
+const readyButtonStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '1rem',
+  fontWeight: 700,
+  letterSpacing: '0.2em',
+  padding: '12px 40px',
+};
+
+const countdownOverlayStyle: React.CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 9999,
+  pointerEvents: 'none',
+};
+
+const countdownNumberStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '120px',
+  fontWeight: 900,
+  color: '#00f0ff',
+  textShadow: '0 0 40px rgba(0, 240, 255, 0.6), 0 0 80px rgba(0, 240, 255, 0.3), 0 0 120px rgba(0, 240, 255, 0.15)',
+  letterSpacing: '0.05em',
 };
 
 const timeLimitStyle: React.CSSProperties = {

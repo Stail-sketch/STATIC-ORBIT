@@ -94,6 +94,14 @@ export function useSocket() {
       store.getState().addChatMessage({ playerName, message, timestamp: Date.now() });
     });
 
+    s.on('game:readyUpdate', ({ readyPlayers, totalPlayers }) => {
+      store.getState().setReadyPlayers(readyPlayers, totalPlayers);
+    });
+
+    s.on('game:countdown', ({ count }) => {
+      store.getState().setCountdown(count);
+    });
+
     return () => {
       // Don't disconnect on unmount — we want persistent connection
     };

@@ -129,6 +129,14 @@ export function initHandlers(io: TypedServer): void {
       }
     });
 
+    socket.on('game:ready', ({ roomCode }) => {
+      try {
+        gameEngine.playerReady(roomCode, socket.id);
+      } catch (err) {
+        socket.emit('room:error', { message: (err as Error).message });
+      }
+    });
+
     socket.on('game:action', (action) => {
       try {
         const roomCode = roomManager.findRoomByPlayer(socket.id);

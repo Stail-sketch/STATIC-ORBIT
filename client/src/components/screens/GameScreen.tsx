@@ -110,6 +110,8 @@ const GameScreen: React.FC = () => {
   const lastFeedback = useGameStore((s) => s.lastFeedback);
   const stagePhase = useGameStore((s) => s.stagePhase);
   const chatMessages = useGameStore((s) => s.chatMessages);
+  const gameMode = useGameStore((s) => s.gameMode);
+  const livesRemaining = useGameStore((s) => s.livesRemaining);
 
   const audio = useAudio();
 
@@ -203,7 +205,26 @@ const GameScreen: React.FC = () => {
             </span>
           )}
         </span>
-        <MissCounter count={missCount} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {gameMode === 'story' && (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'rgba(255, 255, 255, 0.4)' }}>
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  style={{
+                    color: i < livesRemaining ? '#ff4466' : 'rgba(255, 255, 255, 0.15)',
+                    textShadow: i < livesRemaining ? '0 0 6px rgba(255, 68, 102, 0.4)' : 'none',
+                    fontSize: '0.85rem',
+                    marginLeft: '1px',
+                  }}
+                >
+                  {i < livesRemaining ? '\u2665' : '\u2661'}
+                </span>
+              ))}
+            </span>
+          )}
+          <MissCounter count={missCount} />
+        </div>
       </div>
 
       {/* Puzzle area */}

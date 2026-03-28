@@ -92,6 +92,7 @@ export interface ClientToServerEvents {
   'room:start': (data: { roomCode: string }) => void;
   'game:action': (data: GameAction) => void;
   'game:chat': (data: { message: string }) => void;
+  'game:ready': (data: { roomCode: string }) => void;
 }
 
 export interface ServerToClientEvents {
@@ -108,7 +109,10 @@ export interface ServerToClientEvents {
     stagePhase: StagePhase;
     puzzleGuide?: string;
     gameMode: GameMode;
+    livesRemaining?: number;
   }) => void;
+  'game:readyUpdate': (data: { readyPlayers: string[]; totalPlayers: number }) => void;
+  'game:countdown': (data: { count: number }) => void;
   'game:start': (data: { puzzleType: PuzzleType; roleData: Record<string, unknown>; timeLimit: number }) => void;
   'game:timeUpdate': (data: { remaining: number }) => void;
   'game:actionResult': (data: ValidationResult) => void;

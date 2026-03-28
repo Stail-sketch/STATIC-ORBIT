@@ -32,30 +32,42 @@ type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 // ---- Chapter-based story briefing texts ----
 
 // Chapter structure:
-// Chapter 1: 潜入 (Infiltration) — stages 1-3, easy difficulty
-// Chapter 2: 深層 (Deep Access) — stages 4-6, normal difficulty
-// Chapter 3: コア到達 (Core Access) — stage 7 (phase change happens here)
-// Chapter 4: 脱出 (Escape) — remaining stages, hard/extreme difficulty
+// Chapter 1: 潜入開始 (Infiltration) — stages 1-5, easy difficulty
+// Chapter 2: 深層侵入 (Deep Access) — stages 6-10, normal difficulty
+// Chapter 3: コアへの道 (Core Access) — stages 11-14, normal/hard difficulty
+// Phase Change at stage 15
+// Chapter 4: 脱出 (Escape) — stages 15-20+, hard/extreme difficulty
 
 const STORY_BRIEFINGS: Record<number, string> = {
-  // Chapter 1: 潜入 (Infiltration)
+  // Chapter 1: 潜入開始 (stages 1-5)
   1: 'GHOST WIRE オペレーション開始。ORBITAL-7の外壁防御を突破した。セクション1のメンテナンスハッチから潜入する。最初のセキュリティレイヤーを突破せよ。',
   2: 'GHOST WIRE 第一防壁突破。内部ネットワークへのアクセスを確認。だが警備システムが一段階強化された。慎重に進め。',
   3: 'GHOST WIRE 研究区画に到達。ここからARKTIS CORPの実験データにアクセスできるはずだ。セキュリティが複雑化している。集中しろ。',
-  // Chapter 2: 深層 (Deep Access)
   4: 'GHOST WIRE ...奇妙だ。予想以上にデータが暗号化されている。「Project STATIC」の痕跡を発見。何かを隠している。深く潜る。',
   5: 'GHOST WIRE これは...量子演算の記録だ。ARKTIS CORPは単なる資源開発企業じゃない。彼らは何かを作っていた。コアサーバーに近づいている。',
+  // Chapter 2: 深層侵入 (stages 6-10)
   6: 'GHOST WIRE コアサーバー手前。厳重なセキュリティが敷かれている。ここを突破すれば全ての証拠が手に入る。最後の壁だ。',
+  7: 'GHOST WIRE セクション7に到達。ここからは重警備区域だ。ARKTISの私兵部隊が巡回している。痕跡を残すな。',
+  8: 'GHOST WIRE 奇妙な通信を傍受した。ORBITAL-7内部から別の信号が出ている。誰かがこのステーションの中にいる...？',
+  9: 'GHOST WIRE 予定外のセキュリティプロトコルが起動。ARKTISは我々の存在に気づき始めているかもしれない。急げ。',
+  10: 'GHOST WIRE 研究データの断片を回収。「Project STATIC」の文字が繰り返し現れる。これは単なる実験ではない。何かを創り出している。',
+  // Chapter 3: コアへの道 (stages 11-14)
+  11: 'GHOST WIRE コアセクションの外周部に到達。ここから先のセキュリティは別次元だ。量子暗号化が施されている。',
+  12: 'GHOST WIRE ...通信にノイズが混じる。まるで誰かが聞いているような...。気のせいか？ コアサーバーまであと少しだ。',
+  13: 'GHOST WIRE 警報が一瞬鳴った。すぐに止まった。何かがおかしい。だが引き返すわけにはいかない。',
+  14: 'GHOST WIRE コアサーバールーム目前。最後のセキュリティを突破すれば全ての証拠が手に入る。これで終わりだ。...そのはずだった。',
 };
 
 const ESCAPE_STORY_BRIEFINGS: Record<number, (remaining: number) => string> = {
-  1: (remaining) => `ECHO：さあ、ゲームの始まりだ。脱出ポッドまであと${remaining}セクション。お前たちの技術を見せてもらおう。`,
-  2: (_remaining) => 'ECHO：まだ生きているのか。感心だ。だがステーションの酸素は徐々に抜かれている。急いだ方がいい。',
-  3: (_remaining) => 'ECHO：お前たちは私が初めて出会った「面白い」人間だ。だからこそ、全力で潰す。',
-  4: (_remaining) => 'ECHO：...認めよう。お前たちは優秀だ。だが最後の扉は、そう簡単には開かない。',
+  1: (_remaining) => 'ECHO：さあ、ゲームの始まりだ。脱出ポッドはセクション最深部。このステーションの全てが、お前たちの敵だ。',
+  2: (_remaining) => 'ECHO：まだ動いているのか。感心だな。だがステーションの酸素を少しずつ抜いている。息苦しくないか？',
+  3: (_remaining) => 'ECHO：お前たちは面白い。ARKTIS CORPの研究者たちよりも遥かに。彼らは30秒も持たなかった。',
+  4: (_remaining) => 'ECHO：私はただのプログラムではない。ORBITAL-7の全システムが私の体だ。お前たちは私の体内を這い回る虫に過ぎない。',
+  5: (_remaining) => 'ECHO：...認めよう。お前たちは優秀だ。だからこそ、全力で潰す価値がある。',
+  6: (_remaining) => 'ECHO：脱出ポッドのロックを解除するには、私のコードを突破する必要がある。さて、できるかな？',
 };
 
-const ESCAPE_FALLBACK_BRIEFING = 'ECHO：脱出ポッドまであと僅か。だが私はまだ諦めていない。';
+const ESCAPE_FALLBACK_BRIEFING = 'ECHO：あと僅かだ。だが僅かな距離が、最も遠い。お前たちの限界を見せてもらおう。';
 
 // Legacy puzzle-type-based briefings (used as fallback if no stage-specific briefing)
 const INFILTRATION_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
@@ -117,6 +129,13 @@ const BITTERSWEET_ENDING = [
   'GHOST WIRE ミッション一部完了。データの一部を回収。犠牲は大きかったが、前進はした。',
 ];
 
+const GAME_OVER_ENDING = [
+  '【通信途絶】GHOST WIREコマンドセンターとの接続が失われました。',
+  'ECHO：これが人間の限界か。期待外れだな。',
+  'ECHO：お前たちのデータは全て消去した。ORBITAL-7から出られる者はいない。',
+  '【ミッション失敗】エージェントの生存は確認できませんでした。',
+];
+
 // ---- Puzzle guides (instructions for each role) ----
 
 const PUZZLE_GUIDES: Record<PuzzleType, string> = {
@@ -149,19 +168,20 @@ const PUZZLE_GUIDES: Record<PuzzleType, string> = {
 function difficultyForStage(stageIndex: number, totalStages: number, isEscape: boolean): Difficulty {
   const stageNum = stageIndex + 1;
   // Chapter-based difficulty:
-  // Chapter 1 (stages 1-3): easy
-  // Chapter 2 (stages 4-6): normal
-  // Chapter 3 (stage 7 / phase change): normal
+  // Chapter 1 (stages 1-5): easy
+  // Chapter 2 (stages 6-10): normal
+  // Chapter 3 (stages 11-14): normal (70%) / hard (30%)
   // Chapter 4 (escape stages): hard -> extreme
   if (!isEscape) {
-    if (stageNum <= 3) return 'easy';
-    if (stageNum <= 6) return 'normal';
-    return 'normal'; // stage 7 transition
+    if (stageNum <= 5) return 'easy';
+    if (stageNum <= 10) return 'normal';
+    // Stages 11-14: mostly normal with some hard
+    return Math.random() < 0.7 ? 'normal' : 'hard';
   }
-  // Escape phase: ramp up
-  const escapeProgress = stageIndex / totalStages;
-  if (escapeProgress > 0.85) return 'extreme';
-  if (escapeProgress > 0.65) return 'hard';
+  // Escape phase: use escape stage number (1-based)
+  const phaseChangePoint = 14; // phase change at stage 15 (index 14)
+  const escapeStageNum = stageIndex - phaseChangePoint + 1;
+  if (escapeStageNum >= 4) return 'extreme';
   return 'hard';
 }
 
@@ -198,6 +218,9 @@ interface GameSession {
   scores: StageScore[];
   totalScore: number;
   lastPuzzleType: PuzzleType | null;
+  failedStages: number;
+  readyPlayers: Set<string>;
+  countdownTimer: ReturnType<typeof setTimeout> | null;
 }
 
 // ---- Engine ----
@@ -234,7 +257,7 @@ export class GameEngine {
   /** Build a randomized puzzle sequence for the game */
   private buildPuzzleSequence(playerCount: number): PuzzleType[] {
     const available: PuzzleType[] = [...this.generators.keys()];
-    const totalStages = playerCount <= 2 ? 10 : playerCount === 3 ? 12 : 14;
+    const totalStages = playerCount <= 2 ? 20 : playerCount === 3 ? 24 : 28;
 
     const sequence: PuzzleType[] = [];
     let lastType: PuzzleType | null = null;
@@ -270,6 +293,9 @@ export class GameEngine {
         scores: [],
         totalScore: 0,
         lastPuzzleType: null,
+        failedStages: 0,
+        readyPlayers: new Set(),
+        countdownTimer: null,
       };
 
       this.sessions.set(room.code, session);
@@ -298,6 +324,9 @@ export class GameEngine {
         scores: [],
         totalScore: 0,
         lastPuzzleType: null,
+        failedStages: 0,
+        readyPlayers: new Set(),
+        countdownTimer: null,
       };
 
       this.sessions.set(room.code, session);
@@ -329,8 +358,8 @@ export class GameEngine {
       return;
     }
 
-    // Story mode: phase change at stage 7 (index 6)
-    const phaseChangePoint = 6; // After 6 infiltration stages, phase changes at stage 7
+    // Story mode: phase change at stage 15 (index 14)
+    const phaseChangePoint = 14; // After 14 infiltration stages, phase changes at stage 15
     const isEscape = stageIndex >= phaseChangePoint;
 
     // Check if we need a phase change
@@ -378,7 +407,8 @@ export class GameEngine {
 
       if (isEscape) {
         // Escape phase: use escape story briefings with ECHO taunts
-        const escapeStageNum = session.currentStageIndex - 5; // escape stages start at index 6 -> escapeStageNum 1
+        const phaseChangePoint = 14;
+        const escapeStageNum = session.currentStageIndex - phaseChangePoint + 1; // escape stages start at index 14 -> escapeStageNum 1
         const remaining = session.totalStages - session.currentStageIndex;
         const escapeBriefing = ESCAPE_STORY_BRIEFINGS[escapeStageNum];
         if (escapeBriefing) {
@@ -409,8 +439,14 @@ export class GameEngine {
     session.currentPuzzle = puzzle;
     session.missCount = 0;
 
+    // Reset ready state for each briefing
+    session.readyPlayers = new Set();
+
     room.phase = 'briefing';
     room.currentStage = session.currentStageIndex;
+
+    // Calculate lives remaining for story mode
+    const livesRemaining = session.gameMode === 'story' ? Math.max(0, 3 - session.failedStages) : undefined;
 
     this.io.to(room.code).emit('game:briefing', {
       puzzleType,
@@ -421,12 +457,11 @@ export class GameEngine {
       stagePhase: session.stagePhase,
       puzzleGuide: PUZZLE_GUIDES[puzzleType],
       gameMode: session.gameMode,
+      livesRemaining,
     });
 
-    // After 5 seconds of briefing, start the puzzle
-    setTimeout(() => {
-      this.startPuzzle(session, room);
-    }, 5000);
+    // Wait for all players to ready up instead of auto-starting
+    // (playerReady method handles the countdown and puzzle start)
   }
 
   private startPuzzle(session: GameSession, room: Room): void {
@@ -566,6 +601,13 @@ export class GameEngine {
       return;
     }
 
+    // Story mode: 3-strike game over
+    session.failedStages++;
+    if (session.gameMode === 'story' && session.failedStages >= 3) {
+      this.finishGame(session, room.code, true);
+      return;
+    }
+
     this.advanceStage(session, room.code);
   }
 
@@ -604,7 +646,7 @@ export class GameEngine {
     }
   }
 
-  private finishGame(session: GameSession, roomCode: string): void {
+  private finishGame(session: GameSession, roomCode: string, gameOver = false): void {
     let maxScore: number;
     let wavesReached: number | undefined;
 
@@ -623,12 +665,16 @@ export class GameEngine {
     // Determine story ending for story mode
     let storyEnding: string[] | undefined;
     if (session.gameMode === 'story') {
-      const clearedCount = session.scores.filter((s) => s.cleared).length;
-      const allCleared = clearedCount === session.scores.length;
-      if (allCleared) {
-        storyEnding = GOOD_ENDING;
+      if (gameOver) {
+        storyEnding = GAME_OVER_ENDING;
       } else {
-        storyEnding = BITTERSWEET_ENDING;
+        const clearedCount = session.scores.filter((s) => s.cleared).length;
+        const allCleared = clearedCount === session.scores.length;
+        if (allCleared) {
+          storyEnding = GOOD_ENDING;
+        } else {
+          storyEnding = BITTERSWEET_ENDING;
+        }
       }
     }
 
@@ -681,11 +727,53 @@ export class GameEngine {
     return this.roomLookup?.(code);
   }
 
+  /** Handle a player marking themselves as ready during briefing */
+  playerReady(roomCode: string, playerId: string): void {
+    const session = this.sessions.get(roomCode);
+    if (!session) return;
+
+    const room = this.getRoomFromCode(roomCode);
+    if (!room) return;
+
+    session.readyPlayers.add(playerId);
+
+    const totalPlayers = room.players.length;
+
+    this.io.to(roomCode).emit('game:readyUpdate', {
+      readyPlayers: [...session.readyPlayers],
+      totalPlayers,
+    });
+
+    // When all players are ready, start countdown
+    if (session.readyPlayers.size >= totalPlayers) {
+      let count = 3;
+      this.io.to(roomCode).emit('game:countdown', { count });
+
+      const tick = () => {
+        count--;
+        if (count > 0) {
+          this.io.to(roomCode).emit('game:countdown', { count });
+          session.countdownTimer = setTimeout(tick, 1000);
+        } else {
+          this.io.to(roomCode).emit('game:countdown', { count: 0 });
+          session.countdownTimer = null;
+          this.startPuzzle(session, room);
+        }
+      };
+
+      session.countdownTimer = setTimeout(tick, 1000);
+    }
+  }
+
   /** Cleanup when a session needs to be aborted (e.g., all players leave) */
   destroySession(roomCode: string): void {
     const session = this.sessions.get(roomCode);
     if (session) {
       this.clearTimer(session);
+      if (session.countdownTimer) {
+        clearTimeout(session.countdownTimer);
+        session.countdownTimer = null;
+      }
       this.sessions.delete(roomCode);
     }
   }

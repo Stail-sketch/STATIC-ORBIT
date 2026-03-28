@@ -21,6 +21,7 @@ interface BriefingData {
   stagePhase: StagePhase;
   puzzleGuide?: string;
   gameMode?: GameMode;
+  livesRemaining?: number;
 }
 
 interface ChatMessage {
@@ -68,6 +69,14 @@ interface GameState {
   // Last action feedback
   lastFeedback: { correct: boolean; feedback?: string } | null;
 
+  // Ready check
+  readyPlayers: string[];
+  isReady: boolean;
+  countdown: number | null;
+
+  // Lives (story mode)
+  livesRemaining: number;
+
   // Actions
   setScreen: (screen: Screen) => void;
   setPlayerId: (id: string) => void;
@@ -85,6 +94,10 @@ interface GameState {
   setPhaseChange: (data: { newPhase: StagePhase; narrative: string[] }) => void;
   setGameFinished: (result: GameResult) => void;
   addChatMessage: (msg: ChatMessage) => void;
+  setReadyPlayers: (players: string[], total: number) => void;
+  setMyReady: () => void;
+  setCountdown: (count: number | null) => void;
+  setLivesRemaining: (lives: number) => void;
   reset: () => void;
 }
 
@@ -111,6 +124,10 @@ const initialState = {
   gameResult: null as GameResult | null,
   chatMessages: [] as ChatMessage[],
   lastFeedback: null as { correct: boolean; feedback?: string } | null,
+  readyPlayers: [] as string[],
+  isReady: false,
+  countdown: null as number | null,
+  livesRemaining: 3,
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -139,7 +156,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       stagePhase: data.stagePhase,
       missCount: 0,
       lastFeedback: null,
+      readyPlayers: [],
+      isReady: false,
+      countdown: null,
       ...(data.gameMode ? { gameMode: data.gameMode } : {}),
+      ...(data.livesRemaining !== undefined ? { livesRemaining: data.livesRemaining } : {}),
     }),
 
   startPuzzle: (data) =>
@@ -188,6 +209,18 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((s) => ({
       chatMessages: [...s.chatMessages.slice(-50), msg],
     })),
+
+  setReadyPlayers: (players, _total) =>
+    set({ readyPlayers: players }),
+
+  setMyReady: () =>
+    set({ isReady: true }),
+
+  setCountdown: (count) =>
+    set({ countdown: count }),
+
+  setLivesRemaining: (lives) =>
+    set({ livesRemaining: lives }),
 
   reset: () => set({ ...initialState }),
 }));
