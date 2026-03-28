@@ -53,7 +53,7 @@ const cornerDecor = (position: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRi
 
 function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
   const commands = roleData.commands as string[];
-  const displayTime = roleData.displayTime as number;
+  const command = commands[0];
 
   return (
     <div style={containerStyle}>
@@ -90,13 +90,13 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             letterSpacing: 3,
             color: 'rgba(0,255,65,0.5)',
           }}>
-            注入コマンド -- オペレーターに口述せよ
+            注入コマンド — オペレーターに正確に伝えよ
           </span>
         </div>
 
         {/* Terminal body */}
         <div style={{
-          padding: '20px 24px',
+          padding: '32px 24px',
           position: 'relative',
           zIndex: 3,
           backgroundImage:
@@ -111,72 +111,62 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             style={{
               color: 'rgba(0,255,65,0.3)',
               fontSize: 11,
-              marginBottom: 16,
+              marginBottom: 24,
               lineHeight: 1.6,
             }}
           >
             <div>ARKTIS ORBITAL SYSTEMS v7.2.1</div>
-            <div>ペイロード注入モジュール</div>
             <div>-----------------------------------</div>
-            <div>コマンド表示時間: {displayTime}秒</div>
-            <div>コマンド総数: {commands.length}</div>
+            <div>以下のコマンドを一字一句正確に伝達せよ</div>
             <div>-----------------------------------</div>
           </motion.div>
 
-          {/* Command list */}
-          {commands.map((cmd, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.15, duration: 0.4 }}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 12,
-                padding: '10px 12px',
-                marginBottom: 4,
-                background: 'rgba(0,255,65,0.03)',
-                borderLeft: '2px solid rgba(0,255,65,0.3)',
-              }}
-            >
-              {/* Index number */}
-              <span style={{
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: 10,
-                color: 'rgba(0,255,65,0.4)',
-                minWidth: 28,
-                textAlign: 'right',
-                flexShrink: 0,
-                paddingTop: 2,
-              }}>
-                [{String(i + 1).padStart(2, '0')}]
-              </span>
+          {/* Single command — big and prominent */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '20px 16px',
+              background: 'rgba(0,255,65,0.05)',
+              borderLeft: '3px solid rgba(0,255,65,0.5)',
+              borderRight: '1px solid rgba(0,255,65,0.1)',
+            }}
+          >
+            <span style={{
+              color: 'rgba(0,255,65,0.5)',
+              fontSize: 16,
+              flexShrink: 0,
+            }}>
+              $
+            </span>
+            <span style={{
+              fontFamily: "'Share Tech Mono', monospace",
+              fontSize: 20,
+              color: '#33ff66',
+              textShadow: '0 0 8px rgba(0,255,65,0.4)',
+              wordBreak: 'break-all',
+              lineHeight: 1.5,
+              letterSpacing: 1,
+            }}>
+              {command}
+            </span>
+          </motion.div>
 
-              {/* Prompt */}
-              <span style={{
-                color: 'rgba(0,255,65,0.5)',
-                fontSize: 13,
-                flexShrink: 0,
-              }}>
-                $
-              </span>
+          {/* Character count hint */}
+          <div style={{
+            marginTop: 16,
+            fontSize: 11,
+            color: 'rgba(0,255,65,0.3)',
+            textAlign: 'right',
+          }}>
+            文字数: {command.length}
+          </div>
 
-              {/* Command */}
-              <span style={{
-                fontFamily: "'Share Tech Mono', monospace",
-                fontSize: 14,
-                color: '#33ff66',
-                textShadow: '0 0 6px rgba(0,255,65,0.3)',
-                wordBreak: 'break-all',
-                lineHeight: 1.4,
-              }}>
-                {cmd}
-              </span>
-            </motion.div>
-          ))}
-
-          {/* Blinking cursor line */}
+          {/* Blinking cursor */}
           <motion.div
             animate={{ opacity: [1, 0] }}
             transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
@@ -189,19 +179,6 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             $ _
           </motion.div>
         </div>
-
-        {/* Footer */}
-        <div style={{
-          padding: '8px 16px',
-          background: 'rgba(0,255,65,0.03)',
-          borderTop: '1px solid rgba(0,255,65,0.1)',
-          fontSize: 10,
-          color: 'rgba(0,255,65,0.3)',
-          textAlign: 'center',
-          letterSpacing: 1,
-        }}>
-          {commands.length}個のコマンド待機中 -- 正確な構文が必要
-        </div>
       </div>
     </div>
   );
@@ -210,44 +187,16 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
 /* ── Operator View ─────────────────────────────────────────── */
 
 function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
-  const commandCount = roleData.commandCount as number;
+  const commandLength = (roleData.commandLength as number) || 0;
   const lastFeedback = useGameStore((s) => s.lastFeedback);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState('');
-  const [completedCommands, setCompletedCommands] = useState<Set<number>>(() => new Set());
-  const [flashSuccess, setFlashSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus the input
   useEffect(() => {
     inputRef.current?.focus();
-  }, [currentIndex]);
-
-  // Track successful commands from feedback
-  useEffect(() => {
-    if (lastFeedback?.correct && lastFeedback.feedback?.includes('実行に成功')) {
-      setCompletedCommands(prev => {
-        const next = new Set(prev);
-        next.add(currentIndex);
-        return next;
-      });
-
-      // Flash effect
-      setFlashSuccess(true);
-      setTimeout(() => {
-        setFlashSuccess(false);
-        // Advance to next uncompleted command
-        setCurrentIndex(prev => {
-          for (let i = prev + 1; i < commandCount; i++) {
-            if (!completedCommands.has(i)) return i;
-          }
-          return prev;
-        });
-        setUserInput('');
-      }, 600);
-    }
-  }, [lastFeedback]);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (!userInput.trim()) return;
@@ -255,9 +204,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
     socket.emit('game:action', {
       puzzleId: 'hack-terminal',
       action: 'type-command',
-      data: { index: currentIndex, input: userInput },
+      data: { input: userInput },
     });
-  }, [currentIndex, userInput]);
+  }, [userInput]);
 
   return (
     <div style={containerStyle}>
@@ -313,10 +262,10 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             {lastFeedback && (
               <motion.div
                 key={lastFeedback.feedback}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
                 style={{
                   padding: '8px 16px',
                   marginBottom: 16,
@@ -334,85 +283,28 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             )}
           </AnimatePresence>
 
-          {/* Success flash overlay */}
-          <AnimatePresence>
-            {flashSuccess && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'radial-gradient(ellipse at center, rgba(51,255,102,0.1), transparent 70%)',
-                  pointerEvents: 'none',
-                  zIndex: 10,
-                }}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Command progress header */}
+          {/* Command info */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
             marginBottom: 20,
+            textAlign: 'center',
           }}>
             <div style={{
               fontFamily: "'Orbitron', sans-serif",
-              fontSize: 18,
+              fontSize: 14,
               letterSpacing: 3,
               color: '#ff0066',
               textShadow: '0 0 10px rgba(255,0,102,0.4)',
+              marginBottom: 8,
             }}>
-              コマンド {currentIndex + 1}/{commandCount}
+              コマンド注入
             </div>
-
-            {/* Command step indicators */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              {Array.from({ length: commandCount }, (_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{
-                    background: completedCommands.has(i)
-                      ? '#33ff66'
-                      : i === currentIndex
-                        ? '#ff0066'
-                        : 'rgba(255,255,255,0.1)',
-                    boxShadow: completedCommands.has(i)
-                      ? '0 0 8px rgba(51,255,102,0.5)'
-                      : i === currentIndex
-                        ? '0 0 8px rgba(255,0,102,0.5)'
-                        : 'none',
-                  }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    width: 12,
-                    height: 12,
-                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                  }}
-                />
-              ))}
+            <div style={{
+              fontSize: 11,
+              color: 'rgba(255,0,102,0.4)',
+            }}>
+              文字数: {commandLength} | オブザーバーの口述を正確に入力
             </div>
           </div>
-
-          {/* Completed commands log */}
-          {completedCommands.size > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              {Array.from(completedCommands).sort().map(idx => (
-                <div key={idx} style={{
-                  fontSize: 11,
-                  color: 'rgba(51,255,102,0.4)',
-                  marginBottom: 2,
-                  paddingLeft: 8,
-                }}>
-                  <span style={{ color: 'rgba(51,255,102,0.3)' }}>{'>'}</span> コマンド {idx + 1}: <span style={{ color: 'rgba(51,255,102,0.6)' }}>実行完了</span>
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* Terminal prompt input */}
           <div style={{
@@ -507,38 +399,17 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           </div>
         </div>
 
-        {/* Progress bar */}
+        {/* Footer */}
         <div style={{
-          padding: '10px 16px',
+          padding: '8px 16px',
           borderTop: '1px solid rgba(255,0,102,0.1)',
           background: 'rgba(0,0,0,0.3)',
+          fontSize: 10,
+          color: 'rgba(255,0,102,0.3)',
+          textAlign: 'center',
+          letterSpacing: 1,
         }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: 10,
-            color: 'rgba(255,0,102,0.4)',
-            letterSpacing: 1,
-            marginBottom: 6,
-          }}>
-            <span>注入進捗</span>
-            <span>{completedCommands.size} / {commandCount}</span>
-          </div>
-          <div style={{
-            height: 4,
-            background: 'rgba(255,0,102,0.1)',
-            overflow: 'hidden',
-          }}>
-            <motion.div
-              animate={{ width: `${(completedCommands.size / commandCount) * 100}%` }}
-              transition={{ duration: 0.5 }}
-              style={{
-                height: '100%',
-                background: 'linear-gradient(90deg, #ff0066, #33ff66)',
-                boxShadow: '0 0 8px rgba(255,0,102,0.4)',
-              }}
-            />
-          </div>
+          Enterキーまたは実行ボタンで送信
         </div>
       </div>
     </div>

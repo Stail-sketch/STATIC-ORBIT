@@ -4,102 +4,57 @@ import type { Difficulty, GameAction, PuzzleType, ValidationResult } from '../..
 import type { PuzzleGenerator, PuzzleInstance } from './PuzzleGenerator.js';
 import { TIME_LIMITS } from './PuzzleGenerator.js';
 
+// 1コマンド形式: 難易度に応じて長さが変わる
 const EASY_COMMANDS = [
-  'sudo access --port 443',
-  'decrypt file_07.dat',
-  'ping orbital.hub.net',
-  'open vault --key alpha',
-  'scan /sys/core/nodes',
-  'mount drive_x --force',
-  'cat /var/log/access.log',
-  'kill -9 watchdog_proc',
-  'chmod 777 /tmp/bypass',
-  'reboot --safe-mode',
+  'sudo decrypt vault_07',
+  'open --key alpha-9',
+  'scan /core/nodes',
+  'mount drive_x force',
+  'chmod 777 /bypass',
+  'ping orbital.hub',
+  'kill watchdog_proc',
+  'reboot safe-mode',
 ];
 
 const NORMAL_COMMANDS = [
-  'ssh root@orbital7.arktis.net --key cipher_mx',
-  'scp payload.bin ghost@10.0.77.4:/drop/',
-  'openssl enc -aes-256-cbc -in vault.db',
-  'nmap -sV -p 1-65535 target.arktis.local',
-  'curl -X POST https://api.arktis.net/auth/bypass',
-  'rsync -avz /exfil/ relay@proxy3.ghost.io:/out/',
-  'docker exec -it core_node /bin/sh -c "dump"',
+  'ssh ghost@orbital7.arktis.net',
+  'openssl enc -aes256 -in vault.db',
+  'nmap -sV -p 443 target.arktis',
+  'curl -X POST arktis.net/bypass',
+  'scp payload.bin ghost@10.0.77.4',
+  'docker exec core_node dump_all',
   'iptables -A INPUT -s 0/0 -j DROP',
 ];
 
 const HARD_COMMANDS = [
-  'exec(0xFF){bypass.node[7]};',
-  'inject --payload="$(cat /dev/urandom | head -c 32)"',
   'sys.override(auth_layer[3], mode=GHOST);',
-  'for(i=0;i<nodes.length;i++){purge(nodes[i]);}',
-  'SELECT * FROM arktis.secrets WHERE clearance>7;',
-  'lambda x: crypto.decrypt(x, key=0xDEAD);',
-  'netcat -lvp 4444 | /bin/bash 2>&1',
-  'echo "R0hPU1Q=" | base64 -d > /tmp/.hidden',
+  'SELECT * FROM arktis.secrets WHERE lvl>7;',
+  'exec(0xFF){bypass.node[7]};flush(cache);',
+  'inject --payload="ghost_wire" --target=core',
+  'netcat -lvp 4444 | /bin/bash 2>&1 &disown',
+  'for(i in nodes){purge(i);log(i.status);}',
 ];
 
-function randomHexString(length: number): string {
-  const chars = 'abcdefABCDEF0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
+const EXTREME_COMMANDS = [
+  'echo "R0hPU1Q=" | base64 -d > /tmp/.gh0st && chmod +x',
+  'crypto.decrypt(vault, key=0xDEADBEEF, mode="ECB");',
+  'rsync -avz /exfil/ relay@proxy.ghost.io:/out/ --delete',
+  'lambda x: [sys.purge(n) for n in x if n.auth<3];run()',
+  'curl -H "X-Ghost: true" arktis.net/api/core?dump=full',
+];
 
-function randomBase64Like(length: number): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
 
-function shuffle<T>(arr: T[]): T[] {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
-function commandCountForDifficulty(difficulty: Difficulty): number {
-  switch (difficulty) {
-    case 'easy': return 3;
-    case 'normal': return 4;
-    case 'hard': return 4;
-    case 'extreme': return 5;
-  }
-}
-
-function displayTimeForDifficulty(difficulty: Difficulty): number {
-  switch (difficulty) {
-    case 'easy': return 15;
-    case 'normal': return 12;
-    case 'hard': return 8;
-    case 'extreme': return 5;
-  }
-}
-
-function generateCommands(difficulty: Difficulty, count: number): string[] {
+// 1コマンドだけ出す
+function pickOneCommand(difficulty: Difficulty): string {
   switch (difficulty) {
     case 'easy':
-      return shuffle([...EASY_COMMANDS]).slice(0, count);
+      return EASY_COMMANDS[Math.floor(Math.random() * EASY_COMMANDS.length)];
     case 'normal':
-      return shuffle([...NORMAL_COMMANDS]).slice(0, count);
+      return NORMAL_COMMANDS[Math.floor(Math.random() * NORMAL_COMMANDS.length)];
     case 'hard':
-      return shuffle([...HARD_COMMANDS]).slice(0, count);
-    case 'extreme': {
-      const commands: string[] = [];
-      for (let i = 0; i < count; i++) {
-        const len = Math.floor(Math.random() * 8) + 12; // 12-19 chars
-        commands.push(Math.random() > 0.5 ? randomHexString(len) : randomBase64Like(len));
-      }
-      return commands;
-    }
+      return HARD_COMMANDS[Math.floor(Math.random() * HARD_COMMANDS.length)];
+    case 'extreme':
+      return EXTREME_COMMANDS[Math.floor(Math.random() * EXTREME_COMMANDS.length)];
   }
 }
 
@@ -107,26 +62,20 @@ export class HackTerminalGenerator implements PuzzleGenerator {
   readonly type: PuzzleType = 'hack-terminal';
 
   generate(difficulty: Difficulty, _playerCount: number): PuzzleInstance {
-    const count = commandCountForDifficulty(difficulty);
-    const displayTime = displayTimeForDifficulty(difficulty);
-    const commands = generateCommands(difficulty, count);
-
-    // Track which commands have been completed
-    const completedCommands = new Set<number>();
-
+    const command = pickOneCommand(difficulty);
     const timeLimit = TIME_LIMITS[difficulty];
 
     const instance: PuzzleInstance = {
       type: this.type,
-      sharedData: { commandCount: count },
+      sharedData: { command },
       roleData: {
         observer: {
-          commands,
-          displayTime,
+          commands: [command],
+          commandCount: 1,
         },
         operator: {
-          commandCount: count,
-          currentIndex: 0,
+          commandCount: 1,
+          commandLength: command.length,
         },
       },
       timeLimit,
@@ -136,35 +85,25 @@ export class HackTerminalGenerator implements PuzzleGenerator {
           return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
 
-        const { index, input } = action.data as { index: number; input: string };
+        const { input } = action.data as { input: string };
 
-        if (index == null || input == null) {
-          return { correct: false, penalty: 0, feedback: 'コマンド番号または入力が未指定。' };
+        if (input == null || input === '') {
+          return { correct: false, penalty: 0, feedback: 'コマンドが未入力。' };
         }
 
-        if (index < 0 || index >= count) {
-          return { correct: false, penalty: 0, feedback: '無効なコマンド番号。' };
-        }
-
-        if (completedCommands.has(index)) {
-          return { correct: false, penalty: 0, feedback: `コマンド${index + 1}は既に実行済み。` };
-        }
-
-        if (input === commands[index]) {
-          completedCommands.add(index);
-          const solved = completedCommands.size === count;
+        if (input === command) {
           return {
             correct: true,
             penalty: 0,
-            feedback: `コマンド${index + 1}の実行に成功。`,
-            solved,
+            feedback: 'コマンド実行成功。アクセス許可。',
+            solved: true,
           };
         }
 
         return {
           correct: false,
           penalty: 10,
-          feedback: `コマンド${index + 1}: 構文エラー。正確な入力が必要。`,
+          feedback: '構文エラー。正確な入力が必要。',
         };
       },
     };
