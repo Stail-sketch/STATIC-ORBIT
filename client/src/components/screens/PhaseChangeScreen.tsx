@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../stores/gameStore';
 import TypewriterText from '../effects/TypewriterText';
 import { useAudio } from '../../audio/useAudio';
+import { getSocket } from '../../hooks/useSocket';
 
 const PhaseChangeScreen: React.FC = () => {
   const phaseNarrative = useGameStore((s) => s.phaseNarrative);
+  const isHost = useGameStore((s) => s.isHost);
+  const roomCode = useGameStore((s) => s.roomCode);
   const audio = useAudio();
 
   const [stage, setStage] = useState<'blackout' | 'glitch' | 'narrative' | 'warning'>('blackout');
@@ -174,6 +177,54 @@ const PhaseChangeScreen: React.FC = () => {
                 style={pulseRingStyle}
               />
             ))}
+
+            {/* Host: click to proceed */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.5, duration: 0.5 }}
+              style={{ marginTop: 40, textAlign: 'center' as const }}
+            >
+              {isHost ? (
+                <motion.button
+                  onClick={() => {
+                    if (roomCode) {
+                      getSocket().emit('game:chapterDone', { roomCode });
+                    }
+                  }}
+                  style={{
+                    fontFamily: "'Orbitron', sans-serif",
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: '#ff2244',
+                    backgroundColor: 'transparent',
+                    border: '2px solid #ff2244',
+                    padding: '12px 40px',
+                    cursor: 'pointer',
+                    letterSpacing: 3,
+                    clipPath: 'polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  animate={{
+                    boxShadow: [
+                      '0 0 8px rgba(255,34,68,0.3)',
+                      '0 0 20px rgba(255,34,68,0.6)',
+                      '0 0 8px rgba(255,34,68,0.3)',
+                    ],
+                  }}
+                  transition={{
+                    boxShadow: { duration: 2, repeat: Infinity, ease: 'easeInOut' },
+                  }}
+                >
+                  {'次へ ▶'}
+                </motion.button>
+              ) : (
+                <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: 14, color: '#884444', letterSpacing: 2 }}>
+                  ホストの操作を待っています...
+                </div>
+              )}
+            </motion.div>
           </motion.div>
         )}
       </div>

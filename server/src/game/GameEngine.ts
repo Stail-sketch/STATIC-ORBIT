@@ -661,10 +661,10 @@ export class GameEngine {
           narrative: PHASE_CHANGE_NARRATIVE,
         });
 
-        // After phase change animation, start the actual briefing
-        setTimeout(() => {
+        // Wait for host click (game:chapterDone) to proceed
+        session.pendingChapterCallback = () => {
           this.emitBriefing(session, room, puzzleType, isEscape);
-        }, 5000);
+        };
         return;
       }
 
