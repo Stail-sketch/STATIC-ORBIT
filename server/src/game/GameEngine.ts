@@ -312,6 +312,23 @@ const PUZZLE_GUIDES: Record<PuzzleType, string> = {
     '【ボスパズル】【オブザーバー】本物のシグナルの色と形が見えます。オペレーターに伝えてください。\n【オペレーター】6x6グリッドにターゲットが出現します。本物のシグナルをキャプチャしてください。デコイに注意。',
 };
 
+// ---- Player-count-based difficulty & time scaling ----
+
+function adjustDifficultyForPlayerCount(baseDifficulty: Difficulty, playerCount: number): Difficulty {
+  if (playerCount <= 2) return baseDifficulty;
+  const levels: Difficulty[] = ['easy', 'normal', 'hard', 'extreme'];
+  const baseIndex = levels.indexOf(baseDifficulty);
+  const bump = playerCount === 3 ? 1 : 2;
+  const newIndex = Math.min(baseIndex + bump, levels.length - 1);
+  return levels[newIndex];
+}
+
+function timeBonusForPlayerCount(playerCount: number): number {
+  if (playerCount <= 2) return 0;
+  if (playerCount === 3) return 15;
+  return 25; // 4 players
+}
+
 // ---- Difficulty progression ----
 
 function difficultyForStage(stageIndex: number, totalStages: number, isEscape: boolean): Difficulty {
@@ -374,6 +391,18 @@ interface GameSession {
   isBossSection: boolean;
   bossSequence: PuzzleType[];
   currentBossIndex: number;
+  // Navigator hint system
+  hintsTotal: number;
+  hintsUsed: number;
+  // Hacker scan system
+  scansTotal: number;
+  scansUsed: number;
+  // Hacker ECHO attack system
+  echoAttackTimer: ReturnType<typeof setInterval> | null;
+  echoAttackActive: boolean;
+  currentAttackCode: string | null;
+  currentAttackType: string | null;
+  attackDefenseTimeout: ReturnType<typeof setTimeout> | null;
 }
 
 // ---- Engine ----
@@ -468,6 +497,15 @@ export class GameEngine {
         isBossSection: false,
         bossSequence: [],
         currentBossIndex: 0,
+        hintsTotal: 3,
+        hintsUsed: 0,
+        scansTotal: 3,
+        scansUsed: 0,
+        echoAttackTimer: null,
+        echoAttackActive: false,
+        currentAttackCode: null,
+        currentAttackType: null,
+        attackDefenseTimeout: null,
       };
 
       this.sessions.set(room.code, session);
@@ -502,6 +540,15 @@ export class GameEngine {
         isBossSection: false,
         bossSequence: [...BOSS_SEQUENCE],
         currentBossIndex: 0,
+        hintsTotal: 3,
+        hintsUsed: 0,
+        scansTotal: 3,
+        scansUsed: 0,
+        echoAttackTimer: null,
+        echoAttackActive: false,
+        currentAttackCode: null,
+        currentAttackType: null,
+        attackDefenseTimeout: null,
       };
 
       this.sessions.set(room.code, session);
@@ -595,7 +642,8 @@ export class GameEngine {
 
     const emitBoss = () => {
       // Boss difficulty: first two are 'hard', last two are 'extreme'
-      const difficulty: Difficulty = bossIndex < 2 ? 'hard' : 'extreme';
+      let difficulty: Difficulty = bossIndex < 2 ? 'hard' : 'extreme';
+      difficulty = adjustDifficultyForPlayerCount(difficulty, room.players.length);
       const storyText = BOSS_BRIEFINGS[bossPuzzleType] ?? 'BOSS BATTLE';
 
       const generator = this.generators.get(bossPuzzleType);
@@ -609,6 +657,8 @@ export class GameEngine {
       puzzle.timeLimit = 300;
       session.currentPuzzle = puzzle;
       session.missCount = 0;
+      session.hintsUsed = 0;
+      session.scansUsed = 0;
       session.readyPlayers = new Set();
 
       room.phase = 'briefing';
@@ -691,6 +741,9 @@ export class GameEngine {
       }
     }
 
+    // Adjust difficulty for player count
+    difficulty = adjustDifficultyForPlayerCount(difficulty, room.players.length);
+
     const generator = this.generators.get(puzzleType);
     if (!generator) {
       console.error(`No generator for puzzle type: ${puzzleType}`);
@@ -700,6 +753,10 @@ export class GameEngine {
     const puzzle = generator.generate(difficulty, room.players.length);
     session.currentPuzzle = puzzle;
     session.missCount = 0;
+
+    // Reset hint/scan counts for each new puzzle
+    session.hintsUsed = 0;
+    session.scansUsed = 0;
 
     // Reset ready state for each briefing
     session.readyPlayers = new Set();
@@ -731,7 +788,10 @@ export class GameEngine {
     if (!puzzle) return;
 
     room.phase = 'playing';
-    session.timeRemaining = puzzle.timeLimit;
+    // Apply time bonus for player count
+    const bonus = timeBonusForPlayerCount(room.players.length);
+    const effectiveTimeLimit = puzzle.timeLimit + bonus;
+    session.timeRemaining = effectiveTimeLimit;
 
     // Send role-specific data to each player
     for (const player of room.players) {
@@ -741,7 +801,7 @@ export class GameEngine {
         socket.emit('game:start', {
           puzzleType: puzzle.type,
           roleData,
-          timeLimit: puzzle.timeLimit,
+          timeLimit: effectiveTimeLimit,
         });
       }
     }
@@ -758,6 +818,216 @@ export class GameEngine {
         this.failStage(session, room, '制限時間超過。');
       }
     }, 1000);
+
+    // Start ECHO attack timer for 4-player games
+    this.startEchoAttacks(session, room);
+  }
+
+  /** Start periodic ECHO attacks when 4 players are present */
+  private startEchoAttacks(session: GameSession, room: Room): void {
+    if (room.players.length < 4) return;
+    // Find the hacker player
+    const hacker = room.players.find(p => p.role === 'hacker');
+    if (!hacker) return;
+
+    const delay = 15000 + Math.floor(Math.random() * 5000); // 15-20 seconds
+    session.echoAttackTimer = setInterval(() => {
+      if (!session.currentPuzzle || session.timeRemaining <= 0) {
+        this.clearEchoAttacks(session);
+        return;
+      }
+      this.triggerEchoAttack(session, room);
+    }, delay);
+  }
+
+  private triggerEchoAttack(session: GameSession, room: Room): void {
+    if (session.echoAttackActive) return;
+    if (!session.currentPuzzle || session.timeRemaining <= 0) return;
+
+    const attackTypes = ['timer-drain', 'screen-noise', 'input-scramble'];
+    const attackType = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+    const defenseCode = String(Math.floor(100 + Math.random() * 900)); // 3-digit code
+
+    session.echoAttackActive = true;
+    session.currentAttackCode = defenseCode;
+    session.currentAttackType = attackType;
+
+    // Send attack to hacker (with defense code) and to all players (without code for effects)
+    const hacker = room.players.find(p => p.role === 'hacker');
+    if (hacker) {
+      const hackerSocket = this.io.sockets.sockets.get(hacker.id);
+      if (hackerSocket) {
+        hackerSocket.emit('game:echoAttack', {
+          attackType,
+          duration: 8,
+          defenseCode,
+        });
+      }
+    }
+
+    // Also notify non-hacker players about the attack (without code)
+    for (const player of room.players) {
+      if (player.role !== 'hacker') {
+        const socket = this.io.sockets.sockets.get(player.id);
+        if (socket) {
+          socket.emit('game:echoAttack', {
+            attackType,
+            duration: 8,
+            defenseCode: '', // non-hackers don't see the code
+          });
+        }
+      }
+    }
+
+    // If not defended within 8 seconds, apply effect
+    session.attackDefenseTimeout = setTimeout(() => {
+      if (session.echoAttackActive) {
+        session.echoAttackActive = false;
+        session.currentAttackCode = null;
+        // Apply attack effect
+        if (attackType === 'timer-drain') {
+          session.timeRemaining = Math.max(0, session.timeRemaining - 10);
+          this.io.to(room.code).emit('game:timeUpdate', { remaining: session.timeRemaining });
+        }
+        this.io.to(room.code).emit('game:attackEffect', { effect: attackType });
+        if (session.timeRemaining <= 0) {
+          this.failStage(session, room, 'ECHO攻撃による時間枯渇。');
+        }
+      }
+    }, 8000);
+  }
+
+  /** Handle hacker defending an ECHO attack */
+  handleDefendAttack(roomCode: string, playerId: string, defenseCode: string): void {
+    const session = this.sessions.get(roomCode);
+    if (!session || !session.echoAttackActive) return;
+
+    const room = this.getRoomFromCode(roomCode);
+    if (!room) return;
+
+    // Verify player is hacker
+    const player = room.players.find(p => p.id === playerId);
+    if (!player || player.role !== 'hacker') return;
+
+    const success = defenseCode === session.currentAttackCode;
+    session.echoAttackActive = false;
+    session.currentAttackCode = null;
+
+    if (session.attackDefenseTimeout) {
+      clearTimeout(session.attackDefenseTimeout);
+      session.attackDefenseTimeout = null;
+    }
+
+    const hackerSocket = this.io.sockets.sockets.get(playerId);
+    if (hackerSocket) {
+      hackerSocket.emit('game:attackDefended', { success });
+    }
+
+    if (!success) {
+      // Failed defense — apply effect anyway
+      if (session.currentAttackType === 'timer-drain') {
+        session.timeRemaining = Math.max(0, session.timeRemaining - 10);
+        this.io.to(roomCode).emit('game:timeUpdate', { remaining: session.timeRemaining });
+      }
+      this.io.to(roomCode).emit('game:attackEffect', { effect: session.currentAttackType ?? 'timer-drain' });
+    }
+    session.currentAttackType = null;
+  }
+
+  /** Handle navigator requesting a hint */
+  handleRequestHint(roomCode: string, playerId: string): void {
+    const session = this.sessions.get(roomCode);
+    if (!session || !session.currentPuzzle) return;
+
+    const room = this.getRoomFromCode(roomCode);
+    if (!room) return;
+
+    // Verify player is navigator
+    const player = room.players.find(p => p.id === playerId);
+    if (!player || player.role !== 'navigator') return;
+
+    if (session.hintsUsed >= session.hintsTotal) {
+      const socket = this.io.sockets.sockets.get(playerId);
+      if (socket) {
+        socket.emit('game:hint', { hint: 'ヒント枠を全て使い切りました。', hintsRemaining: 0 });
+      }
+      return;
+    }
+
+    const puzzle = session.currentPuzzle;
+    let hint: string;
+    if (puzzle.getHint) {
+      hint = puzzle.getHint(session.hintsUsed);
+    } else {
+      hint = 'この問題にはヒントがありません。';
+    }
+
+    session.hintsUsed++;
+    // Hint costs 5 seconds
+    session.timeRemaining = Math.max(0, session.timeRemaining - 5);
+    this.io.to(roomCode).emit('game:timeUpdate', { remaining: session.timeRemaining });
+
+    const hintsRemaining = session.hintsTotal - session.hintsUsed;
+
+    const socket = this.io.sockets.sockets.get(playerId);
+    if (socket) {
+      socket.emit('game:hint', { hint, hintsRemaining });
+    }
+
+    if (session.timeRemaining <= 0) {
+      this.failStage(session, room, 'ヒント使用による時間枯渇。');
+    }
+  }
+
+  /** Handle hacker scanning puzzle state */
+  handleScan(roomCode: string, playerId: string): void {
+    const session = this.sessions.get(roomCode);
+    if (!session || !session.currentPuzzle) return;
+
+    const room = this.getRoomFromCode(roomCode);
+    if (!room) return;
+
+    // Verify player is hacker
+    const player = room.players.find(p => p.id === playerId);
+    if (!player || player.role !== 'hacker') return;
+
+    if (session.scansUsed >= session.scansTotal) {
+      const socket = this.io.sockets.sockets.get(playerId);
+      if (socket) {
+        socket.emit('game:scanResult', { result: 'unavailable', scansRemaining: 0 });
+      }
+      return;
+    }
+
+    session.scansUsed++;
+    const scansRemaining = session.scansTotal - session.scansUsed;
+
+    const puzzle = session.currentPuzzle;
+    let result: 'hot' | 'warm' | 'cold' | 'unavailable';
+    if (puzzle.getScanResult) {
+      result = puzzle.getScanResult();
+    } else {
+      result = 'unavailable';
+    }
+
+    const socket = this.io.sockets.sockets.get(playerId);
+    if (socket) {
+      socket.emit('game:scanResult', { result, scansRemaining });
+    }
+  }
+
+  private clearEchoAttacks(session: GameSession): void {
+    if (session.echoAttackTimer) {
+      clearInterval(session.echoAttackTimer);
+      session.echoAttackTimer = null;
+    }
+    if (session.attackDefenseTimeout) {
+      clearTimeout(session.attackDefenseTimeout);
+      session.attackDefenseTimeout = null;
+    }
+    session.echoAttackActive = false;
+    session.currentAttackCode = null;
+    session.currentAttackType = null;
   }
 
   handleAction(roomCode: string, action: GameAction): void {
@@ -1026,6 +1296,7 @@ export class GameEngine {
       clearInterval(session.timer);
       session.timer = null;
     }
+    this.clearEchoAttacks(session);
   }
 
   /** Helper to get a room object — needs RoomManager reference, injected via closure in handlers */
@@ -1082,6 +1353,7 @@ export class GameEngine {
     const session = this.sessions.get(roomCode);
     if (session) {
       this.clearTimer(session);
+      this.clearEchoAttacks(session);
       if (session.countdownTimer) {
         clearTimeout(session.countdownTimer);
         session.countdownTimer = null;

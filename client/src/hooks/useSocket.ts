@@ -106,6 +106,30 @@ export function useSocket() {
       store.getState().setChapterData(data);
     });
 
+    s.on('game:hint', ({ hint, hintsRemaining }) => {
+      store.getState().addHint(hint, hintsRemaining);
+    });
+
+    s.on('game:echoAttack', (data) => {
+      store.getState().setEchoAttack(data);
+    });
+
+    s.on('game:attackDefended', ({ success }) => {
+      const attack = store.getState().echoAttack;
+      store.getState().addAttackLog({
+        attackType: attack?.attackType ?? 'unknown',
+        defended: success,
+      });
+    });
+
+    s.on('game:attackEffect', ({ effect }) => {
+      store.getState().setAttackEffect(effect);
+    });
+
+    s.on('game:scanResult', ({ result, scansRemaining }) => {
+      store.getState().addScanResult({ result, scansRemaining });
+    });
+
     return () => {
       // Don't disconnect on unmount — we want persistent connection
     };

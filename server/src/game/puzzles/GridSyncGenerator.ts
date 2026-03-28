@@ -34,6 +34,9 @@ export class GridSyncGenerator implements PuzzleGenerator {
 
     const timeLimit = TIME_LIMITS[difficulty];
 
+    // Build row hints for the navigator hint system
+    const rowLabels = 'ABCDEFGHIJ';
+
     const instance: PuzzleInstance = {
       type: this.type,
       sharedData: { gridSize: size },
@@ -52,6 +55,18 @@ export class GridSyncGenerator implements PuzzleGenerator {
         },
       },
       timeLimit,
+
+      getHint(hintIndex: number): string {
+        if (hintIndex >= size) return 'これ以上のヒントはありません。';
+        const row = targetPattern[hintIndex];
+        const pattern = row.map(c => c ? '\u25CF' : '\u25CB').join('');
+        return `行${rowLabels[hintIndex]}の正解パターン: ${pattern}`;
+      },
+
+      getScanResult(): 'hot' | 'warm' | 'cold' {
+        // Grid sync is submit-based; can't track intermediate state easily
+        return 'unavailable' as 'cold';
+      },
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'submit-grid') {

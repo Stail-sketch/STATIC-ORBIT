@@ -167,6 +167,30 @@ export function initHandlers(io: TypedServer): void {
       });
     });
 
+    socket.on('game:requestHint', ({ roomCode }) => {
+      try {
+        gameEngine.handleRequestHint(roomCode, socket.id);
+      } catch (err) {
+        socket.emit('room:error', { message: (err as Error).message });
+      }
+    });
+
+    socket.on('game:defendAttack', ({ roomCode, defenseCode }) => {
+      try {
+        gameEngine.handleDefendAttack(roomCode, socket.id, defenseCode);
+      } catch (err) {
+        socket.emit('room:error', { message: (err as Error).message });
+      }
+    });
+
+    socket.on('game:scan', ({ roomCode }) => {
+      try {
+        gameEngine.handleScan(roomCode, socket.id);
+      } catch (err) {
+        socket.emit('room:error', { message: (err as Error).message });
+      }
+    });
+
     socket.on('disconnect', () => {
       const roomCode = roomManager.findRoomByPlayer(socket.id);
       if (roomCode) {

@@ -14,6 +14,8 @@ interface PuzzleProps {
 }
 
 import SupportTerminal from '../puzzles/SupportTerminal';
+import NavigatorTerminal from '../puzzles/NavigatorTerminal';
+import HackerTerminal from '../puzzles/HackerTerminal';
 import CircuitLinkPuzzle from '../puzzles/CircuitLinkPuzzle';
 import CipherBreakPuzzle from '../puzzles/CipherBreakPuzzle';
 import GridSyncPuzzle from '../puzzles/GridSyncPuzzle';
@@ -270,8 +272,10 @@ const GameScreen: React.FC = () => {
       {/* Puzzle area */}
       <div style={puzzleAreaStyle}>
         {PuzzleComponent && roleData && myRole ? (
-          (myRole === 'navigator' || myRole === 'hacker') ? (
-            <SupportTerminal role={myRole} roleData={roleData} />
+          myRole === 'navigator' ? (
+            <NavigatorTerminal roleData={roleData} />
+          ) : myRole === 'hacker' ? (
+            <HackerTerminal roleData={roleData} />
           ) : (
             <PuzzleComponent roleData={roleData} role={myRole} />
           )

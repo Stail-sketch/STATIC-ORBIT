@@ -106,6 +106,9 @@ export interface ClientToServerEvents {
   'game:action': (data: GameAction) => void;
   'game:chat': (data: { message: string }) => void;
   'game:ready': (data: { roomCode: string }) => void;
+  'game:requestHint': (data: { roomCode: string }) => void;
+  'game:defendAttack': (data: { roomCode: string; defenseCode: string }) => void;
+  'game:scan': (data: { roomCode: string }) => void;
 }
 
 export interface ServerToClientEvents {
@@ -137,4 +140,9 @@ export interface ServerToClientEvents {
   'game:finished': (data: GameResult) => void;
   'game:chat': (data: { playerName: string; message: string }) => void;
   'game:chapter': (data: { chapterNumber: number; title: string; subtitle: string; lines: string[]; duration: number }) => void;
+  'game:hint': (data: { hint: string; hintsRemaining: number }) => void;
+  'game:echoAttack': (data: { attackType: string; duration: number; defenseCode: string }) => void;
+  'game:attackDefended': (data: { success: boolean }) => void;
+  'game:attackEffect': (data: { effect: string }) => void;
+  'game:scanResult': (data: { result: 'hot' | 'warm' | 'cold' | 'unavailable'; scansRemaining: number }) => void;
 }

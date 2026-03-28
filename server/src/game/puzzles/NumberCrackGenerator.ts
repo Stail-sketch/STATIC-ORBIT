@@ -115,6 +115,9 @@ export class NumberCrackGenerator implements PuzzleGenerator {
       digitCount,
     };
 
+    // Track last attempted code for scan support
+    let lastAttempt: string | null = null;
+
     const instance: PuzzleInstance = {
       type: this.type,
       sharedData: { digitCount },
@@ -126,6 +129,23 @@ export class NumberCrackGenerator implements PuzzleGenerator {
       },
       timeLimit,
 
+      getHint(hintIndex: number): string {
+        if (hintIndex >= digitCount) return 'これ以上のヒントはありません。';
+        return `${hintIndex + 1}桁目は${code[hintIndex]}です。`;
+      },
+
+      getScanResult(): 'hot' | 'warm' | 'cold' {
+        if (!lastAttempt) return 'cold';
+        let correct = 0;
+        for (let i = 0; i < digitCount; i++) {
+          if (lastAttempt[i] === codeStr[i]) correct++;
+        }
+        const ratio = correct / digitCount;
+        if (ratio >= 0.75) return 'hot';
+        if (ratio >= 0.25) return 'warm';
+        return 'cold';
+      },
+
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'crack') {
           return { correct: false, penalty: 0, feedback: '不明なアクション。' };
@@ -136,6 +156,8 @@ export class NumberCrackGenerator implements PuzzleGenerator {
         if (!attempt || attempt.length !== digitCount) {
           return { correct: false, penalty: 0, feedback: `${digitCount}桁のコードを入力してください。` };
         }
+
+        lastAttempt = attempt;
 
         if (attempt === codeStr) {
           return { correct: true, penalty: 0, feedback: 'ナンバーロック解除成功！', solved: true };

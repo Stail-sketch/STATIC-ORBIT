@@ -100,6 +100,8 @@ export class CipherBreakGenerator implements PuzzleGenerator {
 
     const timeLimit = TIME_LIMITS[difficulty];
 
+    const targetLetters = target.replace(/ /g, '').split('');
+
     const instance: PuzzleInstance = {
       type: this.type,
       sharedData: { symbolCount: uniqueLetters.length + dummyCount },
@@ -120,6 +122,16 @@ export class CipherBreakGenerator implements PuzzleGenerator {
         },
       },
       timeLimit,
+
+      getHint(hintIndex: number): string {
+        if (hintIndex >= targetLetters.length) return 'これ以上のヒントはありません。';
+        return `${hintIndex + 1}文字目は「${targetLetters[hintIndex]}」です。`;
+      },
+
+      getScanResult(): 'hot' | 'warm' | 'cold' {
+        // Cipher break is all-or-nothing, so scan is limited
+        return 'cold';
+      },
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'submit-decode') {

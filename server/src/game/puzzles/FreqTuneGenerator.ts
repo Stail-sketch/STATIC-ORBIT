@@ -50,9 +50,26 @@ export class FreqTuneGenerator implements PuzzleGenerator {
 
     const timeLimit = TIME_LIMITS[difficulty];
 
+    // Shuffle targets for hint ordering
+    const hintTargets = [...targets].sort(() => Math.random() - 0.5);
+
     const instance: PuzzleInstance = {
       type: this.type,
       sharedData: { dialCount: count },
+
+      getHint(hintIndex: number): string {
+        if (hintIndex >= hintTargets.length) return 'これ以上のヒントはありません。';
+        const t = hintTargets[hintIndex];
+        return `ダイヤル${t.index + 1}の目標周波数は${t.frequency} MHzです。`;
+      },
+
+      getScanResult(): 'hot' | 'warm' | 'cold' {
+        const ratio = tunedDials.size / count;
+        if (ratio >= 0.75) return 'hot';
+        if (ratio >= 0.25) return 'warm';
+        return 'cold';
+      },
+
       roleData: {
         observer: {
           targets: targets.map(t => ({

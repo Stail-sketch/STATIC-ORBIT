@@ -57,6 +57,9 @@ export class CircuitLinkGenerator implements PuzzleGenerator {
 
     const timeLimit = TIME_LIMITS[difficulty];
 
+    // Shuffle connections for hint order
+    const hintOrder = shuffle([...connections]);
+
     const instance: PuzzleInstance = {
       type: this.type,
       sharedData: { wireCount },
@@ -89,6 +92,19 @@ export class CircuitLinkGenerator implements PuzzleGenerator {
         },
       },
       timeLimit,
+
+      getHint(hintIndex: number): string {
+        if (hintIndex >= hintOrder.length) return 'これ以上のヒントはありません。';
+        const conn = hintOrder[hintIndex];
+        return `ワイヤー${conn.color}の正解は${conn.destPort}です。`;
+      },
+
+      getScanResult(): 'hot' | 'warm' | 'cold' {
+        const ratio = connectedWires.size / wireCount;
+        if (ratio >= 0.75) return 'hot';
+        if (ratio >= 0.25) return 'warm';
+        return 'cold';
+      },
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'connect-wire') {

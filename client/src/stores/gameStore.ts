@@ -81,6 +81,18 @@ interface GameState {
   // Lives (story mode)
   livesRemaining: number;
 
+  // Navigator hints
+  hints: string[];
+  hintsRemaining: number;
+
+  // Hacker ECHO attack
+  echoAttack: { attackType: string; defenseCode: string; duration: number } | null;
+  attackLog: { attackType: string; defended: boolean; timestamp: number }[];
+
+  // Hacker scan
+  scanResults: { result: string; scansRemaining: number; timestamp: number }[];
+  scansRemaining: number;
+
   // Actions
   setChapterData: (data: { chapterNumber: number; title: string; subtitle: string; lines: string[] }) => void;
   setScreen: (screen: Screen) => void;
@@ -103,6 +115,11 @@ interface GameState {
   setMyReady: () => void;
   setCountdown: (count: number | null) => void;
   setLivesRemaining: (lives: number) => void;
+  addHint: (hint: string, hintsRemaining: number) => void;
+  setEchoAttack: (attack: { attackType: string; defenseCode: string; duration: number } | null) => void;
+  addAttackLog: (entry: { attackType: string; defended: boolean }) => void;
+  addScanResult: (result: { result: string; scansRemaining: number }) => void;
+  setAttackEffect: (effect: string) => void;
   reset: () => void;
 }
 
@@ -134,6 +151,12 @@ const initialState = {
   isReady: false,
   countdown: null as number | null,
   livesRemaining: 3,
+  hints: [] as string[],
+  hintsRemaining: 3,
+  echoAttack: null as { attackType: string; defenseCode: string; duration: number } | null,
+  attackLog: [] as { attackType: string; defended: boolean; timestamp: number }[],
+  scanResults: [] as { result: string; scansRemaining: number; timestamp: number }[],
+  scansRemaining: 3,
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -178,6 +201,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       timeLimit: data.timeLimit,
       timeRemaining: data.timeLimit,
       lastFeedback: null,
+      hints: [],
+      hintsRemaining: 3,
+      echoAttack: null,
+      attackLog: [],
+      scanResults: [],
+      scansRemaining: 3,
     }),
 
   setTimeRemaining: (t) => set({ timeRemaining: t }),
@@ -228,6 +257,30 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   setLivesRemaining: (lives) =>
     set({ livesRemaining: lives }),
+
+  addHint: (hint, hintsRemaining) =>
+    set((s) => ({
+      hints: [...s.hints, hint],
+      hintsRemaining,
+    })),
+
+  setEchoAttack: (attack) =>
+    set({ echoAttack: attack }),
+
+  addAttackLog: (entry) =>
+    set((s) => ({
+      attackLog: [...s.attackLog.slice(-10), { ...entry, timestamp: Date.now() }],
+      echoAttack: null,
+    })),
+
+  addScanResult: (result) =>
+    set((s) => ({
+      scanResults: [...s.scanResults.slice(-5), { ...result, timestamp: Date.now() }],
+      scansRemaining: result.scansRemaining,
+    })),
+
+  setAttackEffect: (_effect) =>
+    set({ echoAttack: null }),
 
   reset: () => set({ ...initialState }),
 }));

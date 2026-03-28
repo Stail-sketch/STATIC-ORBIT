@@ -8,6 +8,8 @@ export interface PuzzleInstance {
   roleData: PuzzleRoleData;
   timeLimit: number;
   validate(action: GameAction): ValidationResult;
+  getHint?: (hintIndex: number) => string;
+  getScanResult?: () => 'hot' | 'warm' | 'cold';
 }
 
 export interface PuzzleGenerator {
