@@ -22,6 +22,7 @@ interface BriefingData {
   puzzleGuide?: string;
   gameMode?: GameMode;
   livesRemaining?: number;
+  isBossSection?: boolean;
 }
 
 interface ChatMessage {

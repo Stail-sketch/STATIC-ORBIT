@@ -21,7 +21,20 @@ export type PuzzleType =
   | 'spatial-nav'
   | 'reflex-burst'
   | 'logic-gate'
-  | 'orbit-calc';
+  | 'orbit-calc'
+  | 'signal-relay'
+  | 'pipe-flow'
+  | 'number-crack'
+  | 'keycard-forge'
+  | 'airlock-sync'
+  | 'layer-stack'
+  | 'emotion-code'
+  | 'alien-language'
+  | 'asteroid-dodge'
+  | 'escape-pod'
+  | 'core-breach'
+  | 'echo-override'
+  | 'signal-storm';
 
 export interface Player {
   id: string;
@@ -110,6 +123,7 @@ export interface ServerToClientEvents {
     puzzleGuide?: string;
     gameMode: GameMode;
     livesRemaining?: number;
+    isBossSection?: boolean;
   }) => void;
   'game:readyUpdate': (data: { readyPlayers: string[]; totalPlayers: number }) => void;
   'game:countdown': (data: { count: number }) => void;

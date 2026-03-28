@@ -25,6 +25,19 @@ import SpatialNavPuzzle from '../puzzles/SpatialNavPuzzle';
 import ReflexBurstPuzzle from '../puzzles/ReflexBurstPuzzle';
 import LogicGatePuzzle from '../puzzles/LogicGatePuzzle';
 import OrbitCalcPuzzle from '../puzzles/OrbitCalcPuzzle';
+import SignalRelayPuzzle from '../puzzles/SignalRelayPuzzle';
+import PipeFlowPuzzle from '../puzzles/PipeFlowPuzzle';
+import NumberCrackPuzzle from '../puzzles/NumberCrackPuzzle';
+import KeycardForgePuzzle from '../puzzles/KeycardForgePuzzle';
+import AirlockSyncPuzzle from '../puzzles/AirlockSyncPuzzle';
+import LayerStackPuzzle from '../puzzles/LayerStackPuzzle';
+import EmotionCodePuzzle from '../puzzles/EmotionCodePuzzle';
+import AlienLanguagePuzzle from '../puzzles/AlienLanguagePuzzle';
+import AsteroidDodgePuzzle from '../puzzles/AsteroidDodgePuzzle';
+import EscapePodPuzzle from '../puzzles/EscapePodPuzzle';
+import CoreBreachPuzzle from '../puzzles/CoreBreachPuzzle';
+import EchoOverridePuzzle from '../puzzles/EchoOverridePuzzle';
+import SignalStormPuzzle from '../puzzles/SignalStormPuzzle';
 
 const PUZZLE_NAMES_JP: Record<string, string> = {
   'circuit-link': '回線接続',
@@ -38,6 +51,19 @@ const PUZZLE_NAMES_JP: Record<string, string> = {
   'reflex-burst': 'リアクション',
   'logic-gate': '論理推理',
   'orbit-calc': '軌道計算',
+  'signal-relay': '波形マッチング',
+  'pipe-flow': 'パイプ接続',
+  'number-crack': 'ナンバーロック',
+  'keycard-forge': 'IDカード偽造',
+  'airlock-sync': 'エアロック同期',
+  'layer-stack': 'レイヤー重ね',
+  'emotion-code': '感情コード',
+  'alien-language': '異星語翻訳',
+  'asteroid-dodge': '小惑星回避',
+  'escape-pod': '脱出ポッド',
+  'core-breach': 'コアブリーチ',
+  'echo-override': 'エコーオーバーライド',
+  'signal-storm': 'シグナルストーム',
 };
 
 const PUZZLE_MAP: Record<string, React.FC<PuzzleProps>> = {
@@ -52,6 +78,19 @@ const PUZZLE_MAP: Record<string, React.FC<PuzzleProps>> = {
   'reflex-burst': ReflexBurstPuzzle,
   'logic-gate': LogicGatePuzzle,
   'orbit-calc': OrbitCalcPuzzle,
+  'signal-relay': SignalRelayPuzzle,
+  'pipe-flow': PipeFlowPuzzle,
+  'number-crack': NumberCrackPuzzle,
+  'keycard-forge': KeycardForgePuzzle,
+  'airlock-sync': AirlockSyncPuzzle,
+  'layer-stack': LayerStackPuzzle,
+  'emotion-code': EmotionCodePuzzle,
+  'alien-language': AlienLanguagePuzzle,
+  'asteroid-dodge': AsteroidDodgePuzzle,
+  'escape-pod': EscapePodPuzzle,
+  'core-breach': CoreBreachPuzzle,
+  'echo-override': EchoOverridePuzzle,
+  'signal-storm': SignalStormPuzzle,
 };
 
 /* ── Feedback flash overlay ────────────────────────────────── */

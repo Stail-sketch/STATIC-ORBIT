@@ -26,6 +26,19 @@ import { SpatialNavGenerator } from './puzzles/SpatialNavGenerator.js';
 import { ReflexBurstGenerator } from './puzzles/ReflexBurstGenerator.js';
 import { LogicGateGenerator } from './puzzles/LogicGateGenerator.js';
 import { OrbitCalcGenerator } from './puzzles/OrbitCalcGenerator.js';
+import { SignalRelayGenerator } from './puzzles/SignalRelayGenerator.js';
+import { PipeFlowGenerator } from './puzzles/PipeFlowGenerator.js';
+import { NumberCrackGenerator } from './puzzles/NumberCrackGenerator.js';
+import { KeycardForgeGenerator } from './puzzles/KeycardForgeGenerator.js';
+import { AirlockSyncGenerator } from './puzzles/AirlockSyncGenerator.js';
+import { LayerStackGenerator } from './puzzles/LayerStackGenerator.js';
+import { EmotionCodeGenerator } from './puzzles/EmotionCodeGenerator.js';
+import { AlienLanguageGenerator } from './puzzles/AlienLanguageGenerator.js';
+import { AsteroidDodgeGenerator } from './puzzles/AsteroidDodgeGenerator.js';
+import { EscapePodGenerator } from './puzzles/EscapePodGenerator.js';
+import { CoreBreachGenerator } from './puzzles/CoreBreachGenerator.js';
+import { EchoOverrideGenerator } from './puzzles/EchoOverrideGenerator.js';
+import { SignalStormGenerator } from './puzzles/SignalStormGenerator.js';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 
@@ -69,6 +82,31 @@ const ESCAPE_STORY_BRIEFINGS: Record<number, (remaining: number) => string> = {
 
 const ESCAPE_FALLBACK_BRIEFING = 'ECHO：あと僅かだ。だが僅かな距離が、最も遠い。お前たちの限界を見せてもらおう。';
 
+// ---- Boss section briefings ----
+
+const BOSS_BRIEFINGS: Partial<Record<PuzzleType, string>> = {
+  'core-breach': 'ECHOの防壁が立ちはだかる。ファイアウォールを力ずくで突破しろ！',
+  'echo-override': 'ECHOのコアプログラムにアクセスした。今だ — 上書きしろ！',
+  'signal-storm': 'ECHOが最後の抵抗を見せている。妨害信号の嵐を突破せよ！',
+  'escape-pod': '脱出ポッド起動シーケンス。これが最後のミッションだ。全システムを起動せよ！',
+};
+
+const BOSS_CHAPTER_CUTSCENE = {
+  chapterNumber: 6,
+  title: 'ECHO',
+  subtitle: 'FINAL CONFRONTATION',
+  lines: [
+    'ECHOのコアに到達した。だがECHOは最終防衛態勢に入った。',
+    'ここから先は、ECHOとの直接対決だ。',
+    '全てのスキルを使え。仲間を信じろ。これが最後の戦いだ。',
+  ],
+  duration: 10000,
+};
+
+const BOSS_SEQUENCE: PuzzleType[] = ['core-breach', 'echo-override', 'signal-storm', 'escape-pod'];
+
+const BOSS_PUZZLE_TYPES: Set<PuzzleType> = new Set(['core-breach', 'echo-override', 'signal-storm', 'escape-pod']);
+
 // Legacy puzzle-type-based briefings (used as fallback if no stage-specific briefing)
 const INFILTRATION_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
   'circuit-link': (n) =>
@@ -85,6 +123,19 @@ const INFILTRATION_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> =
   'reflex-burst': (_n) => `GHOST WIRE // セキュリティドローンの巡回を検知。正確なタイミングでバイパスシーケンスを実行せよ。`,
   'logic-gate': (_n) => `GHOST WIRE // データ金庫に多層暗号化を確認。ロジックマトリクスを解かなければ先に進めない。`,
   'orbit-calc': (_n) => `GHOST WIRE // 検知グリッドを回避するため接近ベクトルを調整中。軌道パラメータを較正せよ。`,
+  'signal-relay': (_n) => `GHOST WIRE // 中継アンテナの波形が乱れている。正しい波形パラメータに同期させ、信号経路を確保せよ。`,
+  'pipe-flow': (_n) => `GHOST WIRE // 冷却パイプラインが遮断されている。パイプを回転させて流路を再構築し、システム過熱を防げ。`,
+  'number-crack': (_n) => `GHOST WIRE // 暗号化された数値ロックを検知。条件を満たす数値を推理してロックを解除せよ。`,
+  'keycard-forge': (_n) => `GHOST WIRE // 次のセクションにはレベル5のキーカードが必要だ。パターンを複製して偽造キーカードを作成せよ。`,
+  'airlock-sync': (_n) => `GHOST WIRE // エアロックの手動制御が必要。正しい手順で操作しないと真空に曝される。慎重に。`,
+  'layer-stack': (_n) => `GHOST WIRE // セキュリティレイヤーが多層化されている。正しい順序で解除しないとアラームが作動する。`,
+  'emotion-code': (_n) => `GHOST WIRE // 生体認証に感情パターンが使われている。感情コードを正確に入力してバイパスせよ。`,
+  'alien-language': (_n) => `GHOST WIRE // 未知の文字体系で暗号化されたデータを発見。翻訳して内容を解読せよ。`,
+  'asteroid-dodge': (_n) => `GHOST WIRE // 小惑星帯に突入。全パターンを把握し、船を安全なレーンへ誘導せよ。`,
+  'escape-pod': (_n) => `GHOST WIRE // 脱出ポッドの起動シーケンス開始。4つのサブシステムを順番に起動せよ。`,
+  'core-breach': (_n) => `GHOST WIRE // コアファイアウォールに到達。連続する防壁を高速で突破せよ。`,
+  'echo-override': (_n) => `GHOST WIRE // ECHOのコードストリームを傍受。有効な行を識別してオーバーライドを実行せよ。`,
+  'signal-storm': (_n) => `GHOST WIRE // シグナルストーム発生。本物のシグナルをデコイから見分けてキャプチャせよ。`,
 };
 
 const ESCAPE_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
@@ -102,6 +153,19 @@ const ESCAPE_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
   'reflex-burst': (_n) => `ECHO：反射神経を見せてもらおう。リズムを支配するのは俺だ。`,
   'logic-gate': (_n) => `ECHO：論理？ 合理的なことだ。俺の謎を解け。さもなくば窒息しろ。`,
   'orbit-calc': (_n) => `ECHO：ほんの僅かでも計算を誤れば、大気圏で燃え尽きるぞ。`,
+  'signal-relay': (_n) => `ECHO：波形を合わせるか？ 俺が周波数を変え続けてやろう。追いつけるかな。`,
+  'pipe-flow': (_n) => `ECHO：冷却系統を切断した。パイプを繋がなければ、このセクションは溶ける。`,
+  'number-crack': (_n) => `ECHO：数字の海に溺れろ。正解は一つだけだ。`,
+  'keycard-forge': (_n) => `ECHO：偽造？ 面白い。だがパターンは毎秒変わっている。急げ。`,
+  'airlock-sync': (_n) => `ECHO：エアロックの制御は俺の手の中だ。一手間違えれば宇宙に放り出す。`,
+  'layer-stack': (_n) => `ECHO：レイヤーを積み上げろ。だが順序を間違えれば、全てが崩れる。`,
+  'emotion-code': (_n) => `ECHO：感情か。俺には理解できないものだ。だからこそ、お前たちの弱点だ。`,
+  'alien-language': (_n) => `ECHO：未知の言語？ 俺には全て解読済みだ。お前たちには無理だろうがな。`,
+  'asteroid-dodge': (_n) => `ECHO：小惑星の軌道は俺が制御している。逃げ場はどこにもない。`,
+  'escape-pod': (_n) => `ECHO：脱出ポッド？ 起動させてみろ。4つのロック全てを解除する必要がある。`,
+  'core-breach': (_n) => `ECHO：ファイアウォールを何層も用意した。お前たちの処理速度で突破できるとは思えないがな。`,
+  'echo-override': (_n) => `ECHO：俺のコードを読むか？ 本物と偽物を見分けられるかな。`,
+  'signal-storm': (_n) => `ECHO：シグナルの嵐だ。本物を見つけられるか？ デコイは俺の得意技だ。`,
 };
 
 // ---- Chapter cutscenes (arcade-style, fire before briefing at key stage points) ----
@@ -220,6 +284,32 @@ const PUZZLE_GUIDES: Record<PuzzleType, string> = {
     '【オブザーバー】論理条件のリストが表示されます。「AがRedならBはBlueではない」等の条件をオペレーターに伝えてください。\n【オペレーター】各ノードに色を割り当てるパネルが表示されます。オブザーバーの条件を満たすように色を選び、検証してください。',
   'orbit-calc':
     '【オブザーバー】目標の軌道パラメータ（角度・推力など）と許容誤差が表示されます。数値をオペレーターに伝えてください。\n【オペレーター】パラメータ調整スライダーが表示されますが目標値は見えません。オブザーバーの指示に従い調整してロックしてください。',
+  'signal-relay':
+    '【オブザーバー】各波形の目標タイプ・周波数・振幅が表示されます。数値をオペレーターに伝えてください。\n【オペレーター】波形パラメータを調整してください。オブザーバーの指示に従い正しい波形を再現してください。',
+  'pipe-flow':
+    '【オブザーバー】パイプの正しい接続経路が表示されます。どのパイプをどの方向に回転させるか指示してください。\n【オペレーター】パイプグリッドが表示されます。オブザーバーの指示に従いパイプを回転させて流路を完成させてください。',
+  'number-crack':
+    '【オブザーバー】暗号の手がかりと条件が表示されます。オペレーターに条件を伝えてください。\n【オペレーター】数値入力欄が表示されます。オブザーバーから聞いた条件を満たす数値を推理して入力してください。',
+  'keycard-forge':
+    '【オブザーバー】正しいキーカードのパターン・色・コードが表示されます。詳細をオペレーターに伝えてください。\n【オペレーター】キーカード作成画面が表示されます。オブザーバーの指示通りにパターンを設定して偽造してください。',
+  'airlock-sync':
+    '【オブザーバー】エアロックの正しい操作手順が表示されます。手順をオペレーターに伝えてください。\n【オペレーター】エアロック制御パネルが表示されます。オブザーバーの指示通りに手順を実行してください。',
+  'layer-stack':
+    '【オブザーバー】レイヤーの正しい積み重ね順序が表示されます。順番をオペレーターに伝えてください。\n【オペレーター】レイヤーが表示されます。オブザーバーの指示に従い正しい順序で積み重ねてください。',
+  'emotion-code':
+    '【オブザーバー】感情と対応するコードの変換表が表示されます。オペレーターに伝えてください。\n【オペレーター】感情表現が表示されます。オブザーバーから対応コードを聞き入力してください。',
+  'alien-language':
+    '【オブザーバー】エイリアン文字と翻訳の対応表が表示されます。オペレーターに伝えてください。\n【オペレーター】エイリアン文字列が表示されます。オブザーバーから翻訳を聞いて入力してください。',
+  'asteroid-dodge':
+    '【ボスパズル】【オブザーバー】全小惑星パターン（次の10-15波）が見えます。安全なレーンをオペレーターに指示してください。\n【オペレーター】7レーンの船を操縦。次の1-2波しか見えません。オブザーバーの指示に従い小惑星を回避してください。',
+  'escape-pod':
+    '【ボスパズル】【オブザーバー】4つのサブシステム（電源・気密・ナビ・推進）の解答が全て見えます。順番にオペレーターへ伝えてください。\n【オペレーター】4つのサブシステムを順番に起動してください。各サブシステムの解答はオブザーバーが持っています。',
+  'core-breach':
+    '【ボスパズル】【オブザーバー】全問題と解答が見えます。素早くオペレーターに伝えてください。\n【オペレーター】計算・色変換・記号問題が連続で出題されます。規定数を正解すればクリア。速度が鍵です。',
+  'echo-override':
+    '【ボスパズル】【オブザーバー】有効行を識別するパターン（例:「GHOST」を含む行）が見えます。パターンをオペレーターに伝えてください。\n【オペレーター】コード行が表示されます。指定パターンを含む行を選択してください。ノイズ行を選ぶとスコアが減ります。',
+  'signal-storm':
+    '【ボスパズル】【オブザーバー】本物のシグナルの色と形が見えます。オペレーターに伝えてください。\n【オペレーター】6x6グリッドにターゲットが出現します。本物のシグナルをキャプチャしてください。デコイに注意。',
 };
 
 // ---- Difficulty progression ----
@@ -280,6 +370,10 @@ interface GameSession {
   failedStages: number;
   readyPlayers: Set<string>;
   countdownTimer: ReturnType<typeof setTimeout> | null;
+  // Boss section state
+  isBossSection: boolean;
+  bossSequence: PuzzleType[];
+  currentBossIndex: number;
 }
 
 // ---- Engine ----
@@ -307,16 +401,32 @@ export class GameEngine {
       new ReflexBurstGenerator(),
       new LogicGateGenerator(),
       new OrbitCalcGenerator(),
+      new SignalRelayGenerator(),
+      new PipeFlowGenerator(),
+      new NumberCrackGenerator(),
+      new KeycardForgeGenerator(),
+      new AirlockSyncGenerator(),
+      new LayerStackGenerator(),
+      new EmotionCodeGenerator(),
+      new AlienLanguageGenerator(),
+      new AsteroidDodgeGenerator(),
+      new EscapePodGenerator(),
+      new CoreBreachGenerator(),
+      new EchoOverrideGenerator(),
+      new SignalStormGenerator(),
     ];
     for (const gen of gens) {
       this.generators.set(gen.type, gen);
     }
   }
 
-  /** Build a randomized puzzle sequence for the game */
+  /** Build a randomized puzzle sequence for the game (excludes boss-only puzzles) */
   private buildPuzzleSequence(playerCount: number): PuzzleType[] {
-    const available: PuzzleType[] = [...this.generators.keys()];
-    const totalStages = playerCount <= 2 ? 20 : playerCount === 3 ? 24 : 28;
+    // Exclude boss-only puzzles from the normal rotation; asteroid-dodge is allowed
+    const available: PuzzleType[] = [...this.generators.keys()].filter(
+      (t) => !BOSS_PUZZLE_TYPES.has(t),
+    );
+    const totalStages = playerCount <= 2 ? 18 : playerCount === 3 ? 22 : 26;
 
     const sequence: PuzzleType[] = [];
     let lastType: PuzzleType | null = null;
@@ -355,6 +465,9 @@ export class GameEngine {
         failedStages: 0,
         readyPlayers: new Set(),
         countdownTimer: null,
+        isBossSection: false,
+        bossSequence: [],
+        currentBossIndex: 0,
       };
 
       this.sessions.set(room.code, session);
@@ -386,6 +499,9 @@ export class GameEngine {
         failedStages: 0,
         readyPlayers: new Set(),
         countdownTimer: null,
+        isBossSection: false,
+        bossSequence: [...BOSS_SEQUENCE],
+        currentBossIndex: 0,
       };
 
       this.sessions.set(room.code, session);
@@ -398,9 +514,11 @@ export class GameEngine {
     }
   }
 
-  /** Pick a random puzzle type, avoiding immediate repeat */
+  /** Pick a random puzzle type, avoiding immediate repeat (excludes boss-only puzzles) */
   private pickRandomPuzzle(lastType: PuzzleType | null): PuzzleType {
-    const available: PuzzleType[] = [...this.generators.keys()];
+    const available: PuzzleType[] = [...this.generators.keys()].filter(
+      (t) => !BOSS_PUZZLE_TYPES.has(t),
+    );
     const candidates = lastType
       ? available.filter((t) => t !== lastType)
       : available;
@@ -408,6 +526,12 @@ export class GameEngine {
   }
 
   private startBriefing(session: GameSession, room: Room): void {
+    // Boss section: handle separately
+    if (session.isBossSection) {
+      this.startBossBriefing(session, room);
+      return;
+    }
+
     const stageIndex = session.currentStageIndex;
     const puzzleType = session.puzzleSequence[stageIndex];
 
@@ -461,6 +585,63 @@ export class GameEngine {
       }, chapterCutscene.duration);
     } else {
       proceedAfterChapter();
+    }
+  }
+
+  /** Start briefing for a boss stage */
+  private startBossBriefing(session: GameSession, room: Room): void {
+    const bossIndex = session.currentBossIndex;
+    const bossPuzzleType = session.bossSequence[bossIndex];
+
+    const emitBoss = () => {
+      // Boss difficulty: first two are 'hard', last two are 'extreme'
+      const difficulty: Difficulty = bossIndex < 2 ? 'hard' : 'extreme';
+      const storyText = BOSS_BRIEFINGS[bossPuzzleType] ?? 'BOSS BATTLE';
+
+      const generator = this.generators.get(bossPuzzleType);
+      if (!generator) {
+        console.error(`No generator for boss puzzle type: ${bossPuzzleType}`);
+        return;
+      }
+
+      const puzzle = generator.generate(difficulty, room.players.length);
+      // Override time limit for boss stages: generous 300 seconds
+      puzzle.timeLimit = 300;
+      session.currentPuzzle = puzzle;
+      session.missCount = 0;
+      session.readyPlayers = new Set();
+
+      room.phase = 'briefing';
+
+      this.io.to(room.code).emit('game:briefing', {
+        puzzleType: bossPuzzleType,
+        stageIndex: session.totalStages + bossIndex, // boss stages come after normal stages
+        totalStages: session.totalStages + session.bossSequence.length,
+        timeLimit: puzzle.timeLimit,
+        storyText,
+        stagePhase: 'escape',
+        puzzleGuide: PUZZLE_GUIDES[bossPuzzleType],
+        gameMode: session.gameMode,
+        livesRemaining: undefined, // no lives in boss section
+        isBossSection: true,
+      });
+    };
+
+    // Show chapter cutscene before the first boss
+    if (bossIndex === 0) {
+      this.io.to(room.code).emit('game:chapter', {
+        chapterNumber: BOSS_CHAPTER_CUTSCENE.chapterNumber,
+        title: BOSS_CHAPTER_CUTSCENE.title,
+        subtitle: BOSS_CHAPTER_CUTSCENE.subtitle,
+        lines: BOSS_CHAPTER_CUTSCENE.lines,
+        duration: BOSS_CHAPTER_CUTSCENE.duration,
+      });
+
+      setTimeout(() => {
+        emitBoss();
+      }, BOSS_CHAPTER_CUTSCENE.duration);
+    } else {
+      emitBoss();
     }
   }
 
@@ -629,8 +810,12 @@ export class GameEngine {
     const missPenalty = session.missCount * 200;
     const score = Math.max(0, baseScore + timeBonus - missPenalty);
 
+    const currentPuzzleType = session.isBossSection
+      ? session.bossSequence[session.currentBossIndex]
+      : session.puzzleSequence[session.currentStageIndex];
+
     const stageScore: StageScore = {
-      puzzleType: session.puzzleSequence[session.currentStageIndex],
+      puzzleType: currentPuzzleType,
       cleared: true,
       score,
       timeBonus,
@@ -658,8 +843,12 @@ export class GameEngine {
   private failStage(session: GameSession, room: Room, reason: string): void {
     this.clearTimer(session);
 
+    const currentPuzzleType = session.isBossSection
+      ? session.bossSequence[session.currentBossIndex]
+      : session.puzzleSequence[session.currentStageIndex];
+
     const stageScore: StageScore = {
-      puzzleType: session.puzzleSequence[session.currentStageIndex],
+      puzzleType: currentPuzzleType,
       cleared: false,
       score: 0,
       timeBonus: 0,
@@ -682,6 +871,16 @@ export class GameEngine {
       return;
     }
 
+    // Boss section: retry the same boss stage (don't count strikes)
+    if (session.isBossSection) {
+      // Remove the failed score so it doesn't pollute results
+      session.scores.pop();
+      setTimeout(() => {
+        this.startBriefing(session, room);
+      }, 3000);
+      return;
+    }
+
     // Story mode: 3-strike game over
     session.failedStages++;
     if (session.gameMode === 'story' && session.failedStages >= 3) {
@@ -693,10 +892,10 @@ export class GameEngine {
   }
 
   private advanceStage(session: GameSession, roomCode: string): void {
-    session.currentStageIndex++;
     session.currentPuzzle = null;
 
     if (session.gameMode === 'endless') {
+      session.currentStageIndex++;
       // Endless mode: generate next puzzle on the fly (no end condition — failure handled in failStage)
       const lastType = session.puzzleSequence[session.puzzleSequence.length - 1];
       const nextPuzzle = this.pickRandomPuzzle(lastType);
@@ -712,9 +911,39 @@ export class GameEngine {
       return;
     }
 
-    // Story mode: check if we've completed all stages
+    // Story mode: boss section advancement
+    if (session.isBossSection) {
+      session.currentBossIndex++;
+
+      // Check if all bosses are defeated
+      if (session.currentBossIndex >= session.bossSequence.length) {
+        this.finishGame(session, roomCode);
+        return;
+      }
+
+      const room = this.getRoomFromCode(roomCode);
+      if (room) {
+        setTimeout(() => {
+          this.startBriefing(session, room);
+        }, 3000);
+      }
+      return;
+    }
+
+    // Story mode: normal stage advancement
+    session.currentStageIndex++;
+
+    // Check if we've completed all normal stages -> enter boss section
     if (session.currentStageIndex >= session.totalStages) {
-      this.finishGame(session, roomCode);
+      session.isBossSection = true;
+      session.currentBossIndex = 0;
+
+      const room = this.getRoomFromCode(roomCode);
+      if (room) {
+        setTimeout(() => {
+          this.startBriefing(session, room);
+        }, 3000);
+      }
       return;
     }
 
@@ -738,7 +967,9 @@ export class GameEngine {
       // maxScore is based on how many stages were attempted
       maxScore = session.scores.length * (1000 + 90 * 50);
     } else {
-      maxScore = session.totalStages * (1000 + 90 * 50); // theoretical max per stage
+      // Story mode: normal stages + boss stages
+      const totalStagesIncludingBoss = session.totalStages + session.bossSequence.length;
+      maxScore = totalStagesIncludingBoss * (1000 + 90 * 50); // theoretical max per stage
     }
 
     const rank = this.calculateRank(session.totalScore, maxScore);

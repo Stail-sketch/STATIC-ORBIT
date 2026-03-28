@@ -17,6 +17,19 @@ const PUZZLE_NAMES_JP: Record<string, string> = {
   'reflex-burst': 'リアクション',
   'logic-gate': '論理推理',
   'orbit-calc': '軌道計算',
+  'signal-relay': 'シグナル中継',
+  'pipe-flow': 'パイプ接続',
+  'number-crack': '数値解錠',
+  'keycard-forge': 'キーカード偽造',
+  'airlock-sync': 'エアロック同期',
+  'layer-stack': 'レイヤー積層',
+  'emotion-code': '感情コード',
+  'alien-language': 'エイリアン言語',
+  'asteroid-dodge': '小惑星回避',
+  'core-breach': 'コアブリーチ',
+  'echo-override': 'ECHOオーバーライド',
+  'signal-storm': 'シグナルストーム',
+  'escape-pod': '脱出ポッド',
 };
 
 const BriefingScreen: React.FC = () => {
@@ -41,13 +54,13 @@ const BriefingScreen: React.FC = () => {
     useGameStore.getState().setMyReady();
   }, [isReady, roomCode]);
 
-  // On mount: switch BGM and play warning SFX for escape phase
+  // On mount: switch BGM and play warning SFX for escape/boss phase
   useEffect(() => {
     if (isEndless) {
       audio.playBGM('infiltration');
     } else {
       audio.playBGM(stagePhase === 'escape' ? 'escape' : 'infiltration');
-      if (stagePhase === 'escape') {
+      if (stagePhase === 'escape' || isBoss) {
         audio.playSFX('warning');
       }
     }
@@ -70,7 +83,8 @@ const BriefingScreen: React.FC = () => {
 
   if (!briefing) return null;
 
-  const isEscape = stagePhase === 'escape';
+  const isBoss = briefing.isBossSection === true;
+  const isEscape = stagePhase === 'escape' || isBoss;
   const stageNum = String(briefing.stageIndex + 1).padStart(2, '0');
   const totalNum = String(briefing.totalStages).padStart(2, '0');
 
@@ -87,13 +101,20 @@ const BriefingScreen: React.FC = () => {
     <div
       style={{
         ...screenStyle,
-        background: isEscape
-          ? 'linear-gradient(180deg, #0a0204 0%, #12060a 50%, #06080e 100%)'
-          : '#06080e',
+        background: isBoss
+          ? 'linear-gradient(180deg, #0a0400 0%, #120a04 50%, #08060e 100%)'
+          : isEscape
+            ? 'linear-gradient(180deg, #0a0204 0%, #12060a 50%, #06080e 100%)'
+            : '#06080e',
       }}
     >
-      {/* Warning stripe for escape phase */}
-      {isEscape && !isEndless && <div style={warningStripeStyle} />}
+      {/* Warning stripe for escape/boss phase */}
+      {isEscape && !isEndless && <div style={{
+        ...warningStripeStyle,
+        ...(isBoss ? {
+          background: 'repeating-linear-gradient(90deg, #ff8800 0px, #ff8800 20px, transparent 20px, transparent 40px)',
+        } : {}),
+      }} />}
 
       {/* Stage phase badge — hidden in endless mode */}
       {!isEndless && (
@@ -103,16 +124,20 @@ const BriefingScreen: React.FC = () => {
           transition={{ duration: 0.5 }}
           style={{
             ...phaseBadgeStyle,
-            background: isEscape
-              ? 'rgba(255, 34, 68, 0.12)'
-              : 'rgba(0, 240, 255, 0.08)',
-            borderColor: isEscape
-              ? 'rgba(255, 34, 68, 0.4)'
-              : 'rgba(0, 240, 255, 0.3)',
-            color: isEscape ? '#ff2244' : '#00f0ff',
+            background: isBoss
+              ? 'rgba(255, 136, 0, 0.15)'
+              : isEscape
+                ? 'rgba(255, 34, 68, 0.12)'
+                : 'rgba(0, 240, 255, 0.08)',
+            borderColor: isBoss
+              ? 'rgba(255, 136, 0, 0.5)'
+              : isEscape
+                ? 'rgba(255, 34, 68, 0.4)'
+                : 'rgba(0, 240, 255, 0.3)',
+            color: isBoss ? '#ff8800' : isEscape ? '#ff2244' : '#00f0ff',
           }}
         >
-          {stagePhase === 'escape' ? '脱出フェーズ' : '潜入フェーズ'}
+          {isBoss ? 'BOSS' : stagePhase === 'escape' ? '脱出フェーズ' : '潜入フェーズ'}
         </motion.div>
       )}
 
@@ -138,9 +163,16 @@ const BriefingScreen: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.6 }}
-        style={stageNumberStyle}
+        style={{
+          ...stageNumberStyle,
+          ...(isBoss ? { color: 'rgba(255, 136, 0, 0.6)' } : {}),
+        }}
       >
-        {isEndless ? `WAVE ${stageNum}` : `ステージ ${stageNum} / ${totalNum}`}
+        {isEndless
+          ? `WAVE ${stageNum}`
+          : isBoss
+            ? `BOSS ${String(briefing.stageIndex - (briefing.totalStages - 4) + 1).padStart(2, '0')} / 04`
+            : `ステージ ${stageNum} / ${totalNum}`}
         <span style={stageTimeLimitStyle}>
           制限時間: {briefing.timeLimit}秒
         </span>
@@ -153,10 +185,12 @@ const BriefingScreen: React.FC = () => {
         transition={{ delay: 0.4, duration: 0.6 }}
         style={{
           ...puzzleTitleStyle,
-          color: isEscape ? '#ff4466' : '#00f0ff',
-          textShadow: isEscape
-            ? '0 0 12px rgba(255, 34, 68, 0.5)'
-            : '0 0 12px rgba(0, 240, 255, 0.4)',
+          color: isBoss ? '#ff8800' : isEscape ? '#ff4466' : '#00f0ff',
+          textShadow: isBoss
+            ? '0 0 12px rgba(255, 136, 0, 0.6), 0 0 24px rgba(255, 68, 0, 0.3)'
+            : isEscape
+              ? '0 0 12px rgba(255, 34, 68, 0.5)'
+              : '0 0 12px rgba(0, 240, 255, 0.4)',
         }}
       >
         {puzzleLabel}
@@ -183,9 +217,11 @@ const BriefingScreen: React.FC = () => {
         transition={{ delay: 0.6, duration: 0.8 }}
         style={{
           ...dividerStyle,
-          background: isEscape
-            ? 'linear-gradient(90deg, transparent, rgba(255, 34, 68, 0.4), transparent)'
-            : 'linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent)',
+          background: isBoss
+            ? 'linear-gradient(90deg, transparent, rgba(255, 136, 0, 0.5), transparent)'
+            : isEscape
+              ? 'linear-gradient(90deg, transparent, rgba(255, 34, 68, 0.4), transparent)'
+              : 'linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent)',
         }}
       />
 
@@ -265,8 +301,8 @@ const BriefingScreen: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Lives remaining (story mode only) */}
-      {gameMode === 'story' && (
+      {/* Lives remaining (story mode only, hidden during boss section) */}
+      {gameMode === 'story' && !isBoss && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
