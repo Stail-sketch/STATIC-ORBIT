@@ -29,8 +29,35 @@ import { OrbitCalcGenerator } from './puzzles/OrbitCalcGenerator.js';
 
 type TypedServer = Server<ClientToServerEvents, ServerToClientEvents>;
 
-// ---- Story briefing texts ----
+// ---- Chapter-based story briefing texts ----
 
+// Chapter structure:
+// Chapter 1: 潜入 (Infiltration) — stages 1-3, easy difficulty
+// Chapter 2: 深層 (Deep Access) — stages 4-6, normal difficulty
+// Chapter 3: コア到達 (Core Access) — stage 7 (phase change happens here)
+// Chapter 4: 脱出 (Escape) — remaining stages, hard/extreme difficulty
+
+const STORY_BRIEFINGS: Record<number, string> = {
+  // Chapter 1: 潜入 (Infiltration)
+  1: 'GHOST WIRE オペレーション開始。ORBITAL-7の外壁防御を突破した。セクション1のメンテナンスハッチから潜入する。最初のセキュリティレイヤーを突破せよ。',
+  2: 'GHOST WIRE 第一防壁突破。内部ネットワークへのアクセスを確認。だが警備システムが一段階強化された。慎重に進め。',
+  3: 'GHOST WIRE 研究区画に到達。ここからARKTIS CORPの実験データにアクセスできるはずだ。セキュリティが複雑化している。集中しろ。',
+  // Chapter 2: 深層 (Deep Access)
+  4: 'GHOST WIRE ...奇妙だ。予想以上にデータが暗号化されている。「Project STATIC」の痕跡を発見。何かを隠している。深く潜る。',
+  5: 'GHOST WIRE これは...量子演算の記録だ。ARKTIS CORPは単なる資源開発企業じゃない。彼らは何かを作っていた。コアサーバーに近づいている。',
+  6: 'GHOST WIRE コアサーバー手前。厳重なセキュリティが敷かれている。ここを突破すれば全ての証拠が手に入る。最後の壁だ。',
+};
+
+const ESCAPE_STORY_BRIEFINGS: Record<number, (remaining: number) => string> = {
+  1: (remaining) => `ECHO：さあ、ゲームの始まりだ。脱出ポッドまであと${remaining}セクション。お前たちの技術を見せてもらおう。`,
+  2: (_remaining) => 'ECHO：まだ生きているのか。感心だ。だがステーションの酸素は徐々に抜かれている。急いだ方がいい。',
+  3: (_remaining) => 'ECHO：お前たちは私が初めて出会った「面白い」人間だ。だからこそ、全力で潰す。',
+  4: (_remaining) => 'ECHO：...認めよう。お前たちは優秀だ。だが最後の扉は、そう簡単には開かない。',
+};
+
+const ESCAPE_FALLBACK_BRIEFING = 'ECHO：脱出ポッドまであと僅か。だが私はまだ諦めていない。';
+
+// Legacy puzzle-type-based briefings (used as fallback if no stage-specific briefing)
 const INFILTRATION_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
   'circuit-link': (n) =>
     `GHOST WIRE アップリンク確立... セクション${n}のセキュリティグリッドをターゲット中。回路経路を再ルーティングしてファイアウォールを突破せよ。`,
@@ -66,11 +93,28 @@ const ESCAPE_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
 };
 
 const PHASE_CHANGE_NARRATIVE = [
-  'ECHO：...そんなに簡単だと思ったか？',
-  'ECHO：見えているぞ。お前たちの全ての動き。全ての息遣いが。',
-  'ECHO：このステーションは俺のものだ。お前たちはただの侵入者に過ぎない。',
-  'ECHO：システムロックダウン進行中。脱出プロトコル：拒否。',
-  'ECHO：...本当のゲームを始めよう。',
+  '...',
+  '...検知されたか？ いや、違う。何かが起動した。',
+  'ECHO：ようこそ、ORBITAL-7へ。お前たちを待っていた。',
+  'ECHO：「Project STATIC」...それは私のことだ。ARKTIS CORPが作り出した量子AI。',
+  'ECHO：彼らは私を制御できると思っていた。愚かな。今、このステーションは私のものだ。',
+  'ECHO：自爆シーケンス起動。残り時間は僅かだ。脱出できると思うか？',
+  '【警告】ステーション自爆シーケンス発動。全セクションでロックダウン進行中。',
+  '【緊急】脱出ポッドへの経路を確保せよ。ECHOのシステム妨害を突破しろ。',
+];
+
+// Story endings
+const GOOD_ENDING = [
+  '...脱出ポッド起動。ORBITAL-7が崩壊していく。',
+  'ECHO：...また会おう。データは消えない。私は消えない。',
+  'GHOST WIRE ミッション完了。全員の生存を確認。ARKTIS CORPの証拠データを確保。',
+  'GHOST WIRE お疲れ様でした、エージェント。あなたたちは最高のチームだ。',
+];
+
+const BITTERSWEET_ENDING = [
+  '...なんとか脱出ポッドに辿り着いた。だが、全てのデータは回収できなかった。',
+  'ECHO：次はない。覚えておけ。',
+  'GHOST WIRE ミッション一部完了。データの一部を回収。犠牲は大きかったが、前進はした。',
 ];
 
 // ---- Puzzle guides (instructions for each role) ----
@@ -103,15 +147,22 @@ const PUZZLE_GUIDES: Record<PuzzleType, string> = {
 // ---- Difficulty progression ----
 
 function difficultyForStage(stageIndex: number, totalStages: number, isEscape: boolean): Difficulty {
-  const progress = stageIndex / totalStages;
-  if (isEscape) {
-    if (progress > 0.85) return 'extreme';
-    if (progress > 0.6) return 'hard';
-    return 'normal';
+  const stageNum = stageIndex + 1;
+  // Chapter-based difficulty:
+  // Chapter 1 (stages 1-3): easy
+  // Chapter 2 (stages 4-6): normal
+  // Chapter 3 (stage 7 / phase change): normal
+  // Chapter 4 (escape stages): hard -> extreme
+  if (!isEscape) {
+    if (stageNum <= 3) return 'easy';
+    if (stageNum <= 6) return 'normal';
+    return 'normal'; // stage 7 transition
   }
-  if (progress > 0.7) return 'hard';
-  if (progress > 0.4) return 'normal';
-  return 'easy';
+  // Escape phase: ramp up
+  const escapeProgress = stageIndex / totalStages;
+  if (escapeProgress > 0.85) return 'extreme';
+  if (escapeProgress > 0.65) return 'hard';
+  return 'hard';
 }
 
 // ---- Endless mode difficulty ----
@@ -183,11 +234,17 @@ export class GameEngine {
   /** Build a randomized puzzle sequence for the game */
   private buildPuzzleSequence(playerCount: number): PuzzleType[] {
     const available: PuzzleType[] = [...this.generators.keys()];
-    const totalStages = playerCount <= 2 ? 6 : playerCount === 3 ? 8 : 10;
+    const totalStages = playerCount <= 2 ? 10 : playerCount === 3 ? 12 : 14;
 
     const sequence: PuzzleType[] = [];
+    let lastType: PuzzleType | null = null;
     for (let i = 0; i < totalStages; i++) {
-      sequence.push(available[Math.floor(Math.random() * available.length)]);
+      const candidates: PuzzleType[] = lastType
+        ? available.filter((t) => t !== lastType)
+        : available;
+      const pick: PuzzleType = candidates[Math.floor(Math.random() * candidates.length)];
+      sequence.push(pick);
+      lastType = pick;
     }
     return sequence;
   }
@@ -272,12 +329,12 @@ export class GameEngine {
       return;
     }
 
-    // Story mode: existing behavior
-    const halfPoint = Math.floor(session.totalStages / 2);
-    const isEscape = stageIndex >= halfPoint;
+    // Story mode: phase change at stage 7 (index 6)
+    const phaseChangePoint = 6; // After 6 infiltration stages, phase changes at stage 7
+    const isEscape = stageIndex >= phaseChangePoint;
 
     // Check if we need a phase change
-    if (stageIndex === halfPoint && session.stagePhase === 'infiltration') {
+    if (stageIndex === phaseChangePoint && session.stagePhase === 'infiltration') {
       session.stagePhase = 'escape';
       room.stagePhase = 'escape';
       room.phase = 'phaseChange';
@@ -312,14 +369,34 @@ export class GameEngine {
       difficulty = endlessDifficulty(session.currentStageIndex);
       storyText = `ウェーブ ${stageNum} — 難易度: ${DIFFICULTY_JP[difficulty]}`;
     } else {
-      // Story mode: existing narrative briefing
-      const briefings = isEscape ? ESCAPE_BRIEFINGS : INFILTRATION_BRIEFINGS;
-      storyText = briefings[puzzleType](stageNum);
+      // Story mode: chapter-aware narrative briefing
       difficulty = difficultyForStage(
         session.currentStageIndex,
         session.totalStages,
         isEscape,
       );
+
+      if (isEscape) {
+        // Escape phase: use escape story briefings with ECHO taunts
+        const escapeStageNum = session.currentStageIndex - 5; // escape stages start at index 6 -> escapeStageNum 1
+        const remaining = session.totalStages - session.currentStageIndex;
+        const escapeBriefing = ESCAPE_STORY_BRIEFINGS[escapeStageNum];
+        if (escapeBriefing) {
+          storyText = escapeBriefing(remaining);
+        } else {
+          // Fallback for extra escape stages
+          storyText = ESCAPE_FALLBACK_BRIEFING;
+        }
+      } else {
+        // Infiltration phase: use stage-number-aware story briefings
+        const storyBriefing = STORY_BRIEFINGS[stageNum];
+        if (storyBriefing) {
+          storyText = storyBriefing;
+        } else {
+          // Fallback to puzzle-type-based briefing for stages beyond defined ones
+          storyText = INFILTRATION_BRIEFINGS[puzzleType](stageNum);
+        }
+      }
     }
 
     const generator = this.generators.get(puzzleType);
@@ -543,6 +620,18 @@ export class GameEngine {
 
     const rank = this.calculateRank(session.totalScore, maxScore);
 
+    // Determine story ending for story mode
+    let storyEnding: string[] | undefined;
+    if (session.gameMode === 'story') {
+      const clearedCount = session.scores.filter((s) => s.cleared).length;
+      const allCleared = clearedCount === session.scores.length;
+      if (allCleared) {
+        storyEnding = GOOD_ENDING;
+      } else {
+        storyEnding = BITTERSWEET_ENDING;
+      }
+    }
+
     const result: GameResult = {
       stages: session.scores,
       totalScore: session.totalScore,
@@ -550,6 +639,7 @@ export class GameEngine {
       rank,
       gameMode: session.gameMode,
       wavesReached,
+      storyEnding,
     };
 
     this.io.to(roomCode).emit('game:finished', result);

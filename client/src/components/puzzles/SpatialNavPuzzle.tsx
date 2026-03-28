@@ -412,10 +412,10 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           {lastFeedback && (
             <motion.div
               key={lastFeedback.feedback}
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'tween', duration: 0.2 }}
               style={{
                 padding: '8px 16px',
                 marginBottom: 16,
@@ -455,8 +455,8 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           {/* Direction controls */}
           <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => handleMove('up')}
               style={arrowButtonStyle}
             >
@@ -464,24 +464,24 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             </motion.button>
             <div style={{ display: 'flex', gap: 4 }}>
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleMove('left')}
                 style={arrowButtonStyle}
               >
                 ◄ A
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleMove('down')}
                 style={arrowButtonStyle}
               >
                 S ▼
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleMove('right')}
                 style={arrowButtonStyle}
               >

@@ -80,6 +80,7 @@ export interface GameResult {
   rank: Rank;
   gameMode: GameMode;
   wavesReached?: number;
+  storyEnding?: string[];
 }
 
 // ===== Socket Events =====

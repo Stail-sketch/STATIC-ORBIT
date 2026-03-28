@@ -105,9 +105,9 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
             return (
               <motion.div
                 key={`${entry.symbol}-${i}`}
-                initial={{ opacity: 0, scale: 0.7, rotateY: 90 }}
-                animate={{ opacity: isDummy ? 0.4 : 1, scale: 1, rotateY: 0 }}
-                transition={{ delay: i * 0.06, duration: 0.5, type: 'spring' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isDummy ? 0.4 : 1 }}
+                transition={{ delay: i * 0.06, duration: 0.3, type: 'tween' }}
                 style={{
                   width: 72,
                   minHeight: 90,
@@ -264,10 +264,10 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           {lastFeedback && (
             <motion.div
               key={lastFeedback.feedback}
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'tween', duration: 0.2 }}
               style={{
                 padding: '8px 16px',
                 marginBottom: 16,
@@ -427,7 +427,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
         <div style={{ position: 'relative', zIndex: 3, marginTop: 20, textAlign: 'center' }}>
           <motion.button
             whileHover={{ scale: 1.03, boxShadow: '0 0 20px rgba(255,0,102,0.3)' }}
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
             disabled={!answer.trim() || isSubmitting}
             style={{

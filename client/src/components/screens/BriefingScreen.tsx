@@ -4,6 +4,20 @@ import { useGameStore } from '../../stores/gameStore';
 import TypewriterText from '../effects/TypewriterText';
 import { useAudio } from '../../audio/useAudio';
 
+const PUZZLE_NAMES_JP: Record<string, string> = {
+  'circuit-link': '回線接続',
+  'cipher-break': '暗号解読',
+  'grid-sync': 'グリッド同期',
+  'freq-tune': '周波数調整',
+  'morse-decode': 'モールス解読',
+  'memory-chain': '記憶シーケンス',
+  'hack-terminal': 'ハッキング',
+  'spatial-nav': '船内ナビ',
+  'reflex-burst': 'リアクション',
+  'logic-gate': '論理推理',
+  'orbit-calc': '軌道計算',
+};
+
 const BriefingScreen: React.FC = () => {
   const briefing = useGameStore((s) => s.briefing);
   const stagePhase = useGameStore((s) => s.stagePhase);
@@ -130,6 +144,20 @@ const BriefingScreen: React.FC = () => {
         }}
       >
         {puzzleLabel}
+        {briefing.puzzleType && PUZZLE_NAMES_JP[briefing.puzzleType] && (
+          <div
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.75rem',
+              fontWeight: 400,
+              letterSpacing: '0.15em',
+              marginTop: '4px',
+              opacity: 0.6,
+            }}
+          >
+            {PUZZLE_NAMES_JP[briefing.puzzleType]}
+          </div>
+        )}
       </motion.h2>
 
       {/* Divider */}

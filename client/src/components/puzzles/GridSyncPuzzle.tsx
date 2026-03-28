@@ -337,10 +337,10 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           {lastFeedback && (
             <motion.div
               key={lastFeedback.feedback}
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'tween', duration: 0.2 }}
               style={{
                 padding: '8px 16px',
                 marginBottom: 16,
@@ -418,7 +418,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                       borderColor: 'rgba(0,240,255,0.5)',
                       boxShadow: '0 0 12px rgba(0,240,255,0.2)',
                     }}
-                    whileTap={{ scale: 0.9 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => toggleCell(rowIdx, colIdx)}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -449,10 +449,10 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                     <AnimatePresence>
                       {filled && (
                         <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ type: 'tween', duration: 0.15 }}
                           style={{
                             width: '55%',
                             height: '55%',
@@ -492,7 +492,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           {/* Clear Button */}
           <motion.button
             whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.98 }}
             onClick={clearGrid}
             style={{
               background: 'rgba(255,255,255,0.04)',
@@ -512,7 +512,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           {/* Sync Button */}
           <motion.button
             whileHover={{ scale: 1.05, boxShadow: '0 0 24px rgba(0,240,255,0.3)' }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
             disabled={isSubmitting}
             style={{

@@ -485,7 +485,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
             <motion.button
               whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleSubmit}
               disabled={!userInput.trim()}
               style={{

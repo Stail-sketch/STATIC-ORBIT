@@ -280,7 +280,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           }}>
             <motion.button
               whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handlePlay}
               disabled={isPlaying}
               style={{
@@ -379,10 +379,10 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           {lastFeedback && (
             <motion.div
               key={lastFeedback.feedback}
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'tween', duration: 0.2 }}
               style={{
                 padding: '8px 16px',
                 marginBottom: 16,
@@ -557,7 +557,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSubmit}
                 disabled={!answer.trim()}
                 style={{

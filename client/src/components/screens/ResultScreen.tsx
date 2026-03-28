@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useGameStore } from '../../stores/gameStore';
 import type { Rank, StageScore } from '@shared/types';
 import { useAudio } from '../../audio/useAudio';
+import TypewriterText from '../effects/TypewriterText';
 
 /* ── Rank config ───────────────────────────────────────────── */
 
@@ -71,6 +72,8 @@ const ResultScreen: React.FC = () => {
 
   const [showRank, setShowRank] = useState(false);
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'shared' | 'error'>('idle');
+  const [storyEndingDone, setStoryEndingDone] = useState(false);
+  const hasStoryEnding = !!(gameResult?.storyEnding && gameResult.storyEnding.length > 0);
 
   // On mount: stop heartbeat and switch to result BGM
   useEffect(() => {
@@ -79,9 +82,10 @@ const ResultScreen: React.FC = () => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const t = setTimeout(() => setShowRank(true), 2200);
+    const delay = hasStoryEnding ? 6000 : 2200;
+    const t = setTimeout(() => setShowRank(true), delay);
     return () => clearTimeout(t);
-  }, []);
+  }, [hasStoryEnding]);
 
   if (!gameResult) return null;
 
@@ -166,6 +170,28 @@ const ResultScreen: React.FC = () => {
           {isEndless ? 'スコアアタック' : 'デブリーフィング'}
         </div>
       </motion.div>
+
+      {/* Story ending narration */}
+      {hasStoryEnding && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          style={storyEndingBoxStyle}
+        >
+          <div style={storyEndingHeaderStyle}>
+            <span style={storyEndingDotStyle} />
+            <span style={storyEndingLabelStyle}>エピローグ</span>
+          </div>
+          <div style={storyEndingBodyStyle}>
+            <TypewriterText
+              lines={gameResult.storyEnding!}
+              speed={40}
+              onComplete={() => setStoryEndingDone(true)}
+            />
+          </div>
+        </motion.div>
+      )}
 
       {/* Endless mode: wave reached summary */}
       {isEndless && gameResult.wavesReached != null && (
@@ -545,6 +571,42 @@ const waveNumberStyle: React.CSSProperties = {
   color: '#ff00aa',
   letterSpacing: '0.1em',
   textShadow: '0 0 20px rgba(255, 0, 170, 0.5)',
+};
+
+const storyEndingBoxStyle: React.CSSProperties = {
+  width: '100%',
+  maxWidth: '560px',
+  background: 'rgba(0, 0, 0, 0.4)',
+  border: '1px solid rgba(0, 240, 255, 0.15)',
+  marginBottom: '8px',
+};
+
+const storyEndingHeaderStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '8px 12px',
+  borderBottom: '1px solid rgba(0, 240, 255, 0.1)',
+};
+
+const storyEndingDotStyle: React.CSSProperties = {
+  width: '6px',
+  height: '6px',
+  borderRadius: '50%',
+  background: '#ffaa22',
+  boxShadow: '0 0 4px rgba(255, 170, 34, 0.5)',
+};
+
+const storyEndingLabelStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.6rem',
+  color: 'rgba(255, 255, 255, 0.3)',
+  letterSpacing: '0.15em',
+};
+
+const storyEndingBodyStyle: React.CSSProperties = {
+  padding: '16px',
+  minHeight: '80px',
 };
 
 export default ResultScreen;

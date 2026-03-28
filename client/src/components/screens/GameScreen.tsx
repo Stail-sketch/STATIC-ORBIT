@@ -26,6 +26,20 @@ import ReflexBurstPuzzle from '../puzzles/ReflexBurstPuzzle';
 import LogicGatePuzzle from '../puzzles/LogicGatePuzzle';
 import OrbitCalcPuzzle from '../puzzles/OrbitCalcPuzzle';
 
+const PUZZLE_NAMES_JP: Record<string, string> = {
+  'circuit-link': '回線接続',
+  'cipher-break': '暗号解読',
+  'grid-sync': 'グリッド同期',
+  'freq-tune': '周波数調整',
+  'morse-decode': 'モールス解読',
+  'memory-chain': '記憶シーケンス',
+  'hack-terminal': 'ハッキング',
+  'spatial-nav': '船内ナビ',
+  'reflex-burst': 'リアクション',
+  'logic-gate': '論理推理',
+  'orbit-calc': '軌道計算',
+};
+
 const PUZZLE_MAP: Record<string, React.FC<PuzzleProps>> = {
   'circuit-link': CircuitLinkPuzzle,
   'cipher-break': CipherBreakPuzzle,
@@ -183,6 +197,11 @@ const GameScreen: React.FC = () => {
           }}
         >
           {puzzleLabel}
+          {currentPuzzleType && PUZZLE_NAMES_JP[currentPuzzleType] && (
+            <span style={{ opacity: 0.5, marginLeft: 8, fontSize: '0.65rem', fontWeight: 400 }}>
+              {PUZZLE_NAMES_JP[currentPuzzleType]}
+            </span>
+          )}
         </span>
         <MissCounter count={missCount} />
       </div>
