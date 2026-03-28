@@ -24,8 +24,8 @@ const ROLE_NAMES: Record<Role, string> = {
 const ROLE_DESCRIPTIONS: Record<Role, string> = {
   observer: '情報を読み取り、仲間に伝える司令塔',
   operator: 'パズルを直接操作する実行役',
-  navigator: '補助情報の分析とヒント検索を担当',
-  hacker: 'ECHOの妨害を迎撃し、システムをスキャン',
+  navigator: '補助情報の分析とヒント検索を担当（3人以上）',
+  hacker: 'ECHOの妨害を迎撃し、システムをスキャン（4人用）',
 };
 
 const ALL_ROLES: Role[] = ['observer', 'operator', 'navigator', 'hacker'];
