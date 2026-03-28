@@ -64,6 +64,17 @@ export function initHandlers(io: TypedServer): void {
       }
     });
 
+    socket.on('room:selectRole', ({ role }) => {
+      const roomCode = roomManager.findRoomByPlayer(socket.id);
+      if (!roomCode) return;
+      try {
+        const room = roomManager.selectRole(roomCode, socket.id, role);
+        io.to(roomCode).emit('room:updated', { players: room.players, phase: room.phase, gameMode: room.gameMode });
+      } catch (err: any) {
+        socket.emit('room:error', { message: err.message });
+      }
+    });
+
     socket.on('room:ready', ({ playerId }) => {
       try {
         const roomCode = roomManager.findRoomByPlayer(playerId);

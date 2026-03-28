@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../stores/gameStore';
 import { getSocket } from '../../hooks/useSocket';
 import { useAudio } from '../../audio/useAudio';
+import type { Role } from '@shared/types';
 
 const MAX_PLAYERS = 4;
 
@@ -12,6 +13,28 @@ const ROLE_COLORS: Record<string, string> = {
   navigator: '#ffaa00',
   hacker: '#44ff88',
 };
+
+const ROLE_NAMES: Record<Role, string> = {
+  observer: 'オブザーバー',
+  operator: 'オペレーター',
+  navigator: 'ナビゲーター',
+  hacker: 'ハッカー',
+};
+
+const ROLE_DESCRIPTIONS: Record<Role, string> = {
+  observer: '情報を読み取り、仲間に伝える司令塔',
+  operator: 'パズルを直接操作する実行役',
+  navigator: '補助情報の分析とヒント検索を担当',
+  hacker: 'ECHOの妨害を迎撃し、システムをスキャン',
+};
+
+const ALL_ROLES: Role[] = ['observer', 'operator', 'navigator', 'hacker'];
+
+function getAvailableRoles(playerCount: number): Role[] {
+  if (playerCount <= 2) return ['observer', 'operator'];
+  if (playerCount === 3) return ['observer', 'operator', 'navigator'];
+  return ['observer', 'operator', 'navigator', 'hacker'];
+}
 
 const LobbyScreen: React.FC = () => {
   const roomCode = useGameStore((s) => s.roomCode);
@@ -30,6 +53,7 @@ const LobbyScreen: React.FC = () => {
 
   const me = players.find((p) => p.id === playerId);
   const allReady = players.length >= 2 && players.every((p) => p.ready);
+  const availableRoles = getAvailableRoles(players.length);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,12 +90,28 @@ const LobbyScreen: React.FC = () => {
     }
   }, [roomCode, audio]);
 
+  const handleSelectRole = useCallback((role: Role) => {
+    audio.playSFX('click');
+    getSocket().emit('room:selectRole', { role });
+  }, [audio]);
+
   const handleChat = useCallback(() => {
     const msg = chatInput.trim();
     if (!msg) return;
     getSocket().emit('game:chat', { message: msg });
     setChatInput('');
   }, [chatInput]);
+
+  // Determine who owns each role
+  const roleOwners: Record<Role, { name: string; id: string } | null> = {
+    observer: null,
+    operator: null,
+    navigator: null,
+    hacker: null,
+  };
+  for (const p of players) {
+    roleOwners[p.role] = { name: p.name, id: p.id };
+  }
 
   return (
     <div style={screenStyle}>
@@ -122,6 +162,55 @@ const LobbyScreen: React.FC = () => {
         エージェント: {players.length}/{MAX_PLAYERS}
       </div>
 
+      {/* Role Selection */}
+      <div style={roleSectionStyle}>
+        <div style={roleSectionHeaderStyle}>役職選択</div>
+        <div style={roleGridStyle}>
+          {availableRoles.map((role) => {
+            const color = ROLE_COLORS[role];
+            const owner = roleOwners[role];
+            const isMyRole = me?.role === role;
+            const isTakenByOther = owner !== null && owner.id !== playerId;
+
+            return (
+              <motion.button
+                key={role}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => !isTakenByOther && handleSelectRole(role)}
+                style={{
+                  ...roleCardStyle,
+                  borderColor: isMyRole
+                    ? color
+                    : isTakenByOther
+                      ? 'rgba(255, 255, 255, 0.06)'
+                      : 'rgba(255, 255, 255, 0.12)',
+                  boxShadow: isMyRole
+                    ? `0 0 12px ${color}44, inset 0 0 20px ${color}11`
+                    : 'none',
+                  opacity: isTakenByOther ? 0.4 : 1,
+                  cursor: isTakenByOther ? 'default' : 'pointer',
+                  background: isMyRole
+                    ? `linear-gradient(135deg, ${color}0a 0%, ${color}15 100%)`
+                    : 'rgba(255, 255, 255, 0.02)',
+                }}
+              >
+                <span style={{ ...roleCardNameStyle, color }}>{ROLE_NAMES[role]}</span>
+                <span style={roleCardDescStyle}>{ROLE_DESCRIPTIONS[role]}</span>
+                <span
+                  style={{
+                    ...roleCardOwnerStyle,
+                    color: isMyRole ? color : isTakenByOther ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.2)',
+                  }}
+                >
+                  {owner ? owner.name : '空き'}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Player List */}
       <div style={playerListStyle}>
         <AnimatePresence>
@@ -160,10 +249,7 @@ const LobbyScreen: React.FC = () => {
                     color: ROLE_COLORS[player.role] ?? '#aaa',
                   }}
                 >
-                  {({observer: 'オブザーバー', operator: 'オペレーター', navigator: 'ナビゲーター', hacker: 'ハッカー'} as Record<string, string>)[player.role] ?? player.role.toUpperCase()}
-                </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
-                  {({observer: '情報を読み取り伝える', operator: 'パズルを操作する', navigator: '補助情報を伝える', hacker: '補助情報を伝える'} as Record<string, string>)[player.role] ?? ''}
+                  {ROLE_NAMES[player.role as Role] ?? player.role.toUpperCase()}
                 </span>
               </div>
 
@@ -237,8 +323,8 @@ const screenStyle: React.CSSProperties = {
   alignItems: 'center',
   background: '#06080e',
   padding: '24px',
-  gap: '12px',
-  overflow: 'hidden',
+  gap: '10px',
+  overflow: 'auto',
 };
 
 const headerStyle: React.CSSProperties = {
@@ -302,10 +388,73 @@ const playerCountStyle: React.CSSProperties = {
   letterSpacing: '0.15em',
 };
 
+/* ── Role Selection ──────────────────────────────────────── */
+
+const roleSectionStyle: React.CSSProperties = {
+  width: '100%',
+  maxWidth: '480px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+};
+
+const roleSectionHeaderStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '0.6rem',
+  fontWeight: 700,
+  letterSpacing: '0.2em',
+  color: 'rgba(0, 240, 255, 0.4)',
+  textTransform: 'uppercase',
+};
+
+const roleGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, 1fr)',
+  gap: '8px',
+};
+
+const roleCardStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '4px',
+  padding: '10px 14px',
+  border: '1px solid rgba(255, 255, 255, 0.12)',
+  clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+  transition: 'all 0.2s ease',
+  textAlign: 'left',
+  outline: 'none',
+  fontFamily: 'inherit',
+};
+
+const roleCardNameStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '0.8rem',
+  fontWeight: 700,
+  letterSpacing: '0.1em',
+};
+
+const roleCardDescStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.55rem',
+  color: 'rgba(255, 255, 255, 0.4)',
+  letterSpacing: '0.05em',
+  lineHeight: 1.4,
+};
+
+const roleCardOwnerStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.55rem',
+  letterSpacing: '0.08em',
+  marginTop: '2px',
+};
+
+/* ── Player List ─────────────────────────────────────────── */
+
 const playerListStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px',
+  gap: '6px',
   width: '100%',
   maxWidth: '480px',
   flex: '0 1 auto',
@@ -315,7 +464,7 @@ const playerCardStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: '12px',
-  padding: '12px 16px',
+  padding: '10px 16px',
   background: 'rgba(255, 255, 255, 0.02)',
   border: '1px solid rgba(255, 255, 255, 0.08)',
   clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))',
@@ -338,7 +487,7 @@ const playerInfoStyle: React.CSSProperties = {
 
 const playerNameStyle: React.CSSProperties = {
   fontFamily: 'var(--font-body)',
-  fontSize: '0.95rem',
+  fontSize: '0.9rem',
   fontWeight: 600,
   color: '#eee',
   display: 'flex',
@@ -358,7 +507,7 @@ const hostBadgeStyle: React.CSSProperties = {
 
 const roleLabelStyle: React.CSSProperties = {
   fontFamily: 'var(--font-mono)',
-  fontSize: '0.65rem',
+  fontSize: '0.6rem',
   letterSpacing: '0.15em',
 };
 

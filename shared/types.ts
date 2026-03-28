@@ -102,6 +102,7 @@ export interface ClientToServerEvents {
   'room:create': (data: { playerName: string; gameMode: GameMode }) => void;
   'room:join': (data: { roomCode: string; playerName: string }) => void;
   'room:ready': (data: { playerId: string }) => void;
+  'room:selectRole': (data: { role: Role }) => void;
   'room:start': (data: { roomCode: string }) => void;
   'game:action': (data: GameAction) => void;
   'game:chat': (data: { message: string }) => void;

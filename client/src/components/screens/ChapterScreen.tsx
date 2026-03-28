@@ -95,7 +95,7 @@ const ChapterScreen: React.FC = () => {
             transition={{ duration: 0.5 }}
             style={styles.chapterNum}
           >
-            CHAPTER {chapterNumber}
+            {chapterNumber === 0 ? 'PROLOGUE' : `CHAPTER ${chapterNumber}`}
           </motion.div>
         )}
       </AnimatePresence>

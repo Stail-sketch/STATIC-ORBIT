@@ -170,17 +170,33 @@ const ESCAPE_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
 
 // ---- Chapter cutscenes (arcade-style, fire before briefing at key stage points) ----
 
+const PROLOGUE_CUTSCENE = {
+  chapterNumber: 0,
+  title: 'GHOST WIRE',
+  subtitle: 'OPERATION: STATIC ORBIT',
+  lines: [
+    '西暦2087年——',
+    '巨大企業ARKTIS CORPは、表向きは宇宙資源開発を行う企業として知られていた。',
+    'しかしその裏で、宇宙ステーション「ORBITAL-7」にて非合法な量子AI実験「Project STATIC」を秘密裏に進行していた。',
+    '地下ハッカー集団「GHOST WIRE」は、内部告発者からの情報を元に、その証拠を掴むため精鋭エージェントを送り込む。',
+    'あなたたちは、GHOST WIREが選び抜いたチームだ。',
+    'ORBITAL-7に潜入し、Project STATICの全データを回収せよ。',
+    '失敗は許されない。通信だけが頼りだ。仲間を信じろ。',
+  ],
+  duration: 20000,
+};
+
 const CHAPTER_CUTSCENES = [
   {
-    // Chapter 1: Game start (before stage 1)
+    // Chapter 1: Game start (before stage 1, after prologue)
     atStage: 0,
     chapterNumber: 1,
     title: '潜入',
     subtitle: 'INFILTRATION',
     lines: [
-      '西暦2087年。巨大企業ARKTIS CORPが、宇宙ステーション「ORBITAL-7」で非合法な実験を行っているとの情報を入手。',
-      '地下ハッカー集団GHOST WIREは、証拠を掴むためエージェントを送り込んだ。',
-      'ミッション開始。全セクションのセキュリティを突破し、コアサーバーのデータを回収せよ。',
+      'ミッション開始。ORBITAL-7の外壁防御を突破した。',
+      'チーム全員、配置につけ。ここからは一秒も無駄にできない。',
+      '各自の役割を果たし、コアサーバーまで進め。',
     ],
     duration: 12000,
   },
@@ -557,7 +573,19 @@ export class GameEngine {
       room.totalStages = session.totalStages;
       room.stagePhase = 'infiltration';
 
-      this.startBriefing(session, room);
+      // Emit prologue before Chapter 1
+      this.io.to(room.code).emit('game:chapter', {
+        chapterNumber: PROLOGUE_CUTSCENE.chapterNumber,
+        title: PROLOGUE_CUTSCENE.title,
+        subtitle: PROLOGUE_CUTSCENE.subtitle,
+        lines: PROLOGUE_CUTSCENE.lines,
+        duration: PROLOGUE_CUTSCENE.duration,
+      });
+
+      // Wait for prologue to finish, then start briefing (which handles Chapter 1 cutscene)
+      setTimeout(() => {
+        this.startBriefing(session, room);
+      }, PROLOGUE_CUTSCENE.duration);
     }
   }
 
