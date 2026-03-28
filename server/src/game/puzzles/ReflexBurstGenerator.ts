@@ -108,6 +108,11 @@ export class ReflexBurstGenerator implements PuzzleGenerator {
       timeLimit,
 
       validate(action: GameAction): ValidationResult {
+        // Observer triggers sequence playback
+        if (action.action === 'start-sequence') {
+          return { correct: true, penalty: 0, feedback: 'シーケンス開始', solved: false };
+        }
+
         if (action.action !== 'press') {
           return { correct: false, penalty: 0, feedback: '不明なアクション。' };
         }
