@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../stores/gameStore';
 import { getSocket } from '../../hooks/useSocket';
 import { useAudio } from '../../audio/useAudio';
+import type { GameMode } from '@shared/types';
 
 /* ── Tiny star-field canvas ────────────────────────────────── */
 
@@ -68,16 +69,19 @@ const StarField: React.FC = () => {
 const TitleScreen: React.FC = () => {
   const setPlayerName = useGameStore((s) => s.setPlayerName);
   const setRoomCode = useGameStore((s) => s.setRoomCode);
+  const setGameMode = useGameStore((s) => s.setGameMode);
   const audio = useAudio();
 
   const [name, setName] = useState('');
-  const [mode, setMode] = useState<'idle' | 'join'>('idle');
+  const [flow, setFlow] = useState<'idle' | 'modeSelect' | 'join'>('idle');
+  const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
   const [roomInput, setRoomInput] = useState('');
   const [error, setError] = useState('');
+  const [hoveredMode, setHoveredMode] = useState<GameMode | null>(null);
 
   const nameValid = name.trim().length > 0;
 
-  const handleCreate = useCallback(async () => {
+  const handleCreateClick = useCallback(async () => {
     if (!nameValid) {
       setError('名前を入力してください');
       return;
@@ -85,9 +89,17 @@ const TitleScreen: React.FC = () => {
     audio.playSFX('click');
     await audio.init();
     audio.playBGM('title');
+    setError('');
+    setFlow('modeSelect');
+  }, [nameValid, audio]);
+
+  const handleModeSelect = useCallback((mode: GameMode) => {
+    audio.playSFX('click');
+    setSelectedMode(mode);
+    setGameMode(mode);
     setPlayerName(name.trim());
-    getSocket().emit('room:create', { playerName: name.trim() });
-  }, [name, nameValid, setPlayerName, audio]);
+    getSocket().emit('room:create', { playerName: name.trim(), gameMode: mode });
+  }, [name, setPlayerName, setGameMode, audio]);
 
   const handleJoinClick = useCallback(async () => {
     if (!nameValid) {
@@ -98,7 +110,7 @@ const TitleScreen: React.FC = () => {
     await audio.init();
     audio.playBGM('title');
     setError('');
-    setMode('join');
+    setFlow('join');
   }, [nameValid, audio]);
 
   const handleJoinSubmit = useCallback(() => {
@@ -116,11 +128,17 @@ const TitleScreen: React.FC = () => {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
-        if (mode === 'join') handleJoinSubmit();
+        if (flow === 'join') handleJoinSubmit();
       }
     },
-    [mode, handleJoinSubmit],
+    [flow, handleJoinSubmit],
   );
+
+  const handleBackToIdle = useCallback(() => {
+    audio.playSFX('click');
+    setFlow('idle');
+    setSelectedMode(null);
+  }, [audio]);
 
   return (
     <div style={screenStyle}>
@@ -162,77 +180,189 @@ const TitleScreen: React.FC = () => {
           協力型リアルタイム謎解きゲーム
         </motion.p>
 
-        {/* Name Input */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.0, duration: 0.6 }}
-          style={inputGroupStyle}
-        >
-          <label style={labelStyle}>エージェント名:</label>
-          <input
-            type="text"
-            value={name}
-            maxLength={16}
-            onChange={(e) => {
-              setName(e.target.value);
-              setError('');
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && mode === 'idle') handleCreate();
-            }}
-            style={inputStyle}
-            placeholder="_______________"
-            autoFocus
-          />
-        </motion.div>
-
-        {/* Error */}
-        <AnimatePresence>
-          {error && (
+        <AnimatePresence mode="wait">
+          {/* ── Name + Create/Join (idle flow) ── */}
+          {flow === 'idle' && (
             <motion.div
-              initial={{ opacity: 0, y: -5 }}
+              key="idle"
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              style={errorStyle}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}
             >
-              {error}
+              {/* Name Input */}
+              <div style={inputGroupStyle}>
+                <label style={labelStyle}>エージェント名:</label>
+                <input
+                  type="text"
+                  value={name}
+                  maxLength={16}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleCreateClick();
+                  }}
+                  style={inputStyle}
+                  placeholder="_______________"
+                  autoFocus
+                />
+              </div>
+
+              {/* Error */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={errorStyle}
+                  >
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Buttons */}
+              <div style={buttonRowStyle}>
+                <button
+                  className="btn-primary"
+                  onClick={handleCreateClick}
+                  style={!nameValid ? disabledBtnStyle : undefined}
+                >
+                  ルーム作成
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={handleJoinClick}
+                  style={!nameValid ? disabledBtnStyle : undefined}
+                >
+                  ルーム参加
+                </button>
+              </div>
             </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.4, duration: 0.6 }}
-          style={buttonRowStyle}
-        >
-          <button
-            className="btn-primary"
-            onClick={handleCreate}
-            style={!nameValid ? disabledBtnStyle : undefined}
-          >
-            ルーム作成
-          </button>
-          <button
-            className="btn-primary"
-            onClick={handleJoinClick}
-            style={!nameValid ? disabledBtnStyle : undefined}
-          >
-            ルーム参加
-          </button>
-        </motion.div>
-
-        {/* Join room code input */}
-        <AnimatePresence>
-          {mode === 'join' && (
+          {/* ── Mode Selection ── */}
+          {flow === 'modeSelect' && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{ overflow: 'hidden', marginTop: '16px' }}
+              key="modeSelect"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', width: '100%', maxWidth: '640px' }}
             >
+              <div style={modeSelectTitleStyle}>モード選択</div>
+
+              <div style={modeCardsRowStyle}>
+                {/* Story Mode Card */}
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onHoverStart={() => setHoveredMode('story')}
+                  onHoverEnd={() => setHoveredMode(null)}
+                  onClick={() => handleModeSelect('story')}
+                  style={{
+                    ...modeCardStyle,
+                    borderColor: hoveredMode === 'story' || selectedMode === 'story'
+                      ? 'rgba(0, 240, 255, 0.6)'
+                      : 'rgba(0, 240, 255, 0.15)',
+                    boxShadow: hoveredMode === 'story'
+                      ? '0 0 30px rgba(0, 240, 255, 0.15), inset 0 0 30px rgba(0, 240, 255, 0.05)'
+                      : 'none',
+                  }}
+                >
+                  <div style={modeCardIconStyle}>
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                      <path d="M8 6h24v28H8z" stroke="#00f0ff" strokeWidth="1.5" fill="rgba(0,240,255,0.05)" />
+                      <path d="M12 12h16M12 18h12M12 24h14" stroke="#00f0ff" strokeWidth="1" opacity="0.6" />
+                      <path d="M20 32l6-8-6-2-2 10z" fill="#00f0ff" opacity="0.3" />
+                    </svg>
+                  </div>
+                  <div style={{ ...modeCardTitleStyle, color: '#00f0ff' }}>ストーリーモード</div>
+                  <div style={modeCardDescStyle}>
+                    ARKTIS CORPの陰謀を暴け。潜入から脱出まで、仲間と共にミッションを遂行せよ。
+                  </div>
+                  <div style={modeCardTagsStyle}>
+                    <span style={{ ...modeTagStyle, borderColor: 'rgba(0, 240, 255, 0.3)', color: '#00f0ff' }}>ステージ制</span>
+                    <span style={{ ...modeTagStyle, borderColor: 'rgba(0, 240, 255, 0.3)', color: '#00f0ff' }}>ストーリー付き</span>
+                    <span style={{ ...modeTagStyle, borderColor: 'rgba(0, 240, 255, 0.3)', color: '#00f0ff' }}>エンディング</span>
+                  </div>
+                </motion.div>
+
+                {/* Endless Mode Card */}
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onHoverStart={() => setHoveredMode('endless')}
+                  onHoverEnd={() => setHoveredMode(null)}
+                  onClick={() => handleModeSelect('endless')}
+                  style={{
+                    ...modeCardStyle,
+                    borderColor: hoveredMode === 'endless' || selectedMode === 'endless'
+                      ? 'rgba(255, 0, 170, 0.6)'
+                      : 'rgba(255, 0, 170, 0.15)',
+                    boxShadow: hoveredMode === 'endless'
+                      ? '0 0 30px rgba(255, 0, 170, 0.15), inset 0 0 30px rgba(255, 0, 170, 0.05)'
+                      : 'none',
+                  }}
+                >
+                  <div style={modeCardIconStyle}>
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                      <path d="M20 4C11 4 4 11 4 20s7 16 16 16 16-7 16-16S29 4 20 4z" stroke="#ff00aa" strokeWidth="1.5" fill="rgba(255,0,170,0.05)" />
+                      <path d="M12 20c0-4.4 3.6-8 8-8M28 20c0 4.4-3.6 8-8 8" stroke="#ff00aa" strokeWidth="1.5" opacity="0.5" />
+                      <path d="M20 14v6l4 4" stroke="#ff00aa" strokeWidth="1.5" opacity="0.7" />
+                    </svg>
+                  </div>
+                  <div style={{ ...modeCardTitleStyle, color: '#ff00aa' }}>エンドレスモード</div>
+                  <div style={modeCardDescStyle}>
+                    限界に挑め。パズルは無限に生成され、難易度は上がり続ける。失敗するまで止まらない。
+                  </div>
+                  <div style={modeCardTagsStyle}>
+                    <span style={{ ...modeTagStyle, borderColor: 'rgba(255, 0, 170, 0.3)', color: '#ff00aa' }}>ウェーブ制</span>
+                    <span style={{ ...modeTagStyle, borderColor: 'rgba(255, 0, 170, 0.3)', color: '#ff00aa' }}>スコアアタック</span>
+                    <span style={{ ...modeTagStyle, borderColor: 'rgba(255, 0, 170, 0.3)', color: '#ff00aa' }}>エスカレーション</span>
+                  </div>
+                </motion.div>
+              </div>
+
+              <button
+                className="btn-primary"
+                onClick={handleBackToIdle}
+                style={{ opacity: 0.6, fontSize: '0.7rem' }}
+              >
+                戻る
+              </button>
+            </motion.div>
+          )}
+
+          {/* ── Join room code input ── */}
+          {flow === 'join' && (
+            <motion.div
+              key="join"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', width: '100%' }}
+            >
+              {/* Error */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={errorStyle}
+                  >
+                    {error}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div style={inputGroupStyle}>
                 <label style={labelStyle}>ルームコード:</label>
                 <input
@@ -248,13 +378,18 @@ const TitleScreen: React.FC = () => {
                   placeholder="______"
                   autoFocus
                 />
-                <button
-                  className="btn-primary"
-                  onClick={handleJoinSubmit}
-                  style={{ marginTop: '8px' }}
-                >
-                  接続
-                </button>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                  <button className="btn-primary" onClick={handleJoinSubmit}>
+                    接続
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={handleBackToIdle}
+                    style={{ opacity: 0.6 }}
+                  >
+                    戻る
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
@@ -310,7 +445,7 @@ const contentStyle: React.CSSProperties = {
   alignItems: 'center',
   gap: '8px',
   padding: '0 24px',
-  maxWidth: '480px',
+  maxWidth: '660px',
   width: '100%',
 };
 
@@ -391,6 +526,83 @@ const versionStyle: React.CSSProperties = {
   color: 'rgba(255, 255, 255, 0.15)',
   letterSpacing: '0.1em',
   zIndex: 2,
+};
+
+/* ── Mode Selection Styles ─────────────────────────────────── */
+
+const modeSelectTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '0.8rem',
+  fontWeight: 700,
+  letterSpacing: '0.3em',
+  color: 'rgba(255, 255, 255, 0.5)',
+  textTransform: 'uppercase',
+};
+
+const modeCardsRowStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '16px',
+  width: '100%',
+  justifyContent: 'center',
+  flexWrap: 'wrap',
+};
+
+const modeCardStyle: React.CSSProperties = {
+  flex: '1 1 260px',
+  maxWidth: '300px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '12px',
+  padding: '24px 20px',
+  background: 'rgba(255, 255, 255, 0.02)',
+  border: '1px solid',
+  cursor: 'pointer',
+  transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+  clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))',
+};
+
+const modeCardIconStyle: React.CSSProperties = {
+  width: '56px',
+  height: '56px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+  background: 'rgba(255, 255, 255, 0.03)',
+  border: '1px solid rgba(255, 255, 255, 0.06)',
+};
+
+const modeCardTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '1.05rem',
+  fontWeight: 800,
+  letterSpacing: '0.1em',
+};
+
+const modeCardDescStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-body)',
+  fontSize: '0.72rem',
+  color: 'rgba(255, 255, 255, 0.5)',
+  lineHeight: 1.6,
+  textAlign: 'center',
+};
+
+const modeCardTagsStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '6px',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
+  marginTop: '4px',
+};
+
+const modeTagStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.55rem',
+  letterSpacing: '0.08em',
+  padding: '2px 8px',
+  border: '1px solid',
+  background: 'transparent',
 };
 
 export default TitleScreen;

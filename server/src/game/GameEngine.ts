@@ -6,6 +6,7 @@ import type {
   ServerToClientEvents,
   Difficulty,
   GameAction,
+  GameMode,
   GameResult,
   PuzzleType,
   Rank,
@@ -113,10 +114,27 @@ function difficultyForStage(stageIndex: number, totalStages: number, isEscape: b
   return 'easy';
 }
 
+// ---- Endless mode difficulty ----
+
+function endlessDifficulty(stageIndex: number): Difficulty {
+  if (stageIndex >= 9) return 'extreme';
+  if (stageIndex >= 6) return 'hard';
+  if (stageIndex >= 3) return 'normal';
+  return 'easy';
+}
+
+const DIFFICULTY_JP: Record<Difficulty, string> = {
+  easy: 'イージー',
+  normal: 'ノーマル',
+  hard: 'ハード',
+  extreme: 'エクストリーム',
+};
+
 // ---- Session state ----
 
 interface GameSession {
   roomCode: string;
+  gameMode: GameMode;
   puzzleSequence: PuzzleType[];
   currentStageIndex: number;
   totalStages: number;
@@ -128,6 +146,7 @@ interface GameSession {
   totalMissCount: number;
   scores: StageScore[];
   totalScore: number;
+  lastPuzzleType: PuzzleType | null;
 }
 
 // ---- Engine ----
@@ -174,35 +193,86 @@ export class GameEngine {
   }
 
   startGame(room: Room): void {
-    const sequence = this.buildPuzzleSequence(room.players.length);
+    const isEndless = room.gameMode === 'endless';
 
-    const session: GameSession = {
-      roomCode: room.code,
-      puzzleSequence: sequence,
-      currentStageIndex: 0,
-      totalStages: sequence.length,
-      currentPuzzle: null,
-      stagePhase: 'infiltration',
-      timer: null,
-      timeRemaining: 0,
-      missCount: 0,
-      totalMissCount: 0,
-      scores: [],
-      totalScore: 0,
-    };
+    if (isEndless) {
+      // Endless mode: start with a single random puzzle, generate more on the fly
+      const firstPuzzle = this.pickRandomPuzzle(null);
+      const session: GameSession = {
+        roomCode: room.code,
+        gameMode: 'endless',
+        puzzleSequence: [firstPuzzle],
+        currentStageIndex: 0,
+        totalStages: -1, // infinite
+        currentPuzzle: null,
+        stagePhase: 'infiltration',
+        timer: null,
+        timeRemaining: 0,
+        missCount: 0,
+        totalMissCount: 0,
+        scores: [],
+        totalScore: 0,
+        lastPuzzleType: null,
+      };
 
-    this.sessions.set(room.code, session);
+      this.sessions.set(room.code, session);
 
-    room.phase = 'briefing';
-    room.totalStages = session.totalStages;
-    room.stagePhase = 'infiltration';
+      room.phase = 'briefing';
+      room.totalStages = -1;
+      room.stagePhase = 'infiltration';
 
-    this.startBriefing(session, room);
+      this.startBriefing(session, room);
+    } else {
+      // Story mode: existing behavior
+      const sequence = this.buildPuzzleSequence(room.players.length);
+
+      const session: GameSession = {
+        roomCode: room.code,
+        gameMode: 'story',
+        puzzleSequence: sequence,
+        currentStageIndex: 0,
+        totalStages: sequence.length,
+        currentPuzzle: null,
+        stagePhase: 'infiltration',
+        timer: null,
+        timeRemaining: 0,
+        missCount: 0,
+        totalMissCount: 0,
+        scores: [],
+        totalScore: 0,
+        lastPuzzleType: null,
+      };
+
+      this.sessions.set(room.code, session);
+
+      room.phase = 'briefing';
+      room.totalStages = session.totalStages;
+      room.stagePhase = 'infiltration';
+
+      this.startBriefing(session, room);
+    }
+  }
+
+  /** Pick a random puzzle type, avoiding immediate repeat */
+  private pickRandomPuzzle(lastType: PuzzleType | null): PuzzleType {
+    const available: PuzzleType[] = [...this.generators.keys()];
+    const candidates = lastType
+      ? available.filter((t) => t !== lastType)
+      : available;
+    return candidates[Math.floor(Math.random() * candidates.length)];
   }
 
   private startBriefing(session: GameSession, room: Room): void {
     const stageIndex = session.currentStageIndex;
     const puzzleType = session.puzzleSequence[stageIndex];
+
+    // Endless mode: no phase change, always infiltration
+    if (session.gameMode === 'endless') {
+      this.emitBriefing(session, room, puzzleType, false);
+      return;
+    }
+
+    // Story mode: existing behavior
     const halfPoint = Math.floor(session.totalStages / 2);
     const isEscape = stageIndex >= halfPoint;
 
@@ -234,14 +304,24 @@ export class GameEngine {
     isEscape: boolean,
   ): void {
     const stageNum = session.currentStageIndex + 1;
-    const briefings = isEscape ? ESCAPE_BRIEFINGS : INFILTRATION_BRIEFINGS;
-    const storyText = briefings[puzzleType](stageNum);
+    let storyText: string;
+    let difficulty: Difficulty;
 
-    const difficulty = difficultyForStage(
-      session.currentStageIndex,
-      session.totalStages,
-      isEscape,
-    );
+    if (session.gameMode === 'endless') {
+      // Endless mode: short briefing with wave number and difficulty
+      difficulty = endlessDifficulty(session.currentStageIndex);
+      storyText = `ウェーブ ${stageNum} — 難易度: ${DIFFICULTY_JP[difficulty]}`;
+    } else {
+      // Story mode: existing narrative briefing
+      const briefings = isEscape ? ESCAPE_BRIEFINGS : INFILTRATION_BRIEFINGS;
+      storyText = briefings[puzzleType](stageNum);
+      difficulty = difficultyForStage(
+        session.currentStageIndex,
+        session.totalStages,
+        isEscape,
+      );
+    }
+
     const generator = this.generators.get(puzzleType);
     if (!generator) {
       console.error(`No generator for puzzle type: ${puzzleType}`);
@@ -258,11 +338,12 @@ export class GameEngine {
     this.io.to(room.code).emit('game:briefing', {
       puzzleType,
       stageIndex: session.currentStageIndex,
-      totalStages: session.totalStages,
+      totalStages: session.gameMode === 'endless' ? -1 : session.totalStages,
       timeLimit: puzzle.timeLimit,
       storyText,
       stagePhase: session.stagePhase,
       puzzleGuide: PUZZLE_GUIDES[puzzleType],
+      gameMode: session.gameMode,
     });
 
     // After 5 seconds of briefing, start the puzzle
@@ -402,6 +483,12 @@ export class GameEngine {
       totalScore: session.totalScore,
     });
 
+    // Endless mode: failure ends the game immediately
+    if (session.gameMode === 'endless') {
+      this.finishGame(session, room.code);
+      return;
+    }
+
     this.advanceStage(session, room.code);
   }
 
@@ -409,6 +496,23 @@ export class GameEngine {
     session.currentStageIndex++;
     session.currentPuzzle = null;
 
+    if (session.gameMode === 'endless') {
+      // Endless mode: generate next puzzle on the fly (no end condition — failure handled in failStage)
+      const lastType = session.puzzleSequence[session.puzzleSequence.length - 1];
+      const nextPuzzle = this.pickRandomPuzzle(lastType);
+      session.puzzleSequence.push(nextPuzzle);
+      session.lastPuzzleType = lastType;
+
+      const room = this.getRoomFromCode(roomCode);
+      if (room) {
+        setTimeout(() => {
+          this.startBriefing(session, room);
+        }, 3000);
+      }
+      return;
+    }
+
+    // Story mode: check if we've completed all stages
     if (session.currentStageIndex >= session.totalStages) {
       this.finishGame(session, roomCode);
       return;
@@ -424,7 +528,19 @@ export class GameEngine {
   }
 
   private finishGame(session: GameSession, roomCode: string): void {
-    const maxScore = session.totalStages * (1000 + 90 * 50); // theoretical max per stage
+    let maxScore: number;
+    let wavesReached: number | undefined;
+
+    if (session.gameMode === 'endless') {
+      // Endless mode: waves reached = number of cleared stages
+      const clearedCount = session.scores.filter((s) => s.cleared).length;
+      wavesReached = clearedCount;
+      // maxScore is based on how many stages were attempted
+      maxScore = session.scores.length * (1000 + 90 * 50);
+    } else {
+      maxScore = session.totalStages * (1000 + 90 * 50); // theoretical max per stage
+    }
+
     const rank = this.calculateRank(session.totalScore, maxScore);
 
     const result: GameResult = {
@@ -432,6 +548,8 @@ export class GameEngine {
       totalScore: session.totalScore,
       maxScore,
       rank,
+      gameMode: session.gameMode,
+      wavesReached,
     };
 
     this.io.to(roomCode).emit('game:finished', result);

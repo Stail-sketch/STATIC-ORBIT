@@ -7,6 +7,8 @@ import { useAudio } from '../../audio/useAudio';
 const BriefingScreen: React.FC = () => {
   const briefing = useGameStore((s) => s.briefing);
   const stagePhase = useGameStore((s) => s.stagePhase);
+  const gameMode = useGameStore((s) => s.gameMode);
+  const isEndless = gameMode === 'endless';
 
   const audio = useAudio();
   const [typingDone, setTypingDone] = useState(false);
@@ -14,9 +16,13 @@ const BriefingScreen: React.FC = () => {
 
   // On mount: switch BGM and play warning SFX for escape phase
   useEffect(() => {
-    audio.playBGM(stagePhase === 'escape' ? 'escape' : 'infiltration');
-    if (stagePhase === 'escape') {
-      audio.playSFX('warning');
+    if (isEndless) {
+      audio.playBGM('infiltration');
+    } else {
+      audio.playBGM(stagePhase === 'escape' ? 'escape' : 'infiltration');
+      if (stagePhase === 'escape') {
+        audio.playSFX('warning');
+      }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -60,35 +66,54 @@ const BriefingScreen: React.FC = () => {
       }}
     >
       {/* Warning stripe for escape phase */}
-      {isEscape && <div style={warningStripeStyle} />}
+      {isEscape && !isEndless && <div style={warningStripeStyle} />}
 
-      {/* Stage phase badge */}
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          ...phaseBadgeStyle,
-          background: isEscape
-            ? 'rgba(255, 34, 68, 0.12)'
-            : 'rgba(0, 240, 255, 0.08)',
-          borderColor: isEscape
-            ? 'rgba(255, 34, 68, 0.4)'
-            : 'rgba(0, 240, 255, 0.3)',
-          color: isEscape ? '#ff2244' : '#00f0ff',
-        }}
-      >
-        {stagePhase === 'escape' ? '脱出フェーズ' : '潜入フェーズ'}
-      </motion.div>
+      {/* Stage phase badge — hidden in endless mode */}
+      {!isEndless && (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            ...phaseBadgeStyle,
+            background: isEscape
+              ? 'rgba(255, 34, 68, 0.12)'
+              : 'rgba(0, 240, 255, 0.08)',
+            borderColor: isEscape
+              ? 'rgba(255, 34, 68, 0.4)'
+              : 'rgba(0, 240, 255, 0.3)',
+            color: isEscape ? '#ff2244' : '#00f0ff',
+          }}
+        >
+          {stagePhase === 'escape' ? '脱出フェーズ' : '潜入フェーズ'}
+        </motion.div>
+      )}
 
-      {/* Stage number */}
+      {/* Endless mode badge */}
+      {isEndless && (
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            ...phaseBadgeStyle,
+            background: 'rgba(255, 0, 170, 0.08)',
+            borderColor: 'rgba(255, 0, 170, 0.4)',
+            color: '#ff00aa',
+          }}
+        >
+          エンドレスモード
+        </motion.div>
+      )}
+
+      {/* Stage / Wave number */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.6 }}
         style={stageNumberStyle}
       >
-        ステージ {stageNum} / {totalNum}
+        {isEndless ? `WAVE ${stageNum}` : `ステージ ${stageNum} / ${totalNum}`}
       </motion.div>
 
       {/* Puzzle type name */}

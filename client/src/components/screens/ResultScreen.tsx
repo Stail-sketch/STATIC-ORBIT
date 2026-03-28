@@ -64,8 +64,10 @@ function useCountUp(target: number, duration: number = 2000): number {
 
 const ResultScreen: React.FC = () => {
   const gameResult = useGameStore((s) => s.gameResult);
+  const gameMode = useGameStore((s) => s.gameMode);
   const reset = useGameStore((s) => s.reset);
   const audio = useAudio();
+  const isEndless = gameMode === 'endless';
 
   const [showRank, setShowRank] = useState(false);
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'shared' | 'error'>('idle');
@@ -96,6 +98,17 @@ const ResultScreen: React.FC = () => {
   const clearedCount = stages.filter((s: StageScore) => s.cleared).length;
 
   const buildShareText = () => {
+    if (isEndless) {
+      return [
+        '\u{1F6F8} STATIC ORBIT \u2014 エンドレスモード',
+        '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501',
+        `到達: WAVE ${gameResult.wavesReached ?? clearedCount}`,
+        `スコア: ${totalScore}`,
+        `ランク: ${rank}`,
+        '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501',
+        '#StaticOrbit #エンドレス',
+      ].join('\n');
+    }
     return [
       '\u{1F6F8} STATIC ORBIT \u2014 ミッションレポート',
       '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501',
@@ -146,11 +159,28 @@ const ResultScreen: React.FC = () => {
         transition={{ duration: 0.8 }}
         style={headerStyle}
       >
-        <h1 style={titleStyle}>ミッションレポート</h1>
-        <div style={subtitleStyle}>デブリーフィング</div>
+        <h1 style={titleStyle}>
+          {isEndless ? 'エンドレスリザルト' : 'ミッションレポート'}
+        </h1>
+        <div style={subtitleStyle}>
+          {isEndless ? 'スコアアタック' : 'デブリーフィング'}
+        </div>
       </motion.div>
 
-      {/* Stage list */}
+      {/* Endless mode: wave reached summary */}
+      {isEndless && gameResult.wavesReached != null && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          style={waveSummaryStyle}
+        >
+          <div style={waveLabelStyle}>到達ウェーブ</div>
+          <div style={waveNumberStyle}>WAVE {String(gameResult.wavesReached).padStart(2, '0')}</div>
+        </motion.div>
+      )}
+
+      {/* Stage list — shown for story mode, or as compact list for endless */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -158,7 +188,7 @@ const ResultScreen: React.FC = () => {
         style={stageListStyle}
       >
         <div style={stageHeaderRowStyle}>
-          <span style={stageColStyle}>ステージ</span>
+          <span style={stageColStyle}>{isEndless ? 'ウェーブ' : 'ステージ'}</span>
           <span style={stageColCenterStyle}>結果</span>
           <span style={stageColRightStyle}>スコア</span>
           <span style={stageColRightStyle}>ミス</span>
@@ -488,6 +518,33 @@ const buttonRowStyle: React.CSSProperties = {
 const shareButtonStyle: React.CSSProperties = {
   color: '#ff00aa',
   borderColor: '#ff00aa',
+};
+
+const waveSummaryStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '4px',
+  padding: '16px 32px',
+  background: 'rgba(255, 0, 170, 0.05)',
+  border: '1px solid rgba(255, 0, 170, 0.2)',
+  clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
+};
+
+const waveLabelStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: '0.6rem',
+  color: 'rgba(255, 255, 255, 0.4)',
+  letterSpacing: '0.2em',
+};
+
+const waveNumberStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  fontSize: '2rem',
+  fontWeight: 900,
+  color: '#ff00aa',
+  letterSpacing: '0.1em',
+  textShadow: '0 0 20px rgba(255, 0, 170, 0.5)',
 };
 
 export default ResultScreen;

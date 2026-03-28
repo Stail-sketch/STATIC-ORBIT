@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type {
   Player,
   GamePhase,
+  GameMode,
   StagePhase,
   PuzzleType,
   StageScore,
@@ -19,6 +20,7 @@ interface BriefingData {
   storyText: string;
   stagePhase: StagePhase;
   puzzleGuide?: string;
+  gameMode?: GameMode;
 }
 
 interface ChatMessage {
@@ -38,6 +40,7 @@ interface GameState {
   players: Player[];
   myRole: Role | null;
   isHost: boolean;
+  gameMode: GameMode;
 
   // Game
   phase: GamePhase;
@@ -70,6 +73,7 @@ interface GameState {
   setPlayerId: (id: string) => void;
   setPlayerName: (name: string) => void;
   setRoomCode: (code: string) => void;
+  setGameMode: (mode: GameMode) => void;
   setPlayers: (players: Player[]) => void;
   setBriefing: (data: BriefingData) => void;
   startPuzzle: (data: { puzzleType: PuzzleType; roleData: Record<string, unknown>; timeLimit: number }) => void;
@@ -92,6 +96,7 @@ const initialState = {
   players: [] as Player[],
   myRole: null as Role | null,
   isHost: false,
+  gameMode: 'story' as GameMode,
   phase: 'lobby' as GamePhase,
   stagePhase: 'infiltration' as StagePhase,
   currentPuzzleType: null as PuzzleType | null,
@@ -115,6 +120,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setPlayerId: (id) => set({ playerId: id }),
   setPlayerName: (name) => set({ playerName: name }),
   setRoomCode: (code) => set({ roomCode: code }),
+  setGameMode: (mode) => set({ gameMode: mode }),
 
   setPlayers: (players) => {
     const myId = get().playerId;
@@ -133,6 +139,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       stagePhase: data.stagePhase,
       missCount: 0,
       lastFeedback: null,
+      ...(data.gameMode ? { gameMode: data.gameMode } : {}),
     }),
 
   startPuzzle: (data) =>
@@ -174,6 +181,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       screen: 'result',
       gameResult: result,
+      ...(result.gameMode ? { gameMode: result.gameMode } : {}),
     }),
 
   addChatMessage: (msg) =>

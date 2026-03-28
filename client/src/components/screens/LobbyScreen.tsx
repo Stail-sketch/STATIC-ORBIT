@@ -19,6 +19,7 @@ const LobbyScreen: React.FC = () => {
   const playerId = useGameStore((s) => s.playerId);
   const isHost = useGameStore((s) => s.isHost);
   const chatMessages = useGameStore((s) => s.chatMessages);
+  const gameMode = useGameStore((s) => s.gameMode);
 
   const audio = useAudio();
 
@@ -98,6 +99,23 @@ const LobbyScreen: React.FC = () => {
           </button>
         </div>
       </motion.div>
+
+      {/* Game Mode Badge */}
+      <div
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.6rem',
+          fontWeight: 700,
+          letterSpacing: '0.15em',
+          padding: '3px 12px',
+          border: '1px solid',
+          borderColor: gameMode === 'endless' ? 'rgba(255, 0, 170, 0.4)' : 'rgba(0, 240, 255, 0.3)',
+          background: gameMode === 'endless' ? 'rgba(255, 0, 170, 0.08)' : 'rgba(0, 240, 255, 0.06)',
+          color: gameMode === 'endless' ? '#ff00aa' : '#00f0ff',
+        }}
+      >
+        {gameMode === 'endless' ? 'エンドレスモード' : 'ストーリーモード'}
+      </div>
 
       {/* Player count */}
       <div style={playerCountStyle}>

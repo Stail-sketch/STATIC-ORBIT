@@ -30,20 +30,23 @@ export function useSocket() {
 
     const s = getSocket();
 
-    s.on('room:created', ({ roomCode, playerId }) => {
+    s.on('room:created', ({ roomCode, playerId, gameMode }) => {
       store.getState().setPlayerId(playerId);
       store.getState().setRoomCode(roomCode);
+      if (gameMode) store.getState().setGameMode(gameMode);
       store.getState().setScreen('lobby');
     });
 
-    s.on('room:joined', ({ playerId, players }) => {
+    s.on('room:joined', ({ playerId, players, gameMode }) => {
       store.getState().setPlayerId(playerId);
       store.getState().setPlayers(players);
+      if (gameMode) store.getState().setGameMode(gameMode);
       store.getState().setScreen('lobby');
     });
 
-    s.on('room:updated', ({ players }) => {
+    s.on('room:updated', ({ players, gameMode }) => {
       store.getState().setPlayers(players);
+      if (gameMode) store.getState().setGameMode(gameMode);
     });
 
     s.on('room:error', ({ message }) => {

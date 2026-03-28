@@ -1,5 +1,7 @@
 // ===== STATIC ORBIT — Shared Types =====
 
+export type GameMode = 'story' | 'endless';
+
 export type Difficulty = 'easy' | 'normal' | 'hard' | 'extreme';
 
 export type Role = 'observer' | 'operator' | 'navigator' | 'hacker';
@@ -37,6 +39,7 @@ export interface Room {
   currentStage: number;
   totalStages: number;
   scores: StageScore[];
+  gameMode: GameMode;
 }
 
 export interface StageScore {
@@ -75,12 +78,14 @@ export interface GameResult {
   totalScore: number;
   maxScore: number;
   rank: Rank;
+  gameMode: GameMode;
+  wavesReached?: number;
 }
 
 // ===== Socket Events =====
 
 export interface ClientToServerEvents {
-  'room:create': (data: { playerName: string }) => void;
+  'room:create': (data: { playerName: string; gameMode: GameMode }) => void;
   'room:join': (data: { roomCode: string; playerName: string }) => void;
   'room:ready': (data: { playerId: string }) => void;
   'room:start': (data: { roomCode: string }) => void;
@@ -89,9 +94,9 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToClientEvents {
-  'room:created': (data: { roomCode: string; playerId: string }) => void;
-  'room:joined': (data: { playerId: string; players: Player[] }) => void;
-  'room:updated': (data: { players: Player[]; phase: GamePhase }) => void;
+  'room:created': (data: { roomCode: string; playerId: string; gameMode: GameMode }) => void;
+  'room:joined': (data: { playerId: string; players: Player[]; gameMode: GameMode }) => void;
+  'room:updated': (data: { players: Player[]; phase: GamePhase; gameMode: GameMode }) => void;
   'room:error': (data: { message: string }) => void;
   'game:briefing': (data: {
     puzzleType: PuzzleType;
@@ -101,6 +106,7 @@ export interface ServerToClientEvents {
     storyText: string;
     stagePhase: StagePhase;
     puzzleGuide?: string;
+    gameMode: GameMode;
   }) => void;
   'game:start': (data: { puzzleType: PuzzleType; roleData: Record<string, unknown>; timeLimit: number }) => void;
   'game:timeUpdate': (data: { remaining: number }) => void;

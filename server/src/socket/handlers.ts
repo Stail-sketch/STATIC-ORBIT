@@ -18,22 +18,24 @@ export function initHandlers(io: TypedServer): void {
   io.on('connection', (socket: TypedSocket) => {
     console.log(`[CONNECT] ${socket.id}`);
 
-    socket.on('room:create', ({ playerName }) => {
+    socket.on('room:create', ({ playerName, gameMode }) => {
       try {
-        const room = roomManager.createRoom(socket.id, playerName);
+        const room = roomManager.createRoom(socket.id, playerName, gameMode ?? 'story');
         socket.join(room.code);
 
         socket.emit('room:created', {
           roomCode: room.code,
           playerId: socket.id,
+          gameMode: room.gameMode,
         });
 
         io.to(room.code).emit('room:updated', {
           players: room.players,
           phase: room.phase,
+          gameMode: room.gameMode,
         });
 
-        console.log(`[ROOM:CREATE] ${playerName} created room ${room.code}`);
+        console.log(`[ROOM:CREATE] ${playerName} created room ${room.code} (${room.gameMode})`);
       } catch (err) {
         socket.emit('room:error', { message: (err as Error).message });
       }
@@ -47,11 +49,13 @@ export function initHandlers(io: TypedServer): void {
         socket.emit('room:joined', {
           playerId: socket.id,
           players: room.players,
+          gameMode: room.gameMode,
         });
 
         io.to(room.code).emit('room:updated', {
           players: room.players,
           phase: room.phase,
+          gameMode: room.gameMode,
         });
 
         console.log(`[ROOM:JOIN] ${playerName} joined room ${roomCode}`);
@@ -73,6 +77,7 @@ export function initHandlers(io: TypedServer): void {
         io.to(roomCode).emit('room:updated', {
           players: room.players,
           phase: room.phase,
+          gameMode: room.gameMode,
         });
       } catch (err) {
         socket.emit('room:error', { message: (err as Error).message });
@@ -115,6 +120,7 @@ export function initHandlers(io: TypedServer): void {
         io.to(roomCode).emit('room:updated', {
           players: room.players,
           phase: room.phase,
+          gameMode: room.gameMode,
         });
 
         console.log(`[GAME:START] Room ${roomCode}`);
@@ -163,6 +169,7 @@ export function initHandlers(io: TypedServer): void {
           io.to(roomCode).emit('room:updated', {
             players: room.players,
             phase: room.phase,
+            gameMode: room.gameMode,
           });
         } else {
           // Room was destroyed (last player left)

@@ -1,6 +1,6 @@
 // ===== STATIC ORBIT — Room Manager =====
 
-import type { Player, Role, Room } from '../../../shared/types.js';
+import type { GameMode, Player, Role, Room } from '../../../shared/types.js';
 
 const ROLE_ASSIGNMENT_ORDER: Role[] = ['observer', 'operator', 'navigator', 'hacker'];
 
@@ -16,7 +16,7 @@ function generateRoomCode(): string {
 export class RoomManager {
   private rooms = new Map<string, Room>();
 
-  createRoom(hostId: string, hostName: string): Room {
+  createRoom(hostId: string, hostName: string, gameMode: GameMode = 'story'): Room {
     let code = generateRoomCode();
     // Avoid collision (extremely unlikely but safe)
     while (this.rooms.has(code)) {
@@ -39,6 +39,7 @@ export class RoomManager {
       currentStage: 0,
       totalStages: 0,
       scores: [],
+      gameMode,
     };
 
     this.rooms.set(code, room);
