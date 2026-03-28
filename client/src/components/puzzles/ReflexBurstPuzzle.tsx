@@ -332,18 +332,27 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
   const beatTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackProcessedRef = useRef<string | null>(null);
+  const [sequenceStartCount, setSequenceStartCount] = useState(0);
 
   // Keep refs in sync
   useEffect(() => { phaseRef.current = phase; }, [phase]);
   useEffect(() => { currentBeatRef.current = currentBeat; }, [currentBeat]);
 
-  // Detect start-sequence from lastFeedback
+  // Detect start-sequence from lastFeedback — capture into counter immediately
   useEffect(() => {
     if (!lastFeedback) return;
-    if (lastFeedback.feedback === 'シーケンス開始' && phaseRef.current !== 'countdown' && phaseRef.current !== 'playing') {
-      startCountdown();
+    if (lastFeedback.feedback === 'シーケンス開始') {
+      setSequenceStartCount((c) => c + 1);
     }
-  }, [lastFeedback]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lastFeedback]);
+
+  // React to sequenceStartCount to begin countdown (decoupled from lastFeedback)
+  useEffect(() => {
+    if (sequenceStartCount === 0) return;
+    // Only start if not already in countdown or playing
+    if (phaseRef.current === 'countdown' || phaseRef.current === 'playing') return;
+    startCountdown();
+  }, [sequenceStartCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track beat results from action feedback
   useEffect(() => {
@@ -430,19 +439,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
 
     // Beat advance timer
     beatTimerRef.current = setInterval(() => {
-      // Mark missed beats (no press on a real beat)
-      if (!pressedThisBeatRef.current) {
-        setBeatResults((prev) => {
-          const next = [...prev];
-          if (next[beat] === 'pending') {
-            // We don't know if this was a real or fake beat client-side,
-            // so we leave pending beats as-is (server handles miss penalty if needed)
-            // But we can mark it as "no input" visually
-            next[beat] = 'miss';
-          }
-          return next;
-        });
-      }
+      // Don't auto-mark unplayed beats as 'miss' on the client.
+      // The client doesn't know which beats are real vs fake,
+      // so leave them as 'pending' and only update based on server feedback.
 
       beat++;
       if (beat >= totalBeats) {
@@ -848,12 +847,12 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                 fontFamily: "'Orbitron', sans-serif",
                 fontWeight: 'bold',
                 marginBottom: 8,
-                color: correctCount === totalBeats ? '#33ff66' : '#ffaa00',
-                textShadow: correctCount === totalBeats
+                color: correctCount > 0 && beatResults.filter(r => r === 'miss').length === 0 ? '#33ff66' : '#ffaa00',
+                textShadow: correctCount > 0 && beatResults.filter(r => r === 'miss').length === 0
                   ? '0 0 20px rgba(51,255,102,0.5)'
                   : '0 0 20px rgba(255,170,0,0.5)',
               }}>
-                {correctCount}/{totalBeats}
+                {correctCount} 正解 / {beatResults.filter(r => r === 'miss').length} ミス
               </div>
               <div style={{
                 fontSize: 14,
@@ -886,17 +885,27 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                       fontFamily: "'Orbitron', sans-serif",
                       background: result === 'correct'
                         ? 'rgba(51,255,102,0.3)'
-                        : 'rgba(255,34,68,0.3)',
-                      border: `1px solid ${result === 'correct' ? 'rgba(51,255,102,0.5)' : 'rgba(255,34,68,0.5)'}`,
-                      color: result === 'correct' ? '#33ff66' : '#ff3333',
+                        : result === 'miss'
+                          ? 'rgba(255,34,68,0.3)'
+                          : 'rgba(255,255,255,0.05)',
+                      border: `1px solid ${result === 'correct'
+                        ? 'rgba(51,255,102,0.5)'
+                        : result === 'miss'
+                          ? 'rgba(255,34,68,0.5)'
+                          : 'rgba(255,255,255,0.15)'}`,
+                      color: result === 'correct'
+                        ? '#33ff66'
+                        : result === 'miss'
+                          ? '#ff3333'
+                          : 'rgba(255,255,255,0.3)',
                     }}
                   >
-                    {result === 'correct' ? '+' : 'x'}
+                    {result === 'correct' ? '+' : result === 'miss' ? 'x' : '-'}
                   </div>
                 ))}
               </div>
 
-              {correctCount === totalBeats ? (
+              {beatResults.filter(r => r === 'miss').length === 0 && correctCount > 0 ? (
                 <div style={{
                   fontSize: 16,
                   fontFamily: "'Orbitron', sans-serif",

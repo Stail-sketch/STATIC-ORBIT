@@ -1,6 +1,6 @@
 // ===== STATIC ORBIT — Circuit Link Puzzle =====
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSocket } from '../../hooks/useSocket';
 import { useGameStore } from '../../stores/gameStore';
@@ -255,6 +255,9 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
   );
   const [selectedDest, setSelectedDest] = useState<Record<number, string>>({});
 
+  // Track the last attempted wire so we know which one to mark on success
+  const lastAttemptedWireRef = useRef<{ wireIndex: number; color: string; destPort: string } | null>(null);
+
   const usedDests = new Set(
     assignments.filter((a) => a.connected).map((a) => a.destPort)
   );
@@ -264,6 +267,10 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
     if (!dest) return;
 
     const color = wireColors[wireIndex];
+
+    // Track which wire we're attempting (used when feedback arrives)
+    lastAttemptedWireRef.current = { wireIndex, color, destPort: dest };
+
     const socket = getSocket();
     socket.emit('game:action', {
       puzzleId: 'circuit-link',
@@ -271,13 +278,33 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
       data: { color, destPort: dest },
     });
 
-    // Optimistically mark as connected (will revert if wrong via feedback)
-    setAssignments((prev) =>
-      prev.map((a, i) => (i === wireIndex ? { ...a, destPort: dest, connected: true } : a))
-    );
+    // Do NOT optimistically mark as connected — wait for server feedback
   }, [selectedDest, wireColors]);
 
-  // If feedback says wrong, un-connect the last attempted wire
+  // Watch lastFeedback to confirm or reject connections
+  useEffect(() => {
+    if (!lastFeedback) return;
+    const attempted = lastAttemptedWireRef.current;
+    if (!attempted) return;
+
+    // Check if this is a successful connection
+    if (lastFeedback.correct && lastFeedback.feedback && lastFeedback.feedback.includes('接続完了')) {
+      setAssignments((prev) =>
+        prev.map((a, i) =>
+          i === attempted.wireIndex
+            ? { ...a, destPort: attempted.destPort, connected: true }
+            : a
+        )
+      );
+      // Clear the attempt tracker after successful connection
+      lastAttemptedWireRef.current = null;
+    } else if (!lastFeedback.correct && lastFeedback.feedback && lastFeedback.feedback !== 'シーケンス開始') {
+      // Wrong connection — keep the wire as unconnected and keep the dropdown
+      // selection so the operator can see what they tried
+      lastAttemptedWireRef.current = null;
+    }
+  }, [lastFeedback]);
+
   const handleSelectChange = (wireIndex: number, value: string) => {
     setSelectedDest((prev) => ({ ...prev, [wireIndex]: value }));
   };
