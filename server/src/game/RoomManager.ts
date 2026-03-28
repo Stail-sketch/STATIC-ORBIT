@@ -102,15 +102,6 @@ export class RoomManager {
     const roleTaken = room.players.some(p => p.id !== playerId && p.role === role);
     if (roleTaken) throw new Error('その役職は既に選択されています。');
 
-    // Check if role is valid for this player count
-    const maxRoles: Role[] = room.players.length <= 2
-      ? ['observer', 'operator']
-      : room.players.length === 3
-        ? ['observer', 'operator', 'navigator']
-        : ['observer', 'operator', 'navigator', 'hacker'];
-
-    if (!maxRoles.includes(role)) throw new Error('この人数ではその役職は選択できません。');
-
     player.role = role;
     return room;
   }

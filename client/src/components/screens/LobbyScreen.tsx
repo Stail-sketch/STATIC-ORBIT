@@ -30,7 +30,7 @@ const ROLE_DESCRIPTIONS: Record<Role, string> = {
 
 const ALL_ROLES: Role[] = ['observer', 'operator', 'navigator', 'hacker'];
 
-function getAvailableRoles(playerCount: number): Role[] {
+function getRequiredRoles(playerCount: number): Role[] {
   if (playerCount <= 2) return ['observer', 'operator'];
   if (playerCount === 3) return ['observer', 'operator', 'navigator'];
   return ['observer', 'operator', 'navigator', 'hacker'];
@@ -52,8 +52,9 @@ const LobbyScreen: React.FC = () => {
   const prevPlayerCount = useRef(players.length);
 
   const me = players.find((p) => p.id === playerId);
-  const allReady = players.length >= 2 && players.every((p) => p.ready);
-  const availableRoles = getAvailableRoles(players.length);
+  const requiredRoles = getRequiredRoles(players.length);
+  const allRolesFilled = requiredRoles.every((role) => players.some((p) => p.role === role));
+  const allReady = players.length >= 2 && players.every((p) => p.ready) && allRolesFilled;
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -166,11 +167,12 @@ const LobbyScreen: React.FC = () => {
       <div style={roleSectionStyle}>
         <div style={roleSectionHeaderStyle}>役職選択</div>
         <div style={roleGridStyle}>
-          {availableRoles.map((role) => {
+          {ALL_ROLES.map((role) => {
             const color = ROLE_COLORS[role];
             const owner = roleOwners[role];
             const isMyRole = me?.role === role;
             const isTakenByOther = owner !== null && owner.id !== playerId;
+            const isRequired = requiredRoles.includes(role);
 
             return (
               <motion.button
@@ -203,7 +205,7 @@ const LobbyScreen: React.FC = () => {
                     color: isMyRole ? color : isTakenByOther ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.2)',
                   }}
                 >
-                  {owner ? owner.name : '空き'}
+                  {owner ? owner.name : isRequired ? '空き（必須）' : '空き'}
                 </span>
               </motion.button>
             );
@@ -272,13 +274,24 @@ const LobbyScreen: React.FC = () => {
         </button>
 
         {isHost && (
-          <button
-            className="btn-primary"
-            onClick={handleStart}
-            style={!allReady ? { opacity: 0.35, pointerEvents: 'none' } : undefined}
-          >
-            ミッション開始
-          </button>
+          <>
+            <button
+              className="btn-primary"
+              onClick={handleStart}
+              style={!allReady ? { opacity: 0.35, pointerEvents: 'none' } : undefined}
+            >
+              ミッション開始
+            </button>
+            {!allReady && (
+              <div style={{ fontSize: 10, color: 'rgba(255,170,0,0.6)', letterSpacing: 1, marginTop: 4, textAlign: 'center' }}>
+                {players.length < 2
+                  ? '2人以上のエージェントが必要です'
+                  : !allRolesFilled
+                    ? '全ての必須役職にエージェントを配置してください'
+                    : '全員の準備完了を待っています...'}
+              </div>
+            )}
+          </>
         )}
       </div>
 
