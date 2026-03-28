@@ -656,6 +656,8 @@ export class GameEngine {
   }
 
   private startBriefing(session: GameSession, room: Room): void {
+    console.log(`[GameEngine] startBriefing: room=${room.code} stage=${session.currentStageIndex}/${session.totalStages} boss=${session.isBossSection} mode=${session.gameMode}`);
+
     // Boss section: handle separately
     if (session.isBossSection) {
       this.startBossBriefing(session, room);
@@ -664,6 +666,15 @@ export class GameEngine {
 
     const stageIndex = session.currentStageIndex;
     const puzzleType = session.puzzleSequence[stageIndex];
+
+    if (!puzzleType) {
+      console.error(`[GameEngine] No puzzle at index ${stageIndex}, sequence length=${session.puzzleSequence.length}`);
+      // Safety: enter boss section if we've run out of puzzles
+      session.isBossSection = true;
+      session.currentBossIndex = 0;
+      this.startBossBriefing(session, room);
+      return;
+    }
 
     // Endless mode: no phase change, always infiltration
     if (session.gameMode === 'endless') {

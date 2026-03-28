@@ -18,9 +18,15 @@ const ChapterScreen: React.FC = () => {
   const [currentLineTyped, setCurrentLineTyped] = useState(false);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Use a stable key to detect when chapterData changes (reset all state)
+  // Track when chapterData changes by reference (not just content)
+  const chapterCountRef = useRef(0);
+  const prevChapterDataRef = useRef(chapterData);
+  if (chapterData !== prevChapterDataRef.current) {
+    chapterCountRef.current++;
+    prevChapterDataRef.current = chapterData;
+  }
   const chapterKey = chapterData
-    ? `${chapterData.chapterNumber}-${chapterData.title}`
+    ? `${chapterData.chapterNumber}-${chapterData.title}-${chapterCountRef.current}`
     : '';
 
   // Reset all state whenever chapterData changes
