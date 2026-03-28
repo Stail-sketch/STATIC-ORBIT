@@ -39,10 +39,10 @@ const ATTACK_TYPE_JP: Record<string, string> = {
 };
 
 const SCAN_RESULT_JP: Record<string, { label: string; color: string }> = {
-  hot: { label: 'HOT', color: '#ff4444' },
-  warm: { label: 'WARM', color: '#ffaa00' },
-  cold: { label: 'COLD', color: '#4488ff' },
-  unavailable: { label: 'N/A', color: '#666666' },
+  hot: { label: '高温（近い）', color: '#ff4444' },
+  warm: { label: '温（やや近い）', color: '#ffaa00' },
+  cold: { label: '冷（遠い）', color: '#4488ff' },
+  unavailable: { label: '対象外', color: '#666666' },
 };
 
 /* -- Component -------------------------------------------- */

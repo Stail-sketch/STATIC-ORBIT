@@ -13,7 +13,6 @@ interface PuzzleProps {
   role: 'observer' | 'operator' | 'navigator' | 'hacker';
 }
 
-import SupportTerminal from '../puzzles/SupportTerminal';
 import NavigatorTerminal from '../puzzles/NavigatorTerminal';
 import HackerTerminal from '../puzzles/HackerTerminal';
 import CircuitLinkPuzzle from '../puzzles/CircuitLinkPuzzle';
