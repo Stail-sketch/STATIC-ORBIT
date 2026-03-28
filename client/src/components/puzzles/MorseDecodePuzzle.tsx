@@ -348,7 +348,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
               color: 'rgba(0,240,255,0.4)',
               letterSpacing: 1,
             }}>
-              速度: {playbackSpeed} WPM
+              速度: {playbackSpeed} 語/分
             </div>
           </div>
         </div>

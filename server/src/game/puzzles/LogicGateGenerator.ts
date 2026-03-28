@@ -275,6 +275,16 @@ export class LogicGateGenerator implements PuzzleGenerator {
           elementNames: [...elementNames],
           availableColors: [...availableColors],
         },
+        navigator: {
+          clues: clueTexts,
+          elementNames: [...elementNames],
+          availableColors: [...availableColors],
+        },
+        hacker: {
+          clues: clueTexts,
+          elementNames: [...elementNames],
+          availableColors: [...availableColors],
+        },
       },
       timeLimit,
 

@@ -124,6 +124,22 @@ export class OrbitCalcGenerator implements PuzzleGenerator {
           interference: interferenceEnabled,
           coupling,
         },
+        navigator: {
+          targets: parameters.map(p => ({
+            name: p.name,
+            targetValue: p.targetValue,
+            tolerance: p.tolerance,
+            unit: p.unit,
+          })),
+        },
+        hacker: {
+          targets: parameters.map(p => ({
+            name: p.name,
+            targetValue: p.targetValue,
+            tolerance: p.tolerance,
+            unit: p.unit,
+          })),
+        },
       },
       timeLimit,
 

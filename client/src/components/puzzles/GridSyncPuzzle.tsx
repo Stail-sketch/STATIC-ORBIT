@@ -234,36 +234,7 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
           </div>
         </div>
 
-        {/* Active cells list for verbal relay */}
-        <div style={{
-          marginTop: 16,
-          padding: '10px 14px',
-          background: 'rgba(0,240,255,0.03)',
-          border: '1px solid rgba(0,240,255,0.1)',
-          position: 'relative',
-          zIndex: 3,
-        }}>
-          <div style={{
-            fontSize: 10,
-            color: 'rgba(0,240,255,0.4)',
-            letterSpacing: 2,
-            marginBottom: 8,
-            fontFamily: "'Orbitron', sans-serif",
-          }}>
-            有効座標:
-          </div>
-          <div style={{
-            fontSize: 12,
-            color: '#00f0ff',
-            lineHeight: 1.8,
-            letterSpacing: 1,
-            wordBreak: 'break-all',
-          }}>
-            {targetPattern.flatMap((row, r) =>
-              row.map((filled, c) => filled ? cellLabel(r, c) : null).filter(Boolean)
-            ).join('  ')}
-          </div>
-        </div>
+        {/* Active cells list removed — grid itself is sufficient */}
       </div>
     </div>
   );
@@ -533,29 +504,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
           </motion.button>
         </div>
 
-        {/* Active coordinates reference */}
-        <div style={{
-          marginTop: 16,
-          padding: '8px 12px',
-          background: 'rgba(255,0,102,0.03)',
-          border: '1px solid rgba(255,0,102,0.1)',
-          fontSize: 10,
-          color: 'rgba(255,0,102,0.35)',
-          textAlign: 'center',
-          letterSpacing: 1,
-          position: 'relative',
-          zIndex: 3,
-        }}>
-          {filledCount > 0 ? (
-            <>
-              選択済: {grid.flatMap((row, r) =>
-                row.map((filled, c) => filled ? cellLabel(r, c) : null).filter(Boolean)
-              ).join('  ')}
-            </>
-          ) : (
-            'セル未選択 -- タップして切替'
-          )}
-        </div>
+        {/* Coordinate list removed — grid itself is sufficient */}
       </div>
     </div>
   );

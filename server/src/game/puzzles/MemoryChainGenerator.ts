@@ -84,6 +84,20 @@ export class MemoryChainGenerator implements PuzzleGenerator {
           gridCols: grid.cols,
           gridRows: grid.rows,
         },
+        navigator: {
+          panels: labels,
+          sequence,
+          displayTime,
+          gridCols: grid.cols,
+          gridRows: grid.rows,
+        },
+        hacker: {
+          panels: labels,
+          sequence,
+          displayTime,
+          gridCols: grid.cols,
+          gridRows: grid.rows,
+        },
       },
       timeLimit,
 

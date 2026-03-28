@@ -73,6 +73,20 @@ export class CircuitLinkGenerator implements PuzzleGenerator {
           sourcePorts: [...sourcePorts],
           destPorts: shuffle([...destPorts]),
         },
+        navigator: {
+          connectionMap: connections.map(c => ({
+            color: c.color,
+            sourcePort: c.sourcePort,
+            destPort: c.destPort,
+          })),
+        },
+        hacker: {
+          connectionMap: connections.map(c => ({
+            color: c.color,
+            sourcePort: c.sourcePort,
+            destPort: c.destPort,
+          })),
+        },
       },
       timeLimit,
 

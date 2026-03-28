@@ -112,6 +112,12 @@ export class CipherBreakGenerator implements PuzzleGenerator {
           targetLength: target.replace(/ /g, '').length,
           hasSpaces: target.includes(' '),
         },
+        navigator: {
+          cipherTable,
+        },
+        hacker: {
+          cipherTable,
+        },
       },
       timeLimit,
 

@@ -1,6 +1,6 @@
 // ===== STATIC ORBIT — Freq Tune Puzzle =====
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSocket } from '../../hooks/useSocket';
 import { useGameStore } from '../../stores/gameStore';
@@ -256,6 +256,20 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
   );
   const [lockedDials, setLockedDials] = useState<Set<number>>(() => new Set());
 
+  // Lock dials only when server confirms correct tuning
+  const prevFeedback = useRef(lastFeedback);
+  useEffect(() => {
+    if (lastFeedback && lastFeedback !== prevFeedback.current && lastFeedback.correct) {
+      // Extract dial index from feedback message: "ダイヤルXをYYY MHzでロック。"
+      const match = lastFeedback.feedback?.match(/ダイヤル(\d+)を/);
+      if (match) {
+        const dialIdx = parseInt(match[1], 10) - 1; // convert 1-based to 0-based
+        setLockedDials(prev => new Set(prev).add(dialIdx));
+      }
+    }
+    prevFeedback.current = lastFeedback;
+  }, [lastFeedback]);
+
   const handleFrequencyChange = useCallback((index: number, value: number) => {
     if (lockedDials.has(index)) return;
     setFrequencies(prev => {
@@ -273,7 +287,7 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
       action: 'tune',
       data: { dialIndex: index, frequency: frequencies[index] },
     });
-    setLockedDials(prev => new Set(prev).add(index));
+    // Don't immediately lock — wait for server feedback to confirm correctness
   }, [frequencies, lockedDials]);
 
   return (

@@ -162,6 +162,9 @@ const LobbyScreen: React.FC = () => {
                 >
                   {({observer: 'オブザーバー', operator: 'オペレーター', navigator: 'ナビゲーター', hacker: 'ハッカー'} as Record<string, string>)[player.role] ?? player.role.toUpperCase()}
                 </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+                  {({observer: '情報を読み取り伝える', operator: 'パズルを操作する', navigator: '補助情報を伝える', hacker: '補助情報を伝える'} as Record<string, string>)[player.role] ?? ''}
+                </span>
               </div>
 
               {/* Status */}

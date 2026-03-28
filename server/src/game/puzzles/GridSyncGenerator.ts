@@ -44,6 +44,12 @@ export class GridSyncGenerator implements PuzzleGenerator {
         operator: {
           gridSize: size,
         },
+        navigator: {
+          targetPattern,
+        },
+        hacker: {
+          targetPattern,
+        },
       },
       timeLimit,
 

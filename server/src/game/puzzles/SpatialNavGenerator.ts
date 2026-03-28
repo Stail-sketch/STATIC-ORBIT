@@ -138,6 +138,20 @@ export class SpatialNavGenerator implements PuzzleGenerator {
           currentPos: { ...startPos },
           mapSize: size,
         },
+        navigator: {
+          fullMap: grid.map(row => [...row]),
+          startPos: { ...startPos },
+          exitPos: { ...exitPos },
+          hazards: hazards.map(h => ({ ...h })),
+          mapSize: size,
+        },
+        hacker: {
+          fullMap: grid.map(row => [...row]),
+          startPos: { ...startPos },
+          exitPos: { ...exitPos },
+          hazards: hazards.map(h => ({ ...h })),
+          mapSize: size,
+        },
       },
       timeLimit,
 

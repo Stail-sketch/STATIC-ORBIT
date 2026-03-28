@@ -14,10 +14,10 @@ interface BeatCommand {
 
 function sequenceLength(difficulty: Difficulty): number {
   switch (difficulty) {
-    case 'easy': return 6;
-    case 'normal': return 10;
-    case 'hard': return 15;
-    case 'extreme': return 20;
+    case 'easy': return 4;
+    case 'normal': return 6;
+    case 'hard': return 8;
+    case 'extreme': return 10;
   }
 }
 
@@ -34,8 +34,8 @@ function fakeCount(difficulty: Difficulty): number {
   switch (difficulty) {
     case 'easy': return 0;
     case 'normal': return 0;
-    case 'hard': return 3;
-    case 'extreme': return 5;
+    case 'hard': return 1;
+    case 'extreme': return 2;
   }
 }
 
@@ -103,6 +103,24 @@ export class ReflexBurstGenerator implements PuzzleGenerator {
           tempo: beatTempo,
           totalBeats,
           currentBeat: 0,
+        },
+        navigator: {
+          sequence: commands.map(c => ({
+            key: c.key,
+            isFake: c.isFake,
+            beatIndex: c.beatIndex,
+          })),
+          tempo: beatTempo,
+          totalBeats,
+        },
+        hacker: {
+          sequence: commands.map(c => ({
+            key: c.key,
+            isFake: c.isFake,
+            beatIndex: c.beatIndex,
+          })),
+          tempo: beatTempo,
+          totalBeats,
         },
       },
       timeLimit,

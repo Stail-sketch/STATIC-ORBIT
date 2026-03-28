@@ -144,14 +144,15 @@ const GameScreen: React.FC = () => {
     prevFeedback.current = lastFeedback;
   }, [lastFeedback, audio]);
 
-  // Heartbeat when time < 15
+  // Heartbeat when time < 15 (only while playing — stop on solved/failed)
   useEffect(() => {
-    if (timeRemaining < 15 && timeRemaining > 0) {
+    const isPlaying = currentPuzzleType && !lastFeedback?.feedback?.includes('解除成功') && !lastFeedback?.feedback?.includes('時間切れ');
+    if (timeRemaining < 15 && timeRemaining > 0 && isPlaying) {
       audio.playHeartbeat();
     } else {
       audio.stopHeartbeat();
     }
-  }, [timeRemaining < 15, audio]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [timeRemaining < 15, audio, currentPuzzleType, lastFeedback]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Countdown SFX for last 5 seconds (once per second tick)
   useEffect(() => {

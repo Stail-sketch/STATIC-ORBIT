@@ -80,6 +80,20 @@ export class MorseDecodeGenerator implements PuzzleGenerator {
           referenceChart,
           targetLength: targetWord.length,
         },
+        navigator: {
+          morseSequence,
+          playbackSpeed,
+          targetWord,
+          showLetters,
+          morseGroups,
+        },
+        hacker: {
+          morseSequence,
+          playbackSpeed,
+          targetWord,
+          showLetters,
+          morseGroups,
+        },
       },
       timeLimit,
 

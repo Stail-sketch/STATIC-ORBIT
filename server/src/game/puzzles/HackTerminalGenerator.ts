@@ -77,6 +77,14 @@ export class HackTerminalGenerator implements PuzzleGenerator {
           commandCount: 1,
           commandLength: command.length,
         },
+        navigator: {
+          commands: [command],
+          commandCount: 1,
+        },
+        hacker: {
+          commands: [command],
+          commandCount: 1,
+        },
       },
       timeLimit,
 

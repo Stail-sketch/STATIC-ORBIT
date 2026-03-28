@@ -71,6 +71,22 @@ export class FreqTuneGenerator implements PuzzleGenerator {
             label: `DIAL ${t.index + 1}`,
           })),
         },
+        navigator: {
+          targets: targets.map(t => ({
+            dialIndex: t.index,
+            label: `FREQ ${t.index + 1}: ${t.frequency} MHz ±${t.tolerance}`,
+            frequency: t.frequency,
+            tolerance: t.tolerance,
+          })),
+        },
+        hacker: {
+          targets: targets.map(t => ({
+            dialIndex: t.index,
+            label: `FREQ ${t.index + 1}: ${t.frequency} MHz ±${t.tolerance}`,
+            frequency: t.frequency,
+            tolerance: t.tolerance,
+          })),
+        },
       },
       timeLimit,
 
@@ -107,6 +123,7 @@ export class FreqTuneGenerator implements PuzzleGenerator {
           };
         }
 
+        // Incorrect — do NOT add to tunedDials so the operator can retry
         return {
           correct: false,
           penalty: 10,
