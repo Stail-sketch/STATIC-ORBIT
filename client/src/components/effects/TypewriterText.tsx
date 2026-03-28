@@ -65,7 +65,9 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({
       className={`terminal-text ${className}`}
       style={{
         fontSize: '0.95rem',
-        lineHeight: 1.7,
+        lineHeight: 1.8,
+        wordBreak: 'keep-all',
+        overflowWrap: 'break-word',
       }}
     >
       {displayedLines.map((line, i) => (

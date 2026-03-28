@@ -291,7 +291,7 @@ const BriefingScreen: React.FC = () => {
                       {label}
                     </span>
                   )}
-                  <span style={{ color, fontFamily: 'var(--font-mono)', fontSize: '0.7rem', lineHeight: '1.6' }}>
+                  <span style={{ color, fontFamily: 'var(--font-mono)', fontSize: '0.72rem', lineHeight: '1.7' }}>
                     {body}
                   </span>
                 </div>
@@ -439,7 +439,7 @@ const dividerStyle: React.CSSProperties = {
 
 const terminalBoxStyle: React.CSSProperties = {
   width: '100%',
-  maxWidth: '540px',
+  maxWidth: '620px',
   background: 'rgba(0, 0, 0, 0.4)',
   border: '1px solid rgba(255, 255, 255, 0.06)',
   marginTop: '8px',
@@ -471,11 +471,14 @@ const terminalLabelStyle: React.CSSProperties = {
 const terminalBodyStyle: React.CSSProperties = {
   padding: '16px',
   minHeight: '100px',
+  wordBreak: 'keep-all',
+  overflowWrap: 'break-word',
+  lineHeight: 1.8,
 };
 
 const guideBoxStyle: React.CSSProperties = {
   width: '100%',
-  maxWidth: '540px',
+  maxWidth: '620px',
   background: 'rgba(0, 240, 255, 0.03)',
   border: '1px solid rgba(0, 240, 255, 0.15)',
   marginTop: '8px',
@@ -506,6 +509,9 @@ const guideLabelStyle: React.CSSProperties = {
 
 const guideBodyStyle: React.CSSProperties = {
   padding: '14px 16px',
+  wordBreak: 'keep-all',
+  overflowWrap: 'break-word',
+  lineHeight: 1.7,
 };
 
 const livesStyle: React.CSSProperties = {

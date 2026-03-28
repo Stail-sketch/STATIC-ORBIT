@@ -607,6 +607,9 @@ const storyEndingLabelStyle: React.CSSProperties = {
 const storyEndingBodyStyle: React.CSSProperties = {
   padding: '16px',
   minHeight: '80px',
+  wordBreak: 'keep-all',
+  overflowWrap: 'break-word',
+  lineHeight: 1.8,
 };
 
 export default ResultScreen;

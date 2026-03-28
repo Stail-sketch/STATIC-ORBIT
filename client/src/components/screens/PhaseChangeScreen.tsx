@@ -309,6 +309,8 @@ const narrativeBoxStyle: React.CSSProperties = {
   padding: '24px',
   background: 'rgba(255, 20, 40, 0.03)',
   border: '1px solid rgba(255, 34, 68, 0.15)',
+  wordBreak: 'keep-all',
+  overflowWrap: 'break-word',
 };
 
 const warningContainerStyle: React.CSSProperties = {
