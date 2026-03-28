@@ -32,6 +32,27 @@ const NOISE_FRAGMENTS = [
   'queue.push(MSG_TICK)',
   'rng.seed(Date.now())',
   'gc.collect(FULL)',
+  // Convincing noise lines that look similar to valid patterns
+  'sys.GH0ST.inject(0xBB)',
+  'override_protocol(BACKUP)',
+  'mem.write(0xDEAF, payload)',
+  'net.ECH0.broadcast(sig)',
+  'proc.overide.exec(root)',
+  'GH0ST.wire.activate()',
+  'buf.load(0xBEFF, 1024)',
+  'STATIK.orbit.sync()',
+  'core.ECH0.respond(ACK)',
+  'overrride.layer(3, DEEP)',
+  'io.GH0ST.channel.open()',
+  'hex.decode(0xFF01, OUT)',
+  'ECH0.pulse.emit(FREQ)',
+  'sys.STATC.lock(false)',
+  'data.0xDE4D.route(proxy)',
+  'STATI0N.core.breach(KEY)',
+  'net.echo_local.ping()',
+  'sys.ghost_cache.clear()',
+  'static_var.init(NULL)',
+  'buf.0xBEEP.flush(OUT)',
 ];
 
 const VALID_LINE_TEMPLATES = [
@@ -57,28 +78,28 @@ const VALID_LINE_TEMPLATES = [
 
 function lineCountForDifficulty(difficulty: Difficulty): number {
   switch (difficulty) {
-    case 'easy': return 20;
-    case 'normal': return 24;
-    case 'hard': return 28;
-    case 'extreme': return 30;
+    case 'easy': return 30;
+    case 'normal': return 40;
+    case 'hard': return 50;
+    case 'extreme': return 60;
   }
 }
 
 function validCountForDifficulty(difficulty: Difficulty): number {
   switch (difficulty) {
-    case 'easy': return 7;
-    case 'normal': return 9;
-    case 'hard': return 11;
-    case 'extreme': return 13;
+    case 'easy': return 10;
+    case 'normal': return 13;
+    case 'hard': return 16;
+    case 'extreme': return 19;
   }
 }
 
 function targetForDifficulty(difficulty: Difficulty): number {
   switch (difficulty) {
-    case 'easy': return 5;
-    case 'normal': return 7;
-    case 'hard': return 9;
-    case 'extreme': return 11;
+    case 'easy': return 8;
+    case 'normal': return 11;
+    case 'hard': return 14;
+    case 'extreme': return 17;
   }
 }
 
@@ -171,7 +192,7 @@ export class EchoOverrideGenerator implements PuzzleGenerator {
           description: 'パターンは見えますが、有効行のインデックスは見えません。',
         },
       },
-      timeLimit: 999,
+      timeLimit: 180,
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'select-line') {
@@ -203,11 +224,11 @@ export class EchoOverrideGenerator implements PuzzleGenerator {
           };
         }
 
-        score--;
+        score -= 2;
         return {
           correct: false,
           penalty: 0,
-          feedback: `ノイズ行を選択。スコア減少。 (${score}/${target})`,
+          feedback: `ノイズ行を選択。-2ポイント。 (${score}/${target})`,
         };
       },
     };

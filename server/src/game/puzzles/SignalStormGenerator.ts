@@ -22,6 +22,15 @@ const COLORS: TargetColor[] = ['red', 'blue', 'green', 'yellow', 'cyan', 'magent
 
 function captureTargetForDifficulty(difficulty: Difficulty): number {
   switch (difficulty) {
+    case 'easy': return 10;
+    case 'normal': return 14;
+    case 'hard': return 18;
+    case 'extreme': return 22;
+  }
+}
+
+function roundsForDifficulty(difficulty: Difficulty): number {
+  switch (difficulty) {
     case 'easy': return 6;
     case 'normal': return 8;
     case 'hard': return 10;
@@ -29,21 +38,12 @@ function captureTargetForDifficulty(difficulty: Difficulty): number {
   }
 }
 
-function roundsForDifficulty(difficulty: Difficulty): number {
-  switch (difficulty) {
-    case 'easy': return 4;
-    case 'normal': return 5;
-    case 'hard': return 6;
-    case 'extreme': return 7;
-  }
-}
-
 function targetsPerRound(difficulty: Difficulty): [number, number] {
   switch (difficulty) {
-    case 'easy': return [3, 4];
-    case 'normal': return [3, 5];
-    case 'hard': return [4, 5];
-    case 'extreme': return [4, 6];
+    case 'easy': return [5, 6];
+    case 'normal': return [6, 8];
+    case 'hard': return [7, 9];
+    case 'extreme': return [8, 11];
   }
 }
 
@@ -218,7 +218,7 @@ export class SignalStormGenerator implements PuzzleGenerator {
           description: '本物の形状だけ見えます。色はオブザーバーに確認してください。',
         },
       },
-      timeLimit: 999,
+      timeLimit: 180,
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'capture') {
@@ -254,10 +254,11 @@ export class SignalStormGenerator implements PuzzleGenerator {
         }
 
         missCount++;
+        capturedReal = Math.max(0, capturedReal - 2);
         return {
           correct: false,
           penalty: 0,
-          feedback: `デコイをキャプチャ。ミス +1 (ミス合計: ${missCount})`,
+          feedback: `デコイをキャプチャ。-2ポイント。 (${capturedReal}/${captureTarget})`,
         };
       },
     };

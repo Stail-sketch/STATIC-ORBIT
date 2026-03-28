@@ -707,8 +707,7 @@ export class GameEngine {
       }
 
       const puzzle = generator.generate(difficulty, room.players.length);
-      // Override time limit for boss stages: generous 300 seconds
-      puzzle.timeLimit = 300;
+      // Use the puzzle generator's own time limit (no override)
       session.currentPuzzle = puzzle;
       session.missCount = 0;
       session.hintsUsed = 0;

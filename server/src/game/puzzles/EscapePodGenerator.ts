@@ -4,34 +4,39 @@ import type { Difficulty, GameAction, PuzzleType, ValidationResult } from '../..
 import type { PuzzleGenerator, PuzzleInstance } from './PuzzleGenerator.js';
 
 interface SubsystemSolution {
-  power: string;        // 3-digit code e.g. "472"
-  seal: boolean[];      // 4 switches e.g. [true, false, true, true]
-  nav: { x: number; y: number };  // coordinates
-  thrust: number;       // percentage 0-100
+  power: string;        // 4-digit code e.g. "4729"
+  seal: boolean[];      // 6 switches
+  nav: { x: number; y: number; z: number };  // coordinates with Z
+  thrust: number;       // percentage 0-100 (exact match required)
+  comms: string;        // 3-digit frequency e.g. "347"
 }
 
-const SUBSYSTEM_ORDER = ['power', 'seal', 'nav', 'thrust'] as const;
+const SUBSYSTEM_ORDER = ['power', 'seal', 'nav', 'thrust', 'comms'] as const;
 const SUBSYSTEM_NAMES: Record<string, string> = {
   power: '電源',
   seal: '気密',
   nav: 'ナビ',
   thrust: '推進',
+  comms: '通信',
 };
 
 function generateSolution(difficulty: Difficulty): SubsystemSolution {
-  const powerCode = String(Math.floor(Math.random() * 900) + 100); // 100-999
+  const powerCode = String(Math.floor(Math.random() * 9000) + 1000); // 1000-9999
 
-  const seal = Array.from({ length: 4 }, () => Math.random() > 0.5);
+  const seal = Array.from({ length: 6 }, () => Math.random() > 0.5);
 
   const navRange = difficulty === 'easy' ? 50 : difficulty === 'normal' ? 100 : 200;
   const nav = {
     x: Math.floor(Math.random() * navRange) - Math.floor(navRange / 2),
     y: Math.floor(Math.random() * navRange) - Math.floor(navRange / 2),
+    z: Math.floor(Math.random() * navRange) - Math.floor(navRange / 2),
   };
 
   const thrust = Math.floor(Math.random() * 81) + 20; // 20-100
 
-  return { power: powerCode, seal, nav, thrust };
+  const commsFreq = String(Math.floor(Math.random() * 900) + 100); // 100-999
+
+  return { power: powerCode, seal, nav, thrust, comms: commsFreq };
 }
 
 export class EscapePodGenerator implements PuzzleGenerator {
@@ -41,8 +46,6 @@ export class EscapePodGenerator implements PuzzleGenerator {
     const solution = generateSolution(difficulty);
     const completedSystems = new Set<string>();
     let currentSystemIndex = 0;
-
-    const thrustTolerance = difficulty === 'easy' ? 5 : difficulty === 'normal' ? 3 : 2;
 
     const instance: PuzzleInstance = {
       type: this.type,
@@ -55,8 +58,9 @@ export class EscapePodGenerator implements PuzzleGenerator {
           solutions: {
             power: solution.power,
             seal: solution.seal,
-            nav: `X:${solution.nav.x}, Y:${solution.nav.y}`,
+            nav: `X:${solution.nav.x}, Y:${solution.nav.y}, Z:${solution.nav.z}`,
             thrust: `${solution.thrust}%`,
+            comms: solution.comms,
           },
           subsystemOrder: [...SUBSYSTEM_ORDER],
           description: '全サブシステムの解答が見えます。順番にオペレーターに伝えてください。',
@@ -64,14 +68,15 @@ export class EscapePodGenerator implements PuzzleGenerator {
         operator: {
           subsystemOrder: [...SUBSYSTEM_ORDER],
           subsystemNames: { ...SUBSYSTEM_NAMES },
-          description: '4つのサブシステムを順番に起動してください。オブザーバーの指示に従ってください。',
+          description: '5つのサブシステムを順番に起動してください。オブザーバーの指示に従ってください。',
         },
         navigator: {
           solutions: {
             power: solution.power,
             seal: solution.seal,
-            nav: `X:${solution.nav.x}, Y:${solution.nav.y}`,
+            nav: `X:${solution.nav.x}, Y:${solution.nav.y}, Z:${solution.nav.z}`,
             thrust: `${solution.thrust}%`,
+            comms: solution.comms,
           },
           subsystemOrder: [...SUBSYSTEM_ORDER],
           description: '全解答が見えます。オブザーバーと連携して指示を出してください。',
@@ -79,7 +84,7 @@ export class EscapePodGenerator implements PuzzleGenerator {
         hacker: {
           solutions: {
             power: solution.power,
-            nav: `X:${solution.nav.x}, Y:${solution.nav.y}`,
+            nav: `X:${solution.nav.x}, Y:${solution.nav.y}, Z:${solution.nav.z}`,
           },
           subsystemOrder: [...SUBSYSTEM_ORDER],
           description: '電源とナビの解答が見えます。残りはオブザーバーに確認してください。',
@@ -117,14 +122,14 @@ export class EscapePodGenerator implements PuzzleGenerator {
           case 'power': {
             correct = String(answer) === solution.power;
             if (!correct) {
-              return { correct: false, penalty: 5, feedback: '電源コードが違います。3桁のコードを入力してください。' };
+              return { correct: false, penalty: 5, feedback: '電源コードが違います。4桁のコードを入力してください。' };
             }
             break;
           }
           case 'seal': {
             const switches = answer as boolean[];
-            if (!Array.isArray(switches) || switches.length !== 4) {
-              return { correct: false, penalty: 0, feedback: '4つのスイッチ状態を配列で指定してください。' };
+            if (!Array.isArray(switches) || switches.length !== 6) {
+              return { correct: false, penalty: 0, feedback: '6つのスイッチ状態を配列で指定してください。' };
             }
             correct = switches.every((v, i) => v === solution.seal[i]);
             if (!correct) {
@@ -133,11 +138,11 @@ export class EscapePodGenerator implements PuzzleGenerator {
             break;
           }
           case 'nav': {
-            const coords = answer as { x: number; y: number };
-            if (coords == null || coords.x == null || coords.y == null) {
-              return { correct: false, penalty: 0, feedback: '座標をX, Y形式で指定してください。' };
+            const coords = answer as { x: number; y: number; z: number };
+            if (coords == null || coords.x == null || coords.y == null || coords.z == null) {
+              return { correct: false, penalty: 0, feedback: '座標をX, Y, Z形式で指定してください。' };
             }
-            correct = coords.x === solution.nav.x && coords.y === solution.nav.y;
+            correct = coords.x === solution.nav.x && coords.y === solution.nav.y && coords.z === solution.nav.z;
             if (!correct) {
               return { correct: false, penalty: 5, feedback: 'ナビ座標が一致しません。' };
             }
@@ -148,9 +153,16 @@ export class EscapePodGenerator implements PuzzleGenerator {
             if (isNaN(thrustVal)) {
               return { correct: false, penalty: 0, feedback: '推力をパーセンテージで入力してください。' };
             }
-            correct = Math.abs(thrustVal - solution.thrust) <= thrustTolerance;
+            correct = thrustVal === solution.thrust;
             if (!correct) {
-              return { correct: false, penalty: 5, feedback: `推力が目標値から外れています。(許容誤差: ±${thrustTolerance}%)` };
+              return { correct: false, penalty: 5, feedback: '推力が目標値と一致しません。正確な値を入力してください。' };
+            }
+            break;
+          }
+          case 'comms': {
+            correct = String(answer) === solution.comms;
+            if (!correct) {
+              return { correct: false, penalty: 5, feedback: '通信周波数が違います。3桁の周波数を入力してください。' };
             }
             break;
           }

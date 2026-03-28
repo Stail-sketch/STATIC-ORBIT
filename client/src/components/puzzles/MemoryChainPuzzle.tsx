@@ -99,7 +99,6 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [activePanel, setActivePanel] = useState<string | null>(null);
-  const [playbackDone, setPlaybackDone] = useState(false);
   const playingRef = useRef(false);
 
   const handlePlay = useCallback(() => {
@@ -107,7 +106,6 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
     playingRef.current = true;
     setIsPlaying(true);
     setActivePanel(null);
-    setPlaybackDone(false);
 
     let idx = 0;
     const advance = () => {
@@ -115,7 +113,6 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
         playingRef.current = false;
         setIsPlaying(false);
         setActivePanel(null);
-        setPlaybackDone(true);
         return;
       }
 
@@ -244,45 +241,6 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
               {isPlaying ? '再生中...' : 'シーケンス再生'}
             </motion.button>
           </div>
-
-          {/* Sequence text list (shown after playback) */}
-          <AnimatePresence>
-            {playbackDone && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                style={{
-                  padding: '12px 16px',
-                  background: 'rgba(0,0,0,0.4)',
-                  border: '1px solid rgba(0,240,255,0.15)',
-                  clipPath: 'polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px)',
-                }}
-              >
-                <div style={{
-                  fontFamily: "'Orbitron', sans-serif",
-                  fontSize: 9,
-                  letterSpacing: 2,
-                  color: 'rgba(0,240,255,0.4)',
-                  marginBottom: 8,
-                }}>
-                  シーケンス順序
-                </div>
-                <div style={{
-                  fontFamily: "'Share Tech Mono', monospace",
-                  fontSize: 16,
-                  color: '#00f0ff',
-                  textShadow: '0 0 8px rgba(0,240,255,0.4)',
-                  letterSpacing: 2,
-                  textAlign: 'center',
-                  lineHeight: 1.8,
-                }}>
-                  {sequence.join(' \u2192 ')}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Footer */}

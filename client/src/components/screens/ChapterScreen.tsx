@@ -18,11 +18,29 @@ const ChapterScreen: React.FC = () => {
   const [currentLineTyped, setCurrentLineTyped] = useState(false);
   const typewriterRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Use a stable key to detect when chapterData changes (reset all state)
+  const chapterKey = chapterData
+    ? `${chapterData.chapterNumber}-${chapterData.title}`
+    : '';
+
+  // Reset all state whenever chapterData changes
+  useEffect(() => {
+    setPhase('black');
+    setCurrentLine(0);
+    setDisplayedText('');
+    setAllLinesFinished(false);
+    setCurrentLineTyped(false);
+    if (typewriterRef.current) {
+      clearInterval(typewriterRef.current);
+      typewriterRef.current = null;
+    }
+  }, [chapterKey]);
+
   if (!chapterData) return null;
 
   const { chapterNumber, title, subtitle, lines } = chapterData;
 
-  // Phase sequencing
+  // Phase sequencing — re-runs when chapterData changes
   useEffect(() => {
     audio.playSFX('phaseChange');
 
@@ -42,7 +60,7 @@ const ChapterScreen: React.FC = () => {
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [chapterKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Typewriter effect for story lines
   useEffect(() => {

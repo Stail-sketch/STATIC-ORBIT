@@ -8,19 +8,19 @@ const START_POSITION = 3;
 
 function wavesForDifficulty(difficulty: Difficulty): number {
   switch (difficulty) {
-    case 'easy': return 15;
-    case 'normal': return 20;
-    case 'hard': return 25;
-    case 'extreme': return 30;
+    case 'easy': return 20;
+    case 'normal': return 30;
+    case 'hard': return 40;
+    case 'extreme': return 50;
   }
 }
 
 function blockedLanesForDifficulty(difficulty: Difficulty): [number, number] {
   switch (difficulty) {
-    case 'easy': return [2, 3];
-    case 'normal': return [2, 4];
-    case 'hard': return [3, 4];
-    case 'extreme': return [3, 5];
+    case 'easy': return [3, 4];
+    case 'normal': return [4, 5];
+    case 'hard': return [5, 5];
+    case 'extreme': return [5, 6];
   }
 }
 
@@ -87,7 +87,7 @@ export class AsteroidDodgeGenerator implements PuzzleGenerator {
           description: 'パターンの一部が見えます。オブザーバーと協力して情報を補完してください。',
         },
       },
-      timeLimit: 999,
+      timeLimit: 180,
 
       validate(action: GameAction): ValidationResult {
         if (action.action === 'move') {

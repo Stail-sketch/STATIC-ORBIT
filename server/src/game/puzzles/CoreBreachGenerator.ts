@@ -34,19 +34,19 @@ const SYMBOL_PAIRS: [string, string][] = [
 
 function problemCountForDifficulty(difficulty: Difficulty): number {
   switch (difficulty) {
-    case 'easy': return 10;
-    case 'normal': return 14;
-    case 'hard': return 18;
-    case 'extreme': return 20;
+    case 'easy': return 15;
+    case 'normal': return 20;
+    case 'hard': return 25;
+    case 'extreme': return 30;
   }
 }
 
 function thresholdForDifficulty(difficulty: Difficulty): number {
   switch (difficulty) {
-    case 'easy': return 6;
-    case 'normal': return 8;
-    case 'hard': return 10;
-    case 'extreme': return 12;
+    case 'easy': return 10;
+    case 'normal': return 14;
+    case 'hard': return 18;
+    case 'extreme': return 22;
   }
 }
 
@@ -57,18 +57,18 @@ function generateMathProblem(): { question: string; answer: string } {
 
   switch (op) {
     case '+':
-      a = Math.floor(Math.random() * 90) + 10;
-      b = Math.floor(Math.random() * 90) + 10;
+      a = Math.floor(Math.random() * 900) + 100;
+      b = Math.floor(Math.random() * 900) + 100;
       result = a + b;
       break;
     case '-':
-      a = Math.floor(Math.random() * 90) + 20;
-      b = Math.floor(Math.random() * (a - 1)) + 1;
+      a = Math.floor(Math.random() * 900) + 200;
+      b = Math.floor(Math.random() * (a - 100)) + 100;
       result = a - b;
       break;
     case '*':
-      a = Math.floor(Math.random() * 12) + 2;
-      b = Math.floor(Math.random() * 12) + 2;
+      a = Math.floor(Math.random() * 20) + 5;
+      b = Math.floor(Math.random() * 20) + 5;
       result = a * b;
       break;
   }
@@ -166,7 +166,7 @@ export class CoreBreachGenerator implements PuzzleGenerator {
           description: '奇数番目の問題の解答が見えます。残りはオブザーバーに確認してください。',
         },
       },
-      timeLimit: 999,
+      timeLimit: 180,
 
       validate(action: GameAction): ValidationResult {
         if (action.action !== 'breach') {
@@ -200,10 +200,11 @@ export class CoreBreachGenerator implements PuzzleGenerator {
           };
         }
 
+        correctCount = Math.max(0, correctCount - 1);
         return {
           correct: false,
           penalty: 0,
-          feedback: `不正解。次の問題へ。 (${correctCount}/${threshold})`,
+          feedback: `不正解。-1ポイント。 (${correctCount}/${threshold})`,
         };
       },
     };
