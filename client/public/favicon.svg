@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#0a0a1a" stroke="#00f0ff" stroke-width="2"/>
+  <!-- Orbit ring -->
+  <ellipse cx="32" cy="32" rx="26" ry="10" fill="none" stroke="#00f0ff" stroke-width="1.5" opacity="0.6" transform="rotate(-25 32 32)"/>
+  <!-- Core hexagon -->
+  <polygon points="32,14 44,23 44,41 32,50 20,41 20,23" fill="none" stroke="#00f0ff" stroke-width="2"/>
+  <!-- Inner dot -->
+  <circle cx="32" cy="32" r="4" fill="#00f0ff"/>
+  <!-- Signal lines -->
+  <line x1="32" y1="8" x2="32" y2="14" stroke="#ff00aa" stroke-width="1.5"/>
+  <line x1="32" y1="50" x2="32" y2="56" stroke="#ff00aa" stroke-width="1.5"/>
+  <line x1="8" y1="32" x2="20" y2="32" stroke="#ff00aa" stroke-width="1.5" opacity="0.7"/>
+  <line x1="44" y1="32" x2="56" y2="32" stroke="#ff00aa" stroke-width="1.5" opacity="0.7"/>
+</svg>
