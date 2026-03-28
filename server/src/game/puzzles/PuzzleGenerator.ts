@@ -17,8 +17,8 @@ export interface PuzzleGenerator {
 
 /** Time limits per difficulty in seconds */
 export const TIME_LIMITS: Record<Difficulty, number> = {
-  easy: 90,
-  normal: 75,
-  hard: 60,
-  extreme: 45,
+  easy: 60,
+  normal: 50,
+  hard: 40,
+  extreme: 30,
 };

@@ -115,6 +115,8 @@ function MorseSymbol({ symbol, active }: { symbol: string; active: boolean }) {
 function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
   const morseSequence = roleData.morseSequence as string;
   const playbackSpeed = roleData.playbackSpeed as number;
+  const showLetters = roleData.showLetters as boolean | undefined;
+  const morseGroups = roleData.morseGroups as Array<{ letter: string; morse: string }> | undefined;
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -245,6 +247,47 @@ function ObserverView({ roleData }: { roleData: Record<string, unknown> }) {
               {morseSequence}
             </div>
           </div>
+
+          {/* Decoded letters (easy/normal only) */}
+          {showLetters && morseGroups && (
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              justifyContent: 'center',
+              marginBottom: 16,
+              padding: '12px',
+              background: 'rgba(51,255,102,0.04)',
+              border: '1px solid rgba(51,255,102,0.15)',
+            }}>
+              {morseGroups.map((g, idx) => (
+                <div key={idx} style={{
+                  padding: '6px 10px',
+                  background: 'rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(51,255,102,0.2)',
+                  textAlign: 'center',
+                  minWidth: 60,
+                }}>
+                  <div style={{
+                    fontFamily: "'Share Tech Mono', monospace",
+                    fontSize: 16,
+                    color: 'rgba(0,240,255,0.7)',
+                    letterSpacing: 3,
+                    marginBottom: 4,
+                  }}>
+                    {g.morse}
+                  </div>
+                  <div style={{
+                    fontSize: 10,
+                    color: 'rgba(51,255,102,0.6)',
+                    letterSpacing: 1,
+                  }}>
+                    = {g.letter}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Visual dots and dashes */}
           <div style={{

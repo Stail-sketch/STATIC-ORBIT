@@ -81,6 +81,22 @@ export class OrbitCalcGenerator implements PuzzleGenerator {
     // Track which params are locked (calibrated correctly)
     const locked = new Set<number>();
 
+    // Drift settings: on normal+, locked params expire after N seconds
+    const driftEnabled = difficulty !== 'easy';
+    const driftTimeout = difficulty === 'normal' ? 20 : difficulty === 'hard' ? 15 : 10; // seconds
+
+    // Interference: on hard+, a random param intermittently shows ???
+    const interferenceEnabled = difficulty === 'hard' || difficulty === 'extreme';
+
+    // Coupling: on extreme, changing one param slightly shifts another
+    const couplingEnabled = difficulty === 'extreme';
+    let coupling: { sourceIndex: number; targetIndex: number; factor: number } | null = null;
+    if (couplingEnabled && count >= 2) {
+      const srcIdx = Math.floor(Math.random() * count);
+      let tgtIdx = (srcIdx + 1) % count;
+      coupling = { sourceIndex: srcIdx, targetIndex: tgtIdx, factor: 0.1 + Math.random() * 0.15 };
+    }
+
     const timeLimit = TIME_LIMITS[difficulty];
 
     const instance: PuzzleInstance = {
@@ -104,6 +120,9 @@ export class OrbitCalcGenerator implements PuzzleGenerator {
             step: p.step,
             unit: p.unit,
           })),
+          drift: driftEnabled ? { enabled: true, timeout: driftTimeout } : { enabled: false, timeout: 0 },
+          interference: interferenceEnabled,
+          coupling,
         },
       },
       timeLimit,

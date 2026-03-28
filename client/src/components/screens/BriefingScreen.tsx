@@ -133,7 +133,7 @@ const BriefingScreen: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Stage / Wave number */}
+      {/* Stage / Wave number + Time limit */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -141,6 +141,9 @@ const BriefingScreen: React.FC = () => {
         style={stageNumberStyle}
       >
         {isEndless ? `WAVE ${stageNum}` : `ステージ ${stageNum} / ${totalNum}`}
+        <span style={stageTimeLimitStyle}>
+          制限時間: {briefing.timeLimit}秒
+        </span>
       </motion.div>
 
       {/* Puzzle type name */}
@@ -338,10 +341,6 @@ const BriefingScreen: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Time limit info */}
-      <div style={timeLimitStyle}>
-        制限時間: {briefing.timeLimit}秒
-      </div>
     </div>
   );
 };
@@ -488,8 +487,10 @@ const readySectionStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '12px',
-  marginTop: '20px',
+  gap: '16px',
+  marginTop: '32px',
+  paddingTop: '16px',
+  borderTop: '1px solid rgba(255, 255, 255, 0.06)',
 };
 
 const readyStatusStyle: React.CSSProperties = {
@@ -526,13 +527,12 @@ const countdownNumberStyle: React.CSSProperties = {
   letterSpacing: '0.05em',
 };
 
-const timeLimitStyle: React.CSSProperties = {
-  position: 'absolute',
-  bottom: '20px',
+const stageTimeLimitStyle: React.CSSProperties = {
+  marginLeft: '16px',
   fontFamily: 'var(--font-mono)',
-  fontSize: '0.65rem',
-  color: 'rgba(255, 255, 255, 0.2)',
-  letterSpacing: '0.15em',
+  fontSize: '0.75rem',
+  color: 'rgba(255, 255, 255, 0.3)',
+  letterSpacing: '0.1em',
 };
 
 export default BriefingScreen;

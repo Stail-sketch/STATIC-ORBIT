@@ -1,6 +1,6 @@
 // ===== STATIC ORBIT — Orbit Calc Puzzle =====
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getSocket } from '../../hooks/useSocket';
 import { useGameStore } from '../../stores/gameStore';
@@ -295,10 +295,67 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
     step: number;
     unit: string;
   }>;
+  const drift = roleData.drift as { enabled: boolean; timeout: number } | undefined;
+  const interference = roleData.interference as boolean | undefined;
+  const coupling = roleData.coupling as { sourceIndex: number; targetIndex: number; factor: number } | null | undefined;
+
   const lastFeedback = useGameStore((s) => s.lastFeedback);
 
   const [values, setValues] = useState<number[]>(() => parameters.map((p) => p.currentValue));
   const [lockedParams, setLockedParams] = useState<Set<number>>(() => new Set());
+  const [lockTimers, setLockTimers] = useState<Record<number, number>>({});
+  const [jammedParam, setJammedParam] = useState<number | null>(null);
+  const lockTimerRefs = useRef<Record<number, ReturnType<typeof setInterval>>>({});
+
+  // Drift: when a param is locked, start a countdown. When it expires, unlock locally.
+  const startDriftTimer = useCallback((index: number) => {
+    if (!drift?.enabled || !drift.timeout) return;
+    const timeout = drift.timeout;
+    setLockTimers((prev) => ({ ...prev, [index]: timeout }));
+
+    // Clear existing timer for this index
+    if (lockTimerRefs.current[index]) {
+      clearInterval(lockTimerRefs.current[index]);
+    }
+
+    lockTimerRefs.current[index] = setInterval(() => {
+      setLockTimers((prev) => {
+        const remaining = (prev[index] ?? 0) - 1;
+        if (remaining <= 0) {
+          // Unlock this param due to drift
+          clearInterval(lockTimerRefs.current[index]);
+          delete lockTimerRefs.current[index];
+          setLockedParams((lp) => {
+            const next = new Set(lp);
+            next.delete(index);
+            return next;
+          });
+          const newTimers = { ...prev };
+          delete newTimers[index];
+          return newTimers;
+        }
+        return { ...prev, [index]: remaining };
+      });
+    }, 1000);
+  }, [drift]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(lockTimerRefs.current).forEach(clearInterval);
+    };
+  }, []);
+
+  // Interference: on hard+, intermittently jam a random param display
+  useEffect(() => {
+    if (!interference) return;
+    const interval = setInterval(() => {
+      const idx = Math.floor(Math.random() * parameters.length);
+      setJammedParam(idx);
+      setTimeout(() => setJammedParam(null), 3000);
+    }, 8000 + Math.random() * 5000);
+    return () => clearInterval(interval);
+  }, [interference, parameters.length]);
 
   const handleValueChange = useCallback((index: number, value: number) => {
     if (lockedParams.has(index)) return;
@@ -307,9 +364,16 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
     setValues((prev) => {
       const next = [...prev];
       next[index] = clamped;
+      // Coupling: changing source shifts target
+      if (coupling && index === coupling.sourceIndex) {
+        const delta = clamped - prev[index];
+        const tgt = coupling.targetIndex;
+        const tp = parameters[tgt];
+        next[tgt] = Math.max(tp.min, Math.min(tp.max, Math.round(next[tgt] + delta * coupling.factor)));
+      }
       return next;
     });
-  }, [lockedParams, parameters]);
+  }, [lockedParams, parameters, coupling]);
 
   const handleLock = useCallback((index: number) => {
     if (lockedParams.has(index)) return;
@@ -320,10 +384,8 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
       data: { paramIndex: index, value: values[index] },
     });
     setLockedParams((prev) => new Set(prev).add(index));
-  }, [values, lockedParams]);
-
-  // Unlock if feedback says incorrect (allow retry)
-  // We track via feedback to detect failed locks
+    startDriftTimer(index);
+  }, [values, lockedParams, startDriftTimer]);
 
   return (
     <div style={containerStyle}>
@@ -423,10 +485,38 @@ function OperatorView({ roleData }: { roleData: Record<string, unknown> }) {
                       : '0 0 12px rgba(255,0,102,0.5)',
                     letterSpacing: 4,
                   }}>
-                    {value}
+                    {jammedParam === i ? '???' : value}
                     <span style={{ fontSize: 14, opacity: 0.5, marginLeft: 4 }}>{param.unit}</span>
                   </div>
                 </div>
+
+                {/* Drift countdown for locked params */}
+                {locked && drift?.enabled && lockTimers[i] !== undefined && (
+                  <div style={{
+                    fontSize: 10,
+                    color: lockTimers[i] <= 5 ? '#ff3333' : '#ffaa22',
+                    letterSpacing: 1,
+                    marginBottom: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}>
+                    <span style={{ animation: 'pulse 1s infinite' }}>{lockTimers[i] <= 5 ? '\u25BC' : '\u25B6'}</span>
+                    ロック解除まで: {lockTimers[i]}秒
+                  </div>
+                )}
+
+                {/* Coupling warning */}
+                {coupling && i === coupling.sourceIndex && (
+                  <div style={{
+                    fontSize: 10,
+                    color: '#ffaa22',
+                    letterSpacing: 1,
+                    marginBottom: 8,
+                  }}>
+                    \u26A0 パラメータ連動
+                  </div>
+                )}
 
                 {/* Slider */}
                 <div style={{

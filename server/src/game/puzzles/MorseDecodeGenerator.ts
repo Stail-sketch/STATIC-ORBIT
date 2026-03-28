@@ -15,40 +15,12 @@ const MORSE_MAP: Record<string, string> = {
   '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.',
 };
 
-const WORD_POOLS: Record<'easy' | 'normal' | 'hard', string[]> = {
-  easy: [
-    'FIRE', 'LOCK', 'OPEN', 'CODE', 'VENT', 'CORE', 'WIRE', 'GRID',
-    'HACK', 'SYNC', 'FLUX', 'BEAM', 'BOLT', 'LINK', 'NODE', 'SCAN',
-  ],
-  normal: [
-    'ORBIT', 'GHOST', 'RELAY', 'POWER', 'DRIVE', 'CRYPT', 'GUARD',
-    'BREACH', 'CIPHER', 'STATIC', 'SIGNAL', 'BYPASS', 'MATRIX',
-    'SHIELD', 'ACCESS', 'UPLINK',
-  ],
-  hard: [
-    'REACTOR', 'DECRYPT', 'ORBITAL', 'FIREWALL', 'OVERRIDE',
-    'TERMINAL', 'PROTOCOL', 'SHUTDOWN', 'SPECTRUM', 'FIRMWARE',
-    'AIRLOCK', 'NETWORK', 'COMMAND', 'DEFENSE',
-  ],
+const WORD_POOLS: Record<'easy' | 'normal' | 'hard' | 'extreme', string[]> = {
+  easy: ['GO', 'OK', 'HI', 'NO', 'UP', 'SOS', 'YES'],
+  normal: ['HELP', 'SEND', 'STOP', 'CODE', 'DATA', 'OPEN', 'SAFE'],
+  hard: ['ORBIT', 'GHOST', 'RELAY', 'ABORT', 'ALPHA'],
+  extreme: ['STATIC', 'CIPHER', 'BREACH', 'ESCAPE'],
 };
-
-function shuffle<T>(arr: T[]): T[] {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
-function randomAlphanumeric(length: number): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
 
 function toMorseCode(word: string): string {
   return word
@@ -67,38 +39,29 @@ function playbackSpeedForDifficulty(difficulty: Difficulty): number {
   }
 }
 
-function buildReferenceChart(difficulty: Difficulty): Record<string, string> {
-  const chart: Record<string, string> = { ...MORSE_MAP };
-
-  if (difficulty === 'hard' || difficulty === 'extreme') {
-    const keys = Object.keys(chart);
-    const blanked = shuffle(keys);
-    const blankedCount = difficulty === 'hard' ? 6 : 12;
-    for (let i = 0; i < blankedCount && i < blanked.length; i++) {
-      chart[blanked[i]] = '???';
-    }
-  }
-
-  return chart;
+function buildReferenceChart(): Record<string, string> {
+  return { ...MORSE_MAP };
 }
 
 export class MorseDecodeGenerator implements PuzzleGenerator {
   readonly type: PuzzleType = 'morse-decode';
 
   generate(difficulty: Difficulty, _playerCount: number): PuzzleInstance {
-    let targetWord: string;
-
-    if (difficulty === 'extreme') {
-      const length = Math.floor(Math.random() * 3) + 6; // 6-8
-      targetWord = randomAlphanumeric(length);
-    } else {
-      const pool = WORD_POOLS[difficulty === 'hard' ? 'hard' : difficulty === 'normal' ? 'normal' : 'easy'];
-      targetWord = pool[Math.floor(Math.random() * pool.length)];
-    }
+    const pool = WORD_POOLS[difficulty];
+    const targetWord = pool[Math.floor(Math.random() * pool.length)];
 
     const morseSequence = toMorseCode(targetWord);
     const playbackSpeed = playbackSpeedForDifficulty(difficulty);
-    const referenceChart = buildReferenceChart(difficulty);
+    const referenceChart = buildReferenceChart();
+
+    // On easy/normal, observer also sees decoded letters next to morse groups
+    const showLetters = difficulty === 'easy' || difficulty === 'normal';
+
+    // Build morse groups with decoded letters for observer
+    const morseGroups = targetWord.split('').map(ch => ({
+      letter: ch,
+      morse: MORSE_MAP[ch] ?? '?',
+    }));
 
     const timeLimit = TIME_LIMITS[difficulty];
 
@@ -109,7 +72,9 @@ export class MorseDecodeGenerator implements PuzzleGenerator {
         observer: {
           morseSequence,
           playbackSpeed,
-          targetWord, // observer can see the actual word too for reference
+          targetWord,
+          showLetters,
+          morseGroups,
         },
         operator: {
           referenceChart,
