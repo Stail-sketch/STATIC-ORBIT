@@ -6,6 +6,7 @@ import GameScreen from './components/screens/GameScreen';
 import ResultScreen from './components/screens/ResultScreen';
 import BriefingScreen from './components/screens/BriefingScreen';
 import PhaseChangeScreen from './components/screens/PhaseChangeScreen';
+import ChapterScreen from './components/screens/ChapterScreen';
 import ScanlineOverlay from './components/effects/ScanlineOverlay';
 import SettingsPanel from './components/ui/SettingsPanel';
 
@@ -21,6 +22,7 @@ export default function App() {
       {screen === 'lobby' && <LobbyScreen />}
       {screen === 'briefing' && <BriefingScreen />}
       {screen === 'playing' && <GameScreen />}
+      {screen === 'chapter' && <ChapterScreen />}
       {screen === 'phaseChange' && <PhaseChangeScreen />}
       {screen === 'result' && <ResultScreen />}
     </div>

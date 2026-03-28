@@ -104,6 +104,65 @@ const ESCAPE_BRIEFINGS: Record<PuzzleType, (stageNum: number) => string> = {
   'orbit-calc': (_n) => `ECHO：ほんの僅かでも計算を誤れば、大気圏で燃え尽きるぞ。`,
 };
 
+// ---- Chapter cutscenes (arcade-style, fire before briefing at key stage points) ----
+
+const CHAPTER_CUTSCENES = [
+  {
+    // Chapter 1: Game start (before stage 1)
+    atStage: 0,
+    chapterNumber: 1,
+    title: '潜入',
+    subtitle: 'INFILTRATION',
+    lines: [
+      '西暦2087年。巨大企業ARKTIS CORPが、宇宙ステーション「ORBITAL-7」で非合法な実験を行っているとの情報を入手。',
+      '地下ハッカー集団GHOST WIREは、証拠を掴むためエージェントを送り込んだ。',
+      'ミッション開始。全セクションのセキュリティを突破し、コアサーバーのデータを回収せよ。',
+    ],
+    duration: 12000,
+  },
+  {
+    // Chapter 2: After stage 5 (entering deep zone)
+    atStage: 5,
+    chapterNumber: 2,
+    title: '深層',
+    subtitle: 'DEEP ACCESS',
+    lines: [
+      '外周セキュリティを突破。ORBITAL-7の深部に到達。',
+      '予想以上に厳重な警備。ARKTIS CORPは何を守っているのか。',
+      '「Project STATIC」——その名前が、あらゆるデータに刻まれていた。',
+    ],
+    duration: 10000,
+  },
+  {
+    // Chapter 3: After stage 10 (approaching core)
+    atStage: 10,
+    chapterNumber: 3,
+    title: 'コア',
+    subtitle: 'CORE ACCESS',
+    lines: [
+      'コアセクションの入口に到達。ここから先は未知の領域。',
+      '通信にノイズが混じり始めた。まるで何かが——聞いているような。',
+      'コアサーバーまで、あと僅か。引き返すなら今だ。',
+      '...だが、引き返す者は誰もいなかった。',
+    ],
+    duration: 12000,
+  },
+  // Phase change at stage 14 is handled separately (already exists)
+  {
+    // Chapter 4 mid-point: During escape (after a few escape stages, around stage 17)
+    atStage: 17,
+    chapterNumber: 5,
+    title: '限界',
+    subtitle: 'NO RETURN',
+    lines: [
+      'ステーションが崩壊を始めている。壁が軋み、通路が歪む。',
+      'ECHOの攻撃は容赦ない。だが脱出ポッドはもう近い。',
+      '仲間を信じろ。最後まで、声を繋げ。',
+    ],
+    duration: 10000,
+  },
+];
+
 const PHASE_CHANGE_NARRATIVE = [
   '...',
   '...検知されたか？ いや、違う。何かが起動した。',
@@ -362,25 +421,47 @@ export class GameEngine {
     const phaseChangePoint = 14; // After 14 infiltration stages, phase changes at stage 15
     const isEscape = stageIndex >= phaseChangePoint;
 
-    // Check if we need a phase change
-    if (stageIndex === phaseChangePoint && session.stagePhase === 'infiltration') {
-      session.stagePhase = 'escape';
-      room.stagePhase = 'escape';
-      room.phase = 'phaseChange';
+    // Check for chapter cutscene at this stage
+    const chapterCutscene = CHAPTER_CUTSCENES.find((c) => c.atStage === stageIndex);
 
-      this.io.to(room.code).emit('game:phaseChange', {
-        newPhase: 'escape',
-        narrative: PHASE_CHANGE_NARRATIVE,
+    const proceedAfterChapter = () => {
+      // Check if we need a phase change
+      if (stageIndex === phaseChangePoint && session.stagePhase === 'infiltration') {
+        session.stagePhase = 'escape';
+        room.stagePhase = 'escape';
+        room.phase = 'phaseChange';
+
+        this.io.to(room.code).emit('game:phaseChange', {
+          newPhase: 'escape',
+          narrative: PHASE_CHANGE_NARRATIVE,
+        });
+
+        // After phase change animation, start the actual briefing
+        setTimeout(() => {
+          this.emitBriefing(session, room, puzzleType, isEscape);
+        }, 5000);
+        return;
+      }
+
+      this.emitBriefing(session, room, puzzleType, isEscape);
+    };
+
+    if (chapterCutscene) {
+      this.io.to(room.code).emit('game:chapter', {
+        chapterNumber: chapterCutscene.chapterNumber,
+        title: chapterCutscene.title,
+        subtitle: chapterCutscene.subtitle,
+        lines: chapterCutscene.lines,
+        duration: chapterCutscene.duration,
       });
 
-      // After phase change animation, start the actual briefing
+      // Wait for cutscene duration, then proceed to briefing (or phase change)
       setTimeout(() => {
-        this.emitBriefing(session, room, puzzleType, isEscape);
-      }, 5000);
-      return;
+        proceedAfterChapter();
+      }, chapterCutscene.duration);
+    } else {
+      proceedAfterChapter();
     }
-
-    this.emitBriefing(session, room, puzzleType, isEscape);
   }
 
   private emitBriefing(

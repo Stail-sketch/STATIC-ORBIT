@@ -122,4 +122,5 @@ export interface ServerToClientEvents {
   'game:phaseChange': (data: { newPhase: StagePhase; narrative: string[] }) => void;
   'game:finished': (data: GameResult) => void;
   'game:chat': (data: { playerName: string; message: string }) => void;
+  'game:chapter': (data: { chapterNumber: number; title: string; subtitle: string; lines: string[]; duration: number }) => void;
 }

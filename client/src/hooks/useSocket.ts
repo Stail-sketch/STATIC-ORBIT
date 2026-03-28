@@ -102,6 +102,10 @@ export function useSocket() {
       store.getState().setCountdown(count);
     });
 
+    s.on('game:chapter', (data) => {
+      store.getState().setChapterData(data);
+    });
+
     return () => {
       // Don't disconnect on unmount — we want persistent connection
     };

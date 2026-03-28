@@ -10,7 +10,7 @@ import type {
   Role,
 } from '@shared/types';
 
-export type Screen = 'title' | 'lobby' | 'briefing' | 'playing' | 'phaseChange' | 'result';
+export type Screen = 'title' | 'lobby' | 'briefing' | 'playing' | 'phaseChange' | 'chapter' | 'result';
 
 interface BriefingData {
   puzzleType: PuzzleType;
@@ -55,6 +55,9 @@ interface GameState {
   // Briefing
   briefing: BriefingData | null;
 
+  // Chapter cutscene
+  chapterData: { chapterNumber: number; title: string; subtitle: string; lines: string[] } | null;
+
   // Phase change
   phaseNarrative: string[];
 
@@ -78,6 +81,7 @@ interface GameState {
   livesRemaining: number;
 
   // Actions
+  setChapterData: (data: { chapterNumber: number; title: string; subtitle: string; lines: string[] }) => void;
   setScreen: (screen: Screen) => void;
   setPlayerId: (id: string) => void;
   setPlayerName: (name: string) => void;
@@ -118,6 +122,7 @@ const initialState = {
   timeRemaining: 90,
   missCount: 0,
   briefing: null as BriefingData | null,
+  chapterData: null as { chapterNumber: number; title: string; subtitle: string; lines: string[] } | null,
   phaseNarrative: [] as string[],
   stageScores: [] as StageScore[],
   totalScore: 0,
@@ -133,6 +138,7 @@ const initialState = {
 export const useGameStore = create<GameState>((set, get) => ({
   ...initialState,
 
+  setChapterData: (data) => set({ chapterData: data, screen: 'chapter' }),
   setScreen: (screen) => set({ screen }),
   setPlayerId: (id) => set({ playerId: id }),
   setPlayerName: (name) => set({ playerName: name }),
